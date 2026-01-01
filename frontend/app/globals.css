@@ -1,26 +1,114 @@
 @import "tailwindcss";
 
+/* Worker Theme CSS Variables */
 :root {
+  /* Background colors */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Worker theme - Time-based backgrounds */
+  --bg-morning: url("/backgrounds/morning.png");
+  --bg-noon: url("/backgrounds/noon.png");
+  --bg-night: url("/backgrounds/night.png");
+
+  /* Current background (default to morning) */
+  --bg-current: var(--bg-morning);
+
+  /* Worker theme colors */
+  --worker-primary: #3b82f6;
+  --worker-secondary: #8b5cf6;
+  --worker-accent: #f59e0b;
+  --worker-success: #10b981;
+  --worker-warning: #f59e0b;
+  --worker-danger: #ef4444;
+
+  /* Card and surface colors */
+  --worker-card-bg: rgba(255, 255, 255, 0.9);
+  --worker-card-border: rgba(0, 0, 0, 0.1);
+
+  /* Text colors */
+  --worker-text-primary: #1f2937;
+  --worker-text-secondary: #6b7280;
+  --worker-text-muted: #9ca3af;
 }
 
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+
+    /* Dark mode card colors */
+    --worker-card-bg: rgba(30, 30, 30, 0.9);
+    --worker-card-border: rgba(255, 255, 255, 0.1);
+
+    /* Dark mode text colors */
+    --worker-text-primary: #f9fafb;
+    --worker-text-secondary: #d1d5db;
+    --worker-text-muted: #9ca3af;
+  }
+}
+
+/* Time-based theme classes */
+[data-theme="morning"] {
+  --bg-current: var(--bg-morning);
+  --worker-primary: #f97316;
+  --worker-accent: #fbbf24;
+}
+
+[data-theme="noon"] {
+  --bg-current: var(--bg-noon);
+  --worker-primary: #3b82f6;
+  --worker-accent: #06b6d4;
+}
+
+[data-theme="night"] {
+  --bg-current: var(--bg-night);
+  --worker-primary: #6366f1;
+  --worker-accent: #a855f7;
+}
+
+/* Tailwind theme integration */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Worker theme colors for Tailwind */
+  --color-worker-primary: var(--worker-primary);
+  --color-worker-secondary: var(--worker-secondary);
+  --color-worker-accent: var(--worker-accent);
+  --color-worker-success: var(--worker-success);
+  --color-worker-warning: var(--worker-warning);
+  --color-worker-danger: var(--worker-danger);
+  --color-worker-card-bg: var(--worker-card-bg);
+  --color-worker-card-border: var(--worker-card-border);
+  --color-worker-text-primary: var(--worker-text-primary);
+  --color-worker-text-secondary: var(--worker-text-secondary);
+  --color-worker-text-muted: var(--worker-text-muted);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Base body styles */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Background image container utility */
+.worker-bg {
+  background-image: var(--bg-current);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+/* Glass morphism effect for cards */
+.worker-card {
+  background: var(--worker-card-bg);
+  border: 1px solid var(--worker-card-border);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
 }
