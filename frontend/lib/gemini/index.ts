@@ -1,2 +1,6 @@
 // Gemini AI library
-export {};
+export {
+  generateRecommendation,
+  type RecommendInput,
+  type RecommendResult,
+} from "./recommend";
