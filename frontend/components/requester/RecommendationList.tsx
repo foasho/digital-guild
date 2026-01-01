@@ -68,14 +68,14 @@ export function RecommendationList({
   // レコメンドがない場合
   if (recommendations.length === 0) {
     return (
-      <Card className="bg-white border border-gray-200 shadow-sm">
+      <Card className="bg-white border border-gray-200 shadow-sm rounded-xl">
         <CardBody className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles size={20} className="text-purple-500" />
             <h3 className="font-bold text-gray-800">この人にオススメ</h3>
           </div>
 
-          <div className="bg-purple-50 border border-purple-100 rounded-lg p-6 text-center">
+          <div className="bg-purple-50 border border-purple-100 rounded-xl p-6 text-center">
             {isLoading ? (
               <div className="flex flex-col items-center gap-3">
                 <Spinner color="secondary" size="lg" />
@@ -109,7 +109,7 @@ export function RecommendationList({
 
   // レコメンドがある場合
   return (
-    <Card className="bg-white border border-gray-200 shadow-sm">
+    <Card className="bg-white border border-gray-200 shadow-sm rounded-xl">
       <CardBody className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export function RecommendationList({
               return (
                 <Card
                   key={recommendation.id}
-                  className="bg-gray-50 border border-gray-100"
+                  className="bg-gray-50 border border-gray-100 rounded-xl"
                 >
                   <CardBody className="p-4">
                     {/* 労働者情報 */}
@@ -215,7 +215,7 @@ export function RecommendationList({
                           />
                         )}
                       >
-                        <div className="bg-white border border-gray-100 rounded-lg p-3">
+                        <div className="bg-white border border-gray-100 rounded-xl p-3">
                           <p className="text-sm text-gray-700 leading-relaxed">
                             {recommendation.reason}
                           </p>

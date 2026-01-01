@@ -215,7 +215,7 @@ export default function NewJobPage() {
           </p>
         </div>
 
-        <Card className="bg-white border border-gray-200 shadow-sm">
+        <Card className="bg-white border border-gray-200 shadow-sm rounded-xl">
           <CardBody className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* タイトル */}
@@ -274,7 +274,7 @@ export default function NewJobPage() {
                 />
                 {/* AIインセンティブ表示 */}
                 {rewardNumber > 0 && (
-                  <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
                     <p className="text-sm text-amber-800">
                       AIインセンティブ報酬:{" "}
                       <span className="font-bold">
@@ -467,7 +467,7 @@ export default function NewJobPage() {
                   type="submit"
                   color="primary"
                   size="lg"
-                  className="w-full bg-sky-500 hover:bg-sky-600"
+                  className="w-full bg-sky-500 hover:bg-sky-600 rounded-xl"
                 >
                   作成する
                 </Button>

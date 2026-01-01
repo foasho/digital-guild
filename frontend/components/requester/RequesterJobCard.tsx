@@ -34,7 +34,7 @@ export function RequesterJobCard({
 
   return (
     <Card
-      className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer rounded-xl"
       isPressable={!!onClick}
       onPress={onClick}
     >
@@ -47,7 +47,7 @@ export function RequesterJobCard({
               alt={job.title}
               width={80}
               height={80}
-              className="object-cover rounded-lg"
+              className="object-cover rounded-xl"
               fallbackSrc="/placeholder-job.png"
             />
           </div>

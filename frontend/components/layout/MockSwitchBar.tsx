@@ -29,9 +29,9 @@ export function MockSwitchBar({ visible, mode }: MockSwitchBarProps) {
       : "※これはモックです。労働者側UIは右のボタンから。";
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-2 bg-black/70 backdrop-blur-sm">
-      <span className="text-sm text-white">{message}</span>
-      <Button size="sm" color="primary" variant="solid" onPress={handleSwitch}>
+    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 bg-black/70 backdrop-blur-sm">
+      <span className="text-[10px] text-white">{message}</span>
+      <Button size="sm" color="primary" className="text-[10px] text-white" variant="solid" onPress={handleSwitch}>
         切り替え
       </Button>
     </div>

@@ -43,8 +43,10 @@ export function JobDetailModal({
       placement="bottom"
       size="full"
       scrollBehavior="inside"
+      backdrop="blur"
       classNames={{
-        base: "m-0 sm:m-0 rounded-t-3xl rounded-b-none max-h-[70vh]",
+        backdrop: "bg-black/75",
+        base: "m-0 sm:m-0 rounded-t-3xl rounded-b-none max-h-[70vh] bg-gray-900/95",
         body: "p-0",
         closeButton:
           "top-4 right-4 z-20 bg-black/50 text-white hover:bg-black/70",

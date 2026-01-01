@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import {
   BackgroundImage,
   GuildCard,
+  MobileOnlyOverlay,
   MockSwitchBar,
   WorkerFooter,
   WorkerHeader,
@@ -16,6 +17,9 @@ interface WorkerLayoutProps {
 export default function WorkerLayout({ children }: WorkerLayoutProps) {
   return (
     <BackgroundImage>
+      {/* MobileOnlyOverlay - sm以上で表示 */}
+      <MobileOnlyOverlay />
+
       {/* MockSwitchBar - Fixed at top */}
       <MockSwitchBar visible={true} mode="worker" />
 

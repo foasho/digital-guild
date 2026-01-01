@@ -166,7 +166,7 @@ export default function RequesterJobDetailPage() {
         </div>
 
         {/* ジョブ基本情報 */}
-        <Card className="bg-white border border-gray-200 shadow-sm mb-6">
+        <Card className="bg-white border border-gray-200 shadow-sm mb-6 rounded-xl">
           <CardBody className="p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-3">
               {job.title}
@@ -190,7 +190,7 @@ export default function RequesterJobDetailPage() {
             )}
 
             {/* 報酬情報 */}
-            <div className="bg-sky-50 border border-sky-100 rounded-lg p-4 mb-4">
+            <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 mb-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 text-sm">基本報酬</span>
                 <span className="font-bold text-gray-800">
@@ -236,7 +236,7 @@ export default function RequesterJobDetailPage() {
         </Card>
 
         {/* 説明 */}
-        <Card className="bg-white border border-gray-200 shadow-sm mb-6">
+        <Card className="bg-white border border-gray-200 shadow-sm mb-6 rounded-xl">
           <CardBody className="p-6">
             <h3 className="font-bold text-gray-800 mb-3">仕事内容</h3>
             <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
@@ -247,7 +247,7 @@ export default function RequesterJobDetailPage() {
 
         {/* チェックリスト */}
         {job.checklist.length > 0 && (
-          <Card className="bg-white border border-gray-200 shadow-sm mb-6">
+          <Card className="bg-white border border-gray-200 shadow-sm mb-6 rounded-xl">
             <CardBody className="p-6">
               <h3 className="font-bold text-gray-800 mb-3">チェックリスト</h3>
               <ul className="space-y-2">
@@ -268,7 +268,7 @@ export default function RequesterJobDetailPage() {
         )}
 
         {/* AIレコメンド結果 (プレースホルダー) */}
-        <Card className="bg-white border border-gray-200 shadow-sm mb-6">
+        <Card className="bg-white border border-gray-200 shadow-sm mb-6 rounded-xl">
           <CardBody className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Sparkles size={20} className="text-purple-500" />
@@ -277,7 +277,7 @@ export default function RequesterJobDetailPage() {
               </h3>
             </div>
             {/* プレースホルダー: Task 5.7で実装予定 */}
-            <div className="bg-purple-50 border border-purple-100 rounded-lg p-4 text-center">
+            <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 text-center">
               <p className="text-gray-500 text-sm">
                 AIレコメンド機能は準備中です
               </p>
@@ -287,7 +287,7 @@ export default function RequesterJobDetailPage() {
         </Card>
 
         {/* 応募者一覧 */}
-        <Card className="bg-white border border-gray-200 shadow-sm">
+        <Card className="bg-white border border-gray-200 shadow-sm rounded-xl">
           <CardBody className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-gray-800">応募者一覧</h3>
@@ -312,7 +312,7 @@ export default function RequesterJobDetailPage() {
                   return (
                     <div
                       key={applicant.id}
-                      className="border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                      className="border border-gray-100 rounded-xl p-4 hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -350,7 +350,7 @@ export default function RequesterJobDetailPage() {
                           {isPendingEvaluation ? (
                             <Link
                               href={`/requester/undertaked_jobs/${applicant.id}`}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors"
+                              className="flex items-center gap-1 px-3 py-1.5 bg-orange-500 text-white text-sm font-medium rounded-xl hover:bg-orange-600 transition-colors"
                             >
                               <Clock size={14} />
                               評価する
@@ -387,7 +387,7 @@ export default function RequesterJobDetailPage() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
+              <div className="text-center py-8 bg-gray-50 rounded-xl">
                 <Users size={32} className="mx-auto mb-2 text-gray-300" />
                 <p className="text-gray-500 text-sm">まだ応募者がいません</p>
               </div>

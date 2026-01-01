@@ -19,7 +19,7 @@ export function StatsSummary({ stats }: StatsSummaryProps) {
       {stats.map((stat, index) => (
         <Card
           key={`${stat.label}-${index}`}
-          className="bg-white border border-gray-200 shadow-sm"
+          className="bg-white border border-gray-200 shadow-sm rounded-xl"
         >
           <CardBody className="p-4">
             <div className="flex flex-col items-center text-center">

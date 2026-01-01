@@ -18,7 +18,7 @@ export default function RequesterLayout({ children }: RequesterLayoutProps) {
         {/* Top padding for MockSwitchBar (approx 40px) */}
         <div className="pt-10">
           {/* Header */}
-          <header className="px-6 py-4 border-b border-gray-200">
+          <header className="px-6 py-4">
             <h1 className="text-2xl font-bold text-gray-900">発注管理</h1>
           </header>
         </div>

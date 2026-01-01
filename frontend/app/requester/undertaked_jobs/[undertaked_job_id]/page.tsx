@@ -312,7 +312,7 @@ export default function UndertakedJobEvaluationPage() {
       </div>
 
       {/* 労働者情報カード */}
-      <Card className="mb-6 bg-white border border-gray-200 shadow-sm">
+      <Card className="mb-6 bg-white border border-gray-200 shadow-sm rounded-xl">
         <CardBody className="p-6">
           <h2 className="text-sm font-semibold text-gray-500 mb-4 flex items-center gap-2">
             <User size={16} />
@@ -357,7 +357,7 @@ export default function UndertakedJobEvaluationPage() {
       </Card>
 
       {/* ジョブ情報カード */}
-      <Card className="mb-6 bg-white border border-gray-200 shadow-sm">
+      <Card className="mb-6 bg-white border border-gray-200 shadow-sm rounded-xl">
         <CardBody className="p-6">
           <h2 className="text-sm font-semibold text-gray-500 mb-4 flex items-center gap-2">
             <Briefcase size={16} />
@@ -387,7 +387,7 @@ export default function UndertakedJobEvaluationPage() {
                 {job.checklist.map((item, index) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
+                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100"
                   >
                     <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center shrink-0">
                       <CheckCircle size={14} className="text-white" />
@@ -404,7 +404,7 @@ export default function UndertakedJobEvaluationPage() {
       </Card>
 
       {/* 星評価カード */}
-      <Card className="mb-6 bg-white border border-gray-200 shadow-sm">
+      <Card className="mb-6 bg-white border border-gray-200 shadow-sm rounded-xl">
         <CardBody className="p-6">
           <h2 className="text-sm font-semibold text-gray-500 mb-4 flex items-center gap-2">
             <Star size={16} />
@@ -455,7 +455,7 @@ export default function UndertakedJobEvaluationPage() {
         <Button
           color="primary"
           size="lg"
-          className="bg-sky-500 hover:bg-sky-600 font-semibold px-8"
+          className="bg-sky-500 hover:bg-sky-600 font-semibold px-8 rounded-xl"
           onPress={handleApprove}
           isDisabled={rating === 0}
           startContent={<CheckCircle size={20} />}
