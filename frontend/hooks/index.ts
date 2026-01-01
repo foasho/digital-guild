@@ -1,2 +1,2 @@
 // Custom hooks
-export {};
+export { useTimeBasedBackground } from "./useTimeBasedBackground";

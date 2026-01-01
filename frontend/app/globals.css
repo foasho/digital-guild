@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@source "../components";
+@source "../app";
+
 /* Worker Theme CSS Variables */
 :root {
   /* Background colors */
