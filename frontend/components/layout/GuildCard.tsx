@@ -3,52 +3,77 @@
 import { useEffect, useState } from "react";
 import { Card, CardBody } from "@heroui/react";
 import Image from "next/image";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import { useWorkerStore, useTrustPassportStore } from "@/stores";
 
 const DEFAULT_NAME = "田中　一郎";
 const DEFAULT_BALANCE = 81520;
 const DEFAULT_RANK = "BRONZE";
+const DEFAULT_REGISTERED_AT = "2026-01-07T00:00:00Z";
+const DEFAULT_CERT_ID = "17695712143";
 
 // Rank-based styling configurations
 const rankStyles = {
   BRONZE: {
-    borderColor: "border-orange-500",
-    glowColor: "shadow-orange-500/50",
-    ringColor: "ring-orange-400",
-    ringGlow: "shadow-orange-400/60",
-    gradientFrom: "from-orange-900/20",
-    gradientTo: "to-amber-800/10",
+    ringColor: "ring-white/90",
+    frameFrom: "#E7C892",
+    frameTo: "#A8772D",
+    bgFrom: "#C98C3B",
+    bgMid: "#E1C08A",
+    bgTo: "#7A4D1B",
   },
   SILVER: {
-    borderColor: "border-slate-400",
-    glowColor: "shadow-slate-400/50",
-    ringColor: "ring-slate-300",
-    ringGlow: "shadow-slate-300/60",
-    gradientFrom: "from-slate-700/20",
-    gradientTo: "to-gray-600/10",
+    ringColor: "ring-white/90",
+    frameFrom: "#E5E7EB",
+    frameTo: "#9CA3AF",
+    bgFrom: "#9CA3AF",
+    bgMid: "#E5E7EB",
+    bgTo: "#6B7280",
   },
   GOLD: {
-    borderColor: "border-yellow-400",
-    glowColor: "shadow-yellow-400/50",
-    ringColor: "ring-yellow-300",
-    ringGlow: "shadow-yellow-300/60",
-    gradientFrom: "from-yellow-800/20",
-    gradientTo: "to-amber-700/10",
+    ringColor: "ring-white/90",
+    frameFrom: "#FDE68A",
+    frameTo: "#D97706",
+    bgFrom: "#D9A441",
+    bgMid: "#F3D08B",
+    bgTo: "#8A5A18",
   },
   PLATINUM: {
-    borderColor: "border-cyan-300",
-    glowColor: "shadow-cyan-300/50",
-    ringColor: "ring-cyan-200",
-    ringGlow: "shadow-cyan-200/60",
-    gradientFrom: "from-cyan-800/20",
-    gradientTo: "to-blue-700/10",
+    ringColor: "ring-white/90",
+    frameFrom: "#BAE6FD",
+    frameTo: "#67E8F9",
+    bgFrom: "#3BA7C9",
+    bgMid: "#A7E8F6",
+    bgTo: "#1E6A82",
   },
 };
 
 type RankType = keyof typeof rankStyles;
 
+function formatRegisteredAt(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "2026/01/07";
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
+function toCertificateId(input: string): string {
+  if (/^\d{6,}$/.test(input)) return input;
+  // stable hash -> 11 digits
+  let h = 5381;
+  for (let i = 0; i < input.length; i++) h = (h * 33) ^ input.charCodeAt(i);
+  const mod = 100_000_000_000; // 1e11
+  const n = Math.abs(h) % mod;
+  return String(n).padStart(11, "0");
+}
+
 export function GuildCard() {
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const worker = useWorkerStore((state) => state.worker);
   const jpycBalance = useWorkerStore((state) => state.jpycBalance);
@@ -68,6 +93,11 @@ export function GuildCard() {
   const displayRank = (
     isHydrated ? getRank().toUpperCase() : DEFAULT_RANK
   ) as RankType;
+  const displayRegisteredAt = formatRegisteredAt(
+    isHydrated && worker?.createdAt ? worker.createdAt : DEFAULT_REGISTERED_AT,
+  );
+  const displayCertId =
+    isHydrated && worker?.id ? toCertificateId(worker.id) : DEFAULT_CERT_ID;
 
   const formattedBalance = displayBalance.toLocaleString();
 
@@ -75,121 +105,148 @@ export function GuildCard() {
   const currentRankStyle = rankStyles[displayRank] || rankStyles.BRONZE;
 
   return (
-    <div className="mx-4 relative group">
-      {/* Outer glow effect */}
-      <div
-        className={`absolute -inset-1 rounded-2xl blur-md opacity-60 ${currentRankStyle.glowColor} bg-current transition-opacity duration-300 group-hover:opacity-80`}
-        style={{
-          background:
-            displayRank === "BRONZE"
-              ? "linear-gradient(135deg, rgba(234,88,12,0.4), rgba(217,119,6,0.2))"
-              : displayRank === "SILVER"
-                ? "linear-gradient(135deg, rgba(148,163,184,0.4), rgba(107,114,128,0.2))"
-                : displayRank === "GOLD"
-                  ? "linear-gradient(135deg, rgba(250,204,21,0.4), rgba(245,158,11,0.2))"
-                  : "linear-gradient(135deg, rgba(103,232,249,0.4), rgba(59,130,246,0.2))",
-        }}
-      />
-
-      <Card
-        className={`relative overflow-hidden border-2 ${currentRankStyle.borderColor} backdrop-blur-sm`}
-        radius="lg"
-        shadow="lg"
-        style={{
-          background:
-            "linear-gradient(145deg, rgba(30,41,59,0.95), rgba(15,23,42,0.98))",
+    <div className="mx-4 relative">
+      <button
+        type="button"
+        className="block w-full text-left rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+        aria-expanded={isExpanded}
+        aria-label="ギルド証を開閉"
+        onClick={() => setIsExpanded((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setIsExpanded((v) => !v);
+          }
         }}
       >
-        {/* Subtle shine effect overlay */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-30"
+          className="relative rounded-[16px] p-[2px] shadow-[0_14px_28px_rgba(0,0,0,0.35)] active:scale-[0.99] transition-transform"
           style={{
-            background:
-              "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.05) 50%, transparent 55%)",
+            background: `linear-gradient(135deg, ${currentRankStyle.frameFrom}, ${currentRankStyle.frameTo})`,
           }}
-        />
-
-        {/* Subtle pattern overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-5"
-          style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)`,
-            backgroundSize: "16px 16px",
-          }}
-        />
-
-        <CardBody className="relative flex flex-row items-center gap-3 p-3">
-          {/* Left: Avatar with rank-colored ring */}
-          <div className="relative shrink-0">
-            {/* Outer decorative ring with glow */}
+        >
+          <Card
+            className="relative overflow-hidden rounded-[14px] border border-white/25"
+            shadow="none"
+            radius="none"
+            style={{
+              background: `linear-gradient(135deg, ${currentRankStyle.bgFrom}, ${currentRankStyle.bgMid} 55%, ${currentRankStyle.bgTo})`,
+            }}
+          >
+            {/* 中央の光沢ストライプ */}
             <div
-              className={`absolute -inset-1 rounded-full ${currentRankStyle.ringGlow} blur-sm`}
+              className="absolute inset-0 pointer-events-none opacity-60"
               style={{
                 background:
-                  displayRank === "BRONZE"
-                    ? "linear-gradient(135deg, rgba(251,146,60,0.6), rgba(234,88,12,0.4))"
-                    : displayRank === "SILVER"
-                      ? "linear-gradient(135deg, rgba(203,213,225,0.6), rgba(148,163,184,0.4))"
-                      : displayRank === "GOLD"
-                        ? "linear-gradient(135deg, rgba(253,224,71,0.6), rgba(250,204,21,0.4))"
-                        : "linear-gradient(135deg, rgba(165,243,252,0.6), rgba(103,232,249,0.4))",
+                  "linear-gradient(90deg, rgba(255,255,255,0) 35%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0) 65%)",
               }}
             />
 
-            {/* Avatar container with ring */}
+            {/* 微細パターン */}
             <div
-              className={`relative w-14 h-14 rounded-full ring-2 ${currentRankStyle.ringColor} ring-offset-2 ring-offset-slate-900 overflow-hidden`}
-            >
-              <Image
-                src="/avatar4.png"
-                alt={displayName}
-                fill
-                sizes="56px"
-                className="object-cover"
-              />
-            </div>
-          </div>
+              className="absolute inset-0 pointer-events-none opacity-[0.10]"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.35) 1px, transparent 0)",
+                backgroundSize: "18px 18px",
+              }}
+            />
 
-          {/* Center: Label and Name */}
-          <div className="flex flex-col flex-1 min-w-0">
-            <span className="text-xs text-slate-400 tracking-wider uppercase">
-              探索者
-            </span>
-            <span className="text-base font-bold text-white truncate drop-shadow-sm">
-              {displayName}
-            </span>
-          </div>
+            <CardBody className="relative p-0 text-white">
+              {/* ヘッダー（折りたたみでも共通） */}
+              <div className="flex items-start gap-3 px-4 pt-3">
+                <div className="relative shrink-0">
+                  <div
+                    className={`relative w-12 h-12 rounded-full overflow-hidden ring-2 ${currentRankStyle.ringColor} bg-black/10`}
+                  >
+                    <Image
+                      src="/avatar4.png"
+                      alt={displayName}
+                      fill
+                      sizes="48px"
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
 
-          {/* Right: Balance and Class */}
-          <div className="flex flex-col items-end shrink-0">
-            {/* Enhanced JPYC balance display */}
-            <div className="flex items-baseline gap-1">
-              <span className="text-xl font-extrabold text-white tracking-tight drop-shadow-md">
-                {formattedBalance}
-              </span>
-              <span className="text-sm font-semibold text-slate-300">JPYC</span>
-            </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold tracking-wider opacity-95">
+                    探索者
+                  </div>
+                  <div className="mt-1 text-xl font-extrabold tracking-wide truncate">
+                    {displayName}
+                  </div>
+                </div>
 
-            {/* Rank badge */}
-            <div className="flex items-center gap-1 mt-0.5">
-              <span className="text-xs text-slate-400">class</span>
-              <span
-                className={`text-xs font-bold tracking-wider ${
-                  displayRank === "BRONZE"
-                    ? "text-orange-400"
-                    : displayRank === "SILVER"
-                      ? "text-slate-300"
-                      : displayRank === "GOLD"
-                        ? "text-yellow-400"
-                        : "text-cyan-300"
-                }`}
-              >
-                {displayRank}
-              </span>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
+                <div className="shrink-0 text-right">
+                  <div className="text-lg font-extrabold tracking-tight">
+                    {formattedBalance}{" "}
+                    <span className="text-sm font-bold opacity-95">JPYC</span>
+                  </div>
+                  <div className="my-1 flex items-center justify-end gap-2">
+                    {!isExpanded && (
+                      <>
+                        <div className="text-xs opacity-90">class</div>
+                        <div className="text-sm font-extrabold tracking-widest">
+                          {displayRank}
+                        </div>
+                      </>
+                    )}
+                    <motion.span
+                      className="opacity-70"
+                      animate={{
+                        rotate: isExpanded ? 180 : 0,
+                        opacity: isExpanded ? 0 : 0.7,
+                      }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      aria-hidden="true"
+                    >
+                      <ChevronDown size={14} />
+                    </motion.span>
+                  </div>
+                </div>
+              </div>
+
+              <AnimatePresence initial={false}>
+                {isExpanded && (
+                  <motion.div
+                    key="expanded"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.28, ease: "easeOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-4 pt-5">
+                      <div className="text-lg font-semibold opacity-95">
+                        class
+                      </div>
+                      <div className="mt-2 text-4xl leading-none font-extrabold tracking-widest drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]">
+                        {displayRank}
+                      </div>
+                    </div>
+
+                    <div className="px-4 pb-4 pt-6">
+                      <div className="flex justify-end text-base">
+                        登録: {displayRegisteredAt}
+                      </div>
+
+                      <div className="mt-4 grid grid-cols-[auto_1fr] items-end gap-4">
+                        <div className="text-base">
+                          ID: {displayCertId}
+                        </div>
+                        <div className="text-base text-right">
+                          デジタルギルド公式認証
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </CardBody>
+          </Card>
+        </div>
+      </button>
     </div>
   );
 }
