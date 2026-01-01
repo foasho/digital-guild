@@ -108,6 +108,10 @@ export function GuildCard() {
 
   // Get rank-specific styles
   const currentRankStyle = rankStyles[displayRank] || rankStyles.BRONZE;
+  // NOTE: このアプリは背景に黒マスク（bg-black/50）が乗るため、
+  // 数値のopacity=0.5でも「見た目の50%透過」に見えにくい。
+  // 体感で50%くらい透けて見えるように、実際の描画は係数で落とす。
+  const visualOpacity = Math.min(1, currentRankStyle.opacity * 0.6);
 
   return (
     <div className="mx-4 relative">
@@ -132,7 +136,7 @@ export function GuildCard() {
             className="absolute inset-0 rounded-[16px] pointer-events-none"
             style={{
               background: `linear-gradient(135deg, ${currentRankStyle.frameFrom}, ${currentRankStyle.frameTo})`,
-              opacity: currentRankStyle.opacity,
+              opacity: visualOpacity,
             }}
           />
 
@@ -142,7 +146,7 @@ export function GuildCard() {
             radius="none"
             style={{
               background: "transparent",
-              borderColor: `rgba(255,255,255,${0.25 * currentRankStyle.opacity})`,
+              borderColor: `rgba(255,255,255,${0.25 * visualOpacity})`,
             }}
           >
             {/* 背景グラデ（rankStyles.opacity で透過。文字/枠は透過させない） */}
@@ -150,7 +154,7 @@ export function GuildCard() {
               className="absolute inset-0 pointer-events-none"
               style={{
                 background: `linear-gradient(135deg, ${currentRankStyle.bgFrom}, ${currentRankStyle.bgMid} 55%, ${currentRankStyle.bgTo})`,
-                opacity: currentRankStyle.opacity,
+                opacity: visualOpacity,
               }}
             />
 
@@ -160,7 +164,7 @@ export function GuildCard() {
               style={{
                 background:
                   "linear-gradient(90deg, rgba(255,255,255,0) 35%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0) 65%)",
-                opacity: 0.6 * currentRankStyle.opacity,
+                opacity: 0.6 * visualOpacity,
               }}
             />
 
@@ -171,7 +175,7 @@ export function GuildCard() {
                 backgroundImage:
                   "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.35) 1px, transparent 0)",
                 backgroundSize: "18px 18px",
-                opacity: 0.1 * currentRankStyle.opacity,
+                opacity: 0.1 * visualOpacity,
               }}
             />
 
