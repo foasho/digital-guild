@@ -26,7 +26,7 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
       {/* Main container - Centered with max-width for mobile */}
       <div className="mx-auto max-w-[480px] h-[100dvh] flex flex-col">
         {/* Top padding for MockSwitchBar (approx 40px) */}
-        <div className="pt-10">
+        <div className="pt-10 pb-3 bg-black/25">
           {/* Header */}
           <WorkerHeader />
 
