@@ -26,7 +26,7 @@ export function WorkerFooter() {
 
   return (
     <footer className="fixed bottom-0 left-0 right-0 bg-neutral-900/95 backdrop-blur-sm border-t border-neutral-800">
-      <nav className="flex items-center justify-around py-2 px-4">
+      <nav className="flex items-center justify-around py-3 px-4">
         {navItems.map((item) => {
           const isActive = pathname === item.path;
           return (
@@ -35,7 +35,7 @@ export function WorkerFooter() {
               onClick={() => handleNavigation(item.path)}
               className={`flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all ${
                 isActive
-                  ? "text-amber-400"
+                  ? "text-amber-400 bg-amber-400/20"
                   : "text-neutral-400 hover:text-white"
               }`}
               aria-label={item.label}
@@ -44,8 +44,8 @@ export function WorkerFooter() {
               <Image
                 src={item.icon}
                 alt={item.label}
-                width={24}
-                height={24}
+                width={28}
+                height={28}
                 className={`object-contain ${
                   isActive
                     ? "opacity-100 brightness-125"
@@ -53,7 +53,7 @@ export function WorkerFooter() {
                 }`}
               />
               <span
-                className={`text-xs font-medium ${
+                className={`text-sm font-medium ${
                   isActive ? "text-amber-400" : "text-neutral-400"
                 }`}
               >

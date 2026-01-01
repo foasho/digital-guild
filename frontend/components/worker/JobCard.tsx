@@ -32,30 +32,38 @@ export function JobCard({
 
   return (
     <Card
-      className="relative w-full overflow-hidden rounded-xl"
+      className="relative w-full overflow-hidden rounded-xl drop-shadow-lg hover:drop-shadow-2xl transition-all duration-300"
       radius="lg"
       shadow="md"
     >
-      {/* 背景画像 + 50%黒マスク */}
+      {/* 背景画像 + グラデーションオーバーレイ（下部をより暗く） */}
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${job.imageUrl})` }}
       />
-      <div className="absolute inset-0 bg-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
 
       {/* コンテンツ */}
       <CardBody className="relative z-10 flex flex-col min-h-[200px] p-4">
         {/* 上部: 報酬とおすすめバッジ */}
         <div className="flex justify-between items-start">
           {/* 左上: 報酬額 */}
-          <div className="text-white font-bold text-lg">
-            ¥{totalReward.toLocaleString()} / 回
+          <div className="text-white font-extrabold text-2xl drop-shadow-md">
+            <span className="text-amber-300">¥</span>
+            <span className="text-amber-100">{totalReward.toLocaleString()}</span>
+            <span className="text-base font-bold text-white/80 ml-1">/ 回</span>
           </div>
 
-          {/* 右上: AIレコメンドバッジ（斜めリボン風） */}
+          {/* 右上: AIレコメンドバッジ（グラデーションリボン風） */}
           {isRecommended && (
-            <div className="absolute top-0 right-0 overflow-hidden w-24 h-24">
-              <div className="absolute top-3 right-[-28px] w-32 text-center text-xs font-bold text-white bg-rose-500 py-1 transform rotate-45 shadow-md">
+            <div className="absolute top-0 right-0 overflow-hidden w-28 h-28 pointer-events-none">
+              <div
+                className="absolute top-4 right-[-32px] w-36 text-center text-[10px] font-bold text-white pl-3 py-1.5 transform rotate-45 shadow-lg"
+                style={{
+                  background: "linear-gradient(135deg, #f59e0b 0%, #ea580c 50%, #dc2626 100%)",
+                  boxShadow: "0 2px 8px rgba(245, 158, 11, 0.5)",
+                }}
+              >
                 あなたにおすすめ
               </div>
             </div>

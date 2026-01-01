@@ -112,9 +112,13 @@ function UndertakedJobCard({
 
           {/* 右上: ステータスバッジ */}
           <Chip
-            size="sm"
+            size="md"
             color={statusColors[undertakedJob.status]}
-            variant="flat"
+            variant="solid"
+            classNames={{
+              base: "ring-2 ring-white px-3 py-1",
+              content: "font-semibold text-sm",
+            }}
           >
             {statusLabels[undertakedJob.status]}
           </Chip>

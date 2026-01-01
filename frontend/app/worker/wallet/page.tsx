@@ -38,10 +38,10 @@ function TransactionItem({
   const isPositive = transaction.amount >= 0;
 
   return (
-    <div className="py-3 border-b border-white/10 last:border-b-0">
-      <div className="flex justify-between items-start">
+    <div className="py-4 px-3 bg-white/5 rounded-xl mb-3 last:mb-0 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors">
+      <div className="flex justify-between items-center">
         <div className="flex-1 min-w-0">
-          <p className="text-white/60 text-sm">
+          <p className="text-white/50 text-xs mb-1">
             {formatDateTime(transaction.tradedAt)}
           </p>
           <p className="text-white font-medium truncate">
@@ -49,8 +49,10 @@ function TransactionItem({
           </p>
         </div>
         <div
-          className={`text-right font-bold ${
-            isPositive ? "text-green-400" : "text-red-400"
+          className={`text-right font-bold text-lg ${
+            isPositive
+              ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]"
+              : "text-rose-400 drop-shadow-[0_0_8px_rgba(251,113,133,0.5)]"
           }`}
         >
           {formatAmount(transaction.amount)} JPYC
@@ -94,9 +96,14 @@ export default function WalletPage() {
   return (
     <div className="flex flex-col px-4 py-4">
       {/* ウォレットカード */}
-      <div className="bg-white rounded-2xl p-5 shadow-lg">
+      <div className="relative bg-gradient-to-br from-white via-gray-50 to-amber-50 rounded-2xl p-5 shadow-xl drop-shadow-2xl overflow-hidden">
+        {/* 光沢効果 - 左上から右下へのハイライト */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-radial from-white/60 to-transparent rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-100/40 to-transparent pointer-events-none" />
+
         {/* ヘッダー: JPYCロゴ + タイトル */}
-        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-amber-200">
+        <div className="relative flex items-center gap-3 mb-4 pb-3 border-b border-amber-200/60">
           <Image
             src="/logo/jpyc.png"
             alt="JPYC Logo"
@@ -110,7 +117,7 @@ export default function WalletPage() {
         </div>
 
         {/* バーコード */}
-        <div className="flex justify-center mb-4">
+        <div className="relative flex justify-center mb-4">
           <Image
             src="/logo/barcode.png"
             alt="Barcode"
@@ -121,7 +128,7 @@ export default function WalletPage() {
         </div>
 
         {/* QRコード + 残高 */}
-        <div className="flex items-center justify-center gap-4 mb-2">
+        <div className="relative flex items-center justify-center gap-4 mb-2">
           <Image
             src="/logo/qr.png"
             alt="QR Code"
@@ -130,13 +137,16 @@ export default function WalletPage() {
             className="object-contain"
           />
           <div className="flex items-baseline gap-2">
-            <span className="text-gray-600 text-sm">残高</span>
-            <span className="text-gray-900 font-bold text-3xl">
+            <span className="text-gray-500 text-sm font-medium">残高</span>
+            <span className="text-gray-900 font-bold text-3xl drop-shadow-sm">
               {displayBalance.toLocaleString()}
             </span>
-            <span className="text-gray-600 text-sm">JPYC</span>
+            <span className="text-gray-500 text-sm font-medium">JPYC</span>
           </div>
         </div>
+
+        {/* カード下部の光沢ライン */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-200/50 to-transparent" />
       </div>
 
       {/* スキャンして支払うボタン */}
@@ -171,14 +181,14 @@ export default function WalletPage() {
 
       {/* 取引履歴セクション */}
       <div className="mt-6">
-        <h2 className="text-white text-xl font-bold text-center mb-4">
+        <h2 className="text-white text-xl font-bold text-center mb-4 drop-shadow-lg">
           取引履歴
         </h2>
 
         {/* 取引履歴リスト */}
-        <div className="space-y-0">
+        <div className="flex flex-col">
           {transactions.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-8 bg-white/5 rounded-xl">
               <p className="text-white/50">取引履歴がありません</p>
             </div>
           ) : (

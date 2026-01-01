@@ -186,9 +186,9 @@ export default function RequestMapPage() {
         <button
           type="button"
           onClick={toggleSearch}
-          className={`p-4 rounded-full shadow-lg transition-all duration-200 ${
+          className={`search-button-pulse p-4 rounded-full shadow-lg transition-all duration-200 ${
             isSearchExpanded
-              ? "bg-amber-500 text-white"
+              ? "search-expanded bg-amber-500 text-white"
               : "bg-zinc-800/90 backdrop-blur-sm text-white hover:bg-zinc-700/90"
           }`}
           aria-label={isSearchExpanded ? "Close search" : "Open search"}
@@ -251,11 +251,87 @@ export default function RequestMapPage() {
         onAcceptClick={handleAccept}
       />
 
-      {/* カスタムマーカースタイル */}
+      {/* カスタムマーカースタイル & Leaflet修正 */}
       <style jsx global>{`
+        /* Leaflet コンテナのz-index修正 */
+        .leaflet-container {
+          z-index: 1 !important;
+        }
+
+        /* Leaflet タイルレイヤーの表示修正 */
+        .leaflet-tile-pane {
+          z-index: 1 !important;
+        }
+
+        .leaflet-overlay-pane {
+          z-index: 2 !important;
+        }
+
+        .leaflet-marker-pane {
+          z-index: 3 !important;
+        }
+
+        .leaflet-tooltip-pane {
+          z-index: 4 !important;
+        }
+
+        .leaflet-popup-pane {
+          z-index: 5 !important;
+        }
+
+        /* カスタムマーカースタイル */
         .job-map-marker {
           background: transparent !important;
           border: none !important;
+        }
+
+        /* マーカーホバーエフェクト */
+        .job-map-marker:hover {
+          transform: scale(1.1);
+          transition: transform 0.2s ease-in-out;
+        }
+
+        .job-map-marker .marker-pin {
+          transition: all 0.2s ease-in-out;
+        }
+
+        .job-map-marker:hover .marker-pin {
+          filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+        }
+
+        /* 検索ボタンのパルスアニメーション */
+        @keyframes pulse-ring {
+          0% {
+            transform: scale(1);
+            opacity: 0.8;
+          }
+          50% {
+            transform: scale(1.15);
+            opacity: 0.4;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 0.8;
+          }
+        }
+
+        .search-button-pulse {
+          position: relative;
+        }
+
+        .search-button-pulse::before {
+          content: "";
+          position: absolute;
+          inset: -4px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #f59e0b, #f97316);
+          opacity: 0;
+          z-index: -1;
+          animation: pulse-ring 2s ease-in-out infinite;
+        }
+
+        .search-button-pulse:not(.search-expanded)::before {
+          opacity: 0.6;
         }
       `}</style>
     </div>

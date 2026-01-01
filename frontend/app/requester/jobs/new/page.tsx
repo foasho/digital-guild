@@ -14,8 +14,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { useJobStore, useRequesterStore } from "@/stores";
 import { defaultRequester } from "@/constants/mocks";
+import { useJobStore, useRequesterStore } from "@/stores";
 import type { Job } from "@/types";
 
 // タグ選択肢
@@ -50,6 +50,24 @@ type JobFormData = z.infer<typeof jobFormSchema>;
 interface ChecklistItemInput {
   id: string;
   text: string;
+}
+
+// セクションヘッダーコンポーネント
+function SectionHeader({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string;
+}) {
+  return (
+    <div className="mb-4">
+      <h3 className="text-base font-bold text-gray-800">{title}</h3>
+      {description && (
+        <p className="text-sm text-gray-500 mt-1">{description}</p>
+      )}
+    </div>
+  );
 }
 
 export default function NewJobPage() {
@@ -108,7 +126,7 @@ export default function NewJobPage() {
   // チェックリストテキスト更新
   const handleChecklistTextChange = (id: string, text: string) => {
     setChecklist(
-      checklist.map((item) => (item.id === id ? { ...item, text } : item))
+      checklist.map((item) => (item.id === id ? { ...item, text } : item)),
     );
   };
 
@@ -157,7 +175,7 @@ export default function NewJobPage() {
       reward: formData.reward,
       aiInsentiveReward: Math.min(
         formData.reward * 0.005,
-        formData.reward * 0.5
+        formData.reward * 0.5,
       ),
       location: formData.location,
       latitude: formData.latitude ?? 35.6762,
@@ -217,260 +235,305 @@ export default function NewJobPage() {
 
         <Card className="bg-white border border-gray-200 shadow-sm rounded-xl">
           <CardBody className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* タイトル */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  タイトル <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="例: 動画撮影おてつだい"
-                  variant="bordered"
-                  isInvalid={!!errors.title}
-                  errorMessage={errors.title}
-                  classNames={{
-                    inputWrapper: "border-gray-300",
-                  }}
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* セクション1: 基本情報 */}
+              <section>
+                <SectionHeader
+                  title="基本情報"
+                  description="ジョブの基本的な情報を入力してください"
                 />
-              </div>
-
-              {/* 説明 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  説明 <span className="text-red-500">*</span>
-                </label>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="ジョブの詳細な説明を入力してください"
-                  variant="bordered"
-                  minRows={4}
-                  isInvalid={!!errors.description}
-                  errorMessage={errors.description}
-                  classNames={{
-                    inputWrapper: "border-gray-300",
-                  }}
-                />
-              </div>
-
-              {/* 報酬 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  報酬 (JPYC) <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  type="number"
-                  value={reward}
-                  onChange={(e) => setReward(e.target.value)}
-                  placeholder="例: 10000"
-                  variant="bordered"
-                  isInvalid={!!errors.reward}
-                  errorMessage={errors.reward}
-                  classNames={{
-                    inputWrapper: "border-gray-300",
-                  }}
-                />
-                {/* AIインセンティブ表示 */}
-                {rewardNumber > 0 && (
-                  <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                    <p className="text-sm text-amber-800">
-                      AIインセンティブ報酬:{" "}
-                      <span className="font-bold">
-                        {aiIncentive.toLocaleString()} JPYC
-                      </span>
-                      <span className="text-xs text-amber-600 ml-2">
-                        (報酬の0.5%、最大50%)
-                      </span>
-                    </p>
+                <div className="space-y-5">
+                  {/* タイトル */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      タイトル <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="例: 動画撮影おてつだい"
+                      variant="bordered"
+                      isInvalid={!!errors.title}
+                      errorMessage={errors.title}
+                      classNames={{
+                        inputWrapper: "border-gray-300",
+                      }}
+                    />
                   </div>
-                )}
-              </div>
 
-              {/* 場所 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  場所 <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="例: 山形県湯煙町"
-                  variant="bordered"
-                  isInvalid={!!errors.location}
-                  errorMessage={errors.location}
-                  classNames={{
-                    inputWrapper: "border-gray-300",
-                  }}
-                />
-              </div>
+                  {/* 説明 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      説明 <span className="text-red-500">*</span>
+                    </label>
+                    <Textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="ジョブの詳細な説明を入力してください"
+                      variant="bordered"
+                      minRows={4}
+                      isInvalid={!!errors.description}
+                      errorMessage={errors.description}
+                      classNames={{
+                        inputWrapper: "border-gray-300",
+                      }}
+                    />
+                  </div>
 
-              {/* 緯度・経度 */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    緯度 (オプション)
-                  </label>
-                  <Input
-                    type="number"
-                    step="any"
-                    value={latitude}
-                    onChange={(e) => setLatitude(e.target.value)}
-                    placeholder="例: 35.6762"
-                    variant="bordered"
-                    classNames={{
-                      inputWrapper: "border-gray-300",
-                    }}
-                  />
+                  {/* 報酬 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      報酬 (JPYC) <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      type="number"
+                      value={reward}
+                      onChange={(e) => setReward(e.target.value)}
+                      placeholder="例: 10000"
+                      variant="bordered"
+                      isInvalid={!!errors.reward}
+                      errorMessage={errors.reward}
+                      classNames={{
+                        inputWrapper: "border-gray-300",
+                      }}
+                    />
+                    {/* AIインセンティブ表示 */}
+                    {rewardNumber > 0 && (
+                      <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                        <p className="text-sm text-amber-800">
+                          AIインセンティブ報酬:{" "}
+                          <span className="font-bold">
+                            {aiIncentive.toLocaleString()} JPYC
+                          </span>
+                          <span className="text-xs text-amber-600 ml-2">
+                            (報酬の0.5%、最大50%)
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 定員 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      定員
+                    </label>
+                    <Input
+                      type="number"
+                      value={capacity}
+                      onChange={(e) => setCapacity(e.target.value)}
+                      placeholder="1"
+                      min={1}
+                      variant="bordered"
+                      classNames={{
+                        inputWrapper: "border-gray-300 max-w-[200px]",
+                      }}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    経度 (オプション)
-                  </label>
-                  <Input
-                    type="number"
-                    step="any"
-                    value={longitude}
-                    onChange={(e) => setLongitude(e.target.value)}
-                    placeholder="例: 139.6503"
-                    variant="bordered"
-                    classNames={{
-                      inputWrapper: "border-gray-300",
-                    }}
-                  />
-                </div>
-              </div>
+              </section>
 
-              {/* 画像URL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  画像URL (オプション)
-                </label>
-                <Input
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="デフォルト: /jobs/izakaya.jpg"
-                  variant="bordered"
-                  classNames={{
-                    inputWrapper: "border-gray-300",
-                  }}
+              {/* 区切り線 */}
+              <hr className="border-gray-200" />
+
+              {/* セクション2: 詳細設定 */}
+              <section>
+                <SectionHeader
+                  title="詳細設定"
+                  description="場所や日時などの詳細を設定してください"
                 />
-              </div>
+                <div className="space-y-5">
+                  {/* 場所 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      場所 <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="例: 山形県湯煙町"
+                      variant="bordered"
+                      isInvalid={!!errors.location}
+                      errorMessage={errors.location}
+                      classNames={{
+                        inputWrapper: "border-gray-300",
+                      }}
+                    />
+                  </div>
 
-              {/* タグ */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  タグ
-                </label>
-                <CheckboxGroup
-                  value={selectedTags}
-                  onChange={(values) => setSelectedTags(values as string[])}
-                  orientation="horizontal"
-                  classNames={{
-                    wrapper: "gap-4 flex-wrap",
-                  }}
-                >
-                  {TAG_OPTIONS.map((tag) => (
-                    <Checkbox key={tag} value={tag} classNames={{
-                      label: "text-sm text-gray-700",
-                    }}>
-                      {tag}
-                    </Checkbox>
-                  ))}
-                </CheckboxGroup>
-              </div>
-
-              {/* 定員 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  定員
-                </label>
-                <Input
-                  type="number"
-                  value={capacity}
-                  onChange={(e) => setCapacity(e.target.value)}
-                  placeholder="1"
-                  min={1}
-                  variant="bordered"
-                  classNames={{
-                    inputWrapper: "border-gray-300 max-w-[200px]",
-                  }}
-                />
-              </div>
-
-              {/* チェックリスト */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  チェックリスト
-                </label>
-                <div className="space-y-2">
-                  {checklist.map((item, index) => (
-                    <div key={item.id} className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500 w-6">
-                        {index + 1}.
-                      </span>
+                  {/* 緯度・経度 */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        緯度 (オプション)
+                      </label>
                       <Input
-                        value={item.text}
-                        onChange={(e) =>
-                          handleChecklistTextChange(item.id, e.target.value)
-                        }
-                        placeholder="チェック項目を入力"
+                        type="number"
+                        step="any"
+                        value={latitude}
+                        onChange={(e) => setLatitude(e.target.value)}
+                        placeholder="例: 35.6762"
                         variant="bordered"
                         classNames={{
                           inputWrapper: "border-gray-300",
                         }}
                       />
-                      <Button
-                        isIconOnly
-                        variant="light"
-                        color="danger"
-                        onPress={() => handleRemoveChecklistItem(item.id)}
-                        className="min-w-unit-8 w-8 h-8"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
                     </div>
-                  ))}
-                </div>
-                <Button
-                  variant="bordered"
-                  startContent={<Plus size={16} />}
-                  onPress={handleAddChecklistItem}
-                  className="mt-2 border-gray-300 text-gray-600"
-                >
-                  項目を追加
-                </Button>
-              </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        経度 (オプション)
+                      </label>
+                      <Input
+                        type="number"
+                        step="any"
+                        value={longitude}
+                        onChange={(e) => setLongitude(e.target.value)}
+                        placeholder="例: 139.6503"
+                        variant="bordered"
+                        classNames={{
+                          inputWrapper: "border-gray-300",
+                        }}
+                      />
+                    </div>
+                  </div>
 
-              {/* 予定日 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  予定日 <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  type="date"
-                  value={scheduledDate}
-                  onChange={(e) => setScheduledDate(e.target.value)}
-                  variant="bordered"
-                  isInvalid={!!errors.scheduledDate}
-                  errorMessage={errors.scheduledDate}
-                  classNames={{
-                    inputWrapper: "border-gray-300 max-w-[200px]",
-                  }}
+                  {/* 予定日 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      予定日 <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      type="date"
+                      value={scheduledDate}
+                      onChange={(e) => setScheduledDate(e.target.value)}
+                      variant="bordered"
+                      isInvalid={!!errors.scheduledDate}
+                      errorMessage={errors.scheduledDate}
+                      classNames={{
+                        inputWrapper: "border-gray-300 max-w-[200px]",
+                      }}
+                    />
+                  </div>
+
+                  {/* 画像URL */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      画像URL (オプション)
+                    </label>
+                    <Input
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      placeholder="デフォルト: /jobs/izakaya.jpg"
+                      variant="bordered"
+                      classNames={{
+                        inputWrapper: "border-gray-300",
+                      }}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* 区切り線 */}
+              <hr className="border-gray-200" />
+
+              {/* セクション3: タグ・チェックリスト */}
+              <section>
+                <SectionHeader
+                  title="タグ・チェックリスト"
+                  description="ジョブの分類タグと作業チェックリストを設定してください"
                 />
-              </div>
+                <div className="space-y-6">
+                  {/* タグ */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      タグを選択
+                    </label>
+                    <CheckboxGroup
+                      value={selectedTags}
+                      onChange={(values) => setSelectedTags(values as string[])}
+                      orientation="horizontal"
+                      classNames={{
+                        wrapper: "gap-3 flex-wrap",
+                      }}
+                    >
+                      {TAG_OPTIONS.map((tag) => (
+                        <Checkbox
+                          key={tag}
+                          value={tag}
+                          classNames={{
+                            base: "inline-flex items-center min-w-[120px] max-w-full cursor-pointer rounded-lg gap-3 p-3 border-2 border-gray-200 hover:border-sky-300 hover:bg-sky-50 data-[selected=true]:border-sky-500 data-[selected=true]:bg-sky-50 transition-all",
+                            wrapper:
+                              "w-6 h-6 before:w-6 before:h-6 after:w-3 after:h-3",
+                            label: "text-sm font-medium text-gray-700",
+                          }}
+                        >
+                          {tag}
+                        </Checkbox>
+                      ))}
+                    </CheckboxGroup>
+                  </div>
+
+                  {/* チェックリスト */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      チェックリスト
+                    </label>
+                    <div className="space-y-2">
+                      {checklist.map((item, index) => (
+                        <div key={item.id} className="flex items-center gap-2">
+                          <span className="text-sm text-gray-500 w-6">
+                            {index + 1}.
+                          </span>
+                          <Input
+                            value={item.text}
+                            onChange={(e) =>
+                              handleChecklistTextChange(item.id, e.target.value)
+                            }
+                            placeholder="チェック項目を入力"
+                            variant="bordered"
+                            classNames={{
+                              inputWrapper: "border-gray-300",
+                            }}
+                          />
+                          <Button
+                            isIconOnly
+                            variant="light"
+                            color="danger"
+                            onPress={() => handleRemoveChecklistItem(item.id)}
+                            className="min-w-unit-8 w-8 h-8"
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      variant="bordered"
+                      startContent={<Plus size={16} />}
+                      onPress={handleAddChecklistItem}
+                      className="mt-3 border-gray-300 text-gray-600"
+                    >
+                      項目を追加
+                    </Button>
+                  </div>
+                </div>
+              </section>
+
+              {/* 区切り線 */}
+              <hr className="border-gray-200" />
 
               {/* 送信ボタン */}
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-2">
                 <Button
                   type="submit"
-                  color="primary"
                   size="lg"
-                  className="w-full bg-sky-500 hover:bg-sky-600 rounded-xl"
+                  className="w-full h-14 text-lg font-bold text-white bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200"
                 >
                   作成する
                 </Button>
+                <p className="text-center text-xs text-gray-500 mt-3">
+                  作成後、ダッシュボードで確認できます
+                </p>
               </div>
             </form>
           </CardBody>

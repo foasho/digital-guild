@@ -27,31 +27,67 @@ const calculateRank = (score: number): Rank => {
   return "Bronze";
 };
 
-// ランクに応じたスタイルを取得
+// ランクに応じたスタイルを取得（リッチなグラデーション）
 const getRankStyle = (rank: Rank) => {
   switch (rank) {
     case "Platinum":
-      return "bg-gradient-to-r from-slate-400 to-slate-200 text-slate-800";
+      return "bg-gradient-to-r from-slate-300 via-slate-100 to-slate-300 text-slate-800 shadow-sm border border-slate-300";
     case "Gold":
-      return "bg-gradient-to-r from-amber-400 to-amber-200 text-amber-800";
+      return "bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-400 text-amber-900 shadow-sm border border-amber-300";
     case "Silver":
-      return "bg-gradient-to-r from-gray-400 to-gray-200 text-gray-700";
+      return "bg-gradient-to-r from-gray-400 via-gray-200 to-gray-400 text-gray-700 shadow-sm border border-gray-300";
     case "Bronze":
-      return "bg-gradient-to-r from-orange-400 to-orange-200 text-orange-800";
+      return "bg-gradient-to-r from-orange-500 via-orange-300 to-orange-500 text-orange-900 shadow-sm border border-orange-300";
   }
 };
 
-// UndertakedJobのステータスに応じたスタイルを取得
+// Trust Scoreに応じた色を取得
+const getTrustScoreColor = (score: number) => {
+  if (score >= 80) return { bar: "bg-green-500", text: "text-green-600" };
+  if (score >= 60) return { bar: "bg-yellow-500", text: "text-yellow-600" };
+  return { bar: "bg-red-500", text: "text-red-600" };
+};
+
+// アバターの枠線色をランクに応じて取得
+const getAvatarRingColor = (rank: Rank) => {
+  switch (rank) {
+    case "Platinum":
+      return "ring-2 ring-slate-400 ring-offset-1";
+    case "Gold":
+      return "ring-2 ring-amber-400 ring-offset-1";
+    case "Silver":
+      return "ring-2 ring-gray-400 ring-offset-1";
+    case "Bronze":
+      return "ring-2 ring-orange-400 ring-offset-1";
+  }
+};
+
+// UndertakedJobのステータスに応じたスタイルを取得（より目立つデザイン）
 const getStatusStyle = (status: UndertakedJob["status"]) => {
   switch (status) {
     case "accepted":
-      return { label: "承認済み", style: "bg-sky-100 text-sky-700" };
+      return {
+        label: "承認済み",
+        style:
+          "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm font-semibold",
+      };
     case "in_progress":
-      return { label: "作業中", style: "bg-amber-100 text-amber-700" };
+      return {
+        label: "作業中",
+        style:
+          "bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-sm font-semibold",
+      };
     case "completed":
-      return { label: "完了", style: "bg-green-100 text-green-700" };
+      return {
+        label: "完了",
+        style:
+          "bg-gradient-to-r from-blue-500 to-sky-500 text-white shadow-sm font-semibold",
+      };
     case "canceled":
-      return { label: "キャンセル", style: "bg-gray-100 text-gray-500" };
+      return {
+        label: "キャンセル",
+        style: "bg-gray-200 text-gray-500 font-medium",
+      };
   }
 };
 
@@ -309,6 +345,9 @@ export default function RequesterJobDetailPage() {
                     applicant.status === "completed" &&
                     applicant.requesterEvalScore === null;
 
+                  const trustScoreColor = getTrustScoreColor(trustScore);
+                  const avatarRing = getAvatarRingColor(rank);
+
                   return (
                     <div
                       key={applicant.id}
@@ -316,8 +355,10 @@ export default function RequesterJobDetailPage() {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          {/* アバター */}
-                          <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                          {/* アバター（ランクに応じた枠線付き） */}
+                          <div
+                            className={`w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0 ${avatarRing}`}
+                          >
                             <Image
                               src="/avatar4.png"
                               alt={worker?.name || "労働者"}
@@ -328,19 +369,33 @@ export default function RequesterJobDetailPage() {
                           </div>
 
                           {/* 名前とランク */}
-                          <div>
+                          <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <span className="font-medium text-gray-800">
                                 {worker?.name || `労働者 ${applicant.workerId}`}
                               </span>
                               <span
-                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${getRankStyle(rank)}`}
+                                className={`text-xs px-2 py-0.5 rounded-full ${getRankStyle(rank)}`}
                               >
                                 {rank}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                              <span>Trust Score: {trustScore}</span>
+                            {/* Trust Score プログレスバー */}
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs text-gray-500 w-20">
+                                Trust Score
+                              </span>
+                              <div className="flex-1 max-w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full ${trustScoreColor.bar} transition-all duration-300`}
+                                  style={{ width: `${trustScore}%` }}
+                                />
+                              </div>
+                              <span
+                                className={`text-xs font-semibold ${trustScoreColor.text}`}
+                              >
+                                {trustScore}
+                              </span>
                             </div>
                           </div>
                         </div>

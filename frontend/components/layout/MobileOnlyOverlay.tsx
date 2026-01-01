@@ -22,18 +22,14 @@ export function MobileOnlyOverlay() {
       <h1 className="text-2xl font-bold text-gray-800 mb-2 text-center">
         Digital GUILD
       </h1>
-      <p className="text-gray-500 mb-8 text-center">
-        Worker App
-      </p>
 
       {/* QRコード */}
       <div className="bg-white border-2 border-gray-200 rounded-2xl p-4 shadow-lg mb-6">
         <Image
           src="/links/worker.png"
           alt="QRコード"
-          width={200}
-          height={200}
-          className="w-48 h-48"
+          width={192}
+          height={192}
           priority
         />
       </div>

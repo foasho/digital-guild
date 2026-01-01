@@ -272,7 +272,7 @@ export default function RequestBoardsPage() {
       )}
 
       {/* ジョブカード一覧 */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-6">
         {filteredJobs.length > 0 ? (
           filteredJobs.map((job) => (
             <JobCard

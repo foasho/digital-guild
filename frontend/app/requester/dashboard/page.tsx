@@ -181,17 +181,36 @@ export default function RequesterDashboardPage() {
             aria-label="ステータスフィルター"
             selectedKey={selectedFilter}
             onSelectionChange={(key) => setSelectedFilter(key as StatusFilter)}
+            variant="underlined"
             classNames={{
-              tabList: "bg-white border border-gray-200 rounded-xl p-1",
-              cursor: "bg-sky-500 rounded-lg",
-              tab: "px-4 py-2 rounded-lg",
-              tabContent: "group-data-[selected=true]:text-white",
+              tabList:
+                "gap-4 w-full relative rounded-none p-0 border-b border-gray-200",
+              cursor: "w-full bg-sky-500 h-[3px]",
+              tab: "max-w-fit px-4 py-3 h-12 data-[hover=true]:bg-sky-50 data-[hover=true]:text-sky-600 rounded-t-lg transition-colors",
+              tabContent:
+                "text-gray-500 group-data-[selected=true]:text-sky-600 group-data-[selected=true]:font-semibold",
             }}
           >
-            <Tab key="all" title={`全て (${stats.total})`} />
-            <Tab key="recruiting" title={`募集中 (${stats.recruiting})`} />
-            <Tab key="in_progress" title={`進行中 (${stats.inProgress})`} />
-            <Tab key="completed" title={`完了 (${stats.completed})`} />
+            <Tab
+              key="all"
+              title={`全て (${stats.total})`}
+              className="data-[selected=true]:bg-sky-100"
+            />
+            <Tab
+              key="recruiting"
+              title={`募集中 (${stats.recruiting})`}
+              className="data-[selected=true]:bg-sky-100"
+            />
+            <Tab
+              key="in_progress"
+              title={`進行中 (${stats.inProgress})`}
+              className="data-[selected=true]:bg-sky-100"
+            />
+            <Tab
+              key="completed"
+              title={`完了 (${stats.completed})`}
+              className="data-[selected=true]:bg-sky-100"
+            />
           </Tabs>
         </div>
 

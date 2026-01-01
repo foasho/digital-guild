@@ -37,10 +37,12 @@ function createMarkerIcon(job: Job, isBookmarked: boolean): L.DivIcon {
     : "";
 
   const html = `
-    <div style="
+    <div class="marker-pin" style="
       position: relative;
       width: 50px;
       height: 50px;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+      cursor: pointer;
     ">
       <div style="
         width: 50px;
@@ -49,7 +51,8 @@ function createMarkerIcon(job: Job, isBookmarked: boolean): L.DivIcon {
         border: ${borderWidth} solid ${borderColor};
         overflow: hidden;
         background: #1f2937;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
+        transition: all 0.2s ease-in-out;
       ">
         <img
           src="${job.imageUrl}"
@@ -72,6 +75,7 @@ function createMarkerIcon(job: Job, isBookmarked: boolean): L.DivIcon {
         border-left: 8px solid transparent;
         border-right: 8px solid transparent;
         border-top: 10px solid ${borderColor};
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
       "></div>
     </div>
   `;
