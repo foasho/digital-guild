@@ -103,15 +103,15 @@ export default function WalletPage() {
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-100/40 to-transparent pointer-events-none" />
 
         {/* ヘッダー: JPYCロゴ + タイトル */}
-        <div className="relative flex items-center gap-3 mb-4 pb-3 border-b border-amber-200/60">
+        <div className="relative flex items-center justify-between mb-4 pb-3 border-b border-amber-200/60">
           <Image
             src="/logo/jpyc.png"
             alt="JPYC Logo"
-            width={32}
+            width={72}
             height={32}
             className="object-contain"
           />
-          <span className="text-gray-800 font-semibold text-lg tracking-wide">
+          <span className="text-gray-800 font-semibold text-lg tracking-wide text-right">
             DIGITAL GUILD WALLET
           </span>
         </div>
