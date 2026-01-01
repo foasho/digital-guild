@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import { JobMapMarker } from "@/components/worker/JobMapMarker";
 import type { Job } from "@/types";
 
@@ -14,6 +14,23 @@ interface MapComponentProps {
 // 日本の中心座標
 const JAPAN_CENTER: [number, number] = [36.5, 138];
 const DEFAULT_ZOOM = 5;
+
+function MapResizer() {
+  const map = useMap();
+
+  useEffect(() => {
+    const container = map.getContainer();
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(container);
+
+    // 初期描画直後にも1回だけサイズ計算を強制
+    setTimeout(() => map.invalidateSize(), 0);
+
+    return () => observer.disconnect();
+  }, [map]);
+
+  return null;
+}
 
 export default function MapComponent({
   jobs,
@@ -42,16 +59,17 @@ export default function MapComponent({
       zoom={DEFAULT_ZOOM}
       className="w-full h-full"
       style={{
-        background: "#1a1a2e",
+        background: "#f8fafc",
         zIndex: 1,
         position: "relative",
       }}
       zoomControl={false}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      <MapResizer />
       {jobs.map((job) => (
         <JobMapMarker
           key={job.id}

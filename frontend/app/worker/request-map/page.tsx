@@ -9,9 +9,6 @@ import { jobs as mockJobs } from "@/constants/mocks/jobs";
 import { useBookmarkStore, useJobStore, useUndertakedJobStore } from "@/stores";
 import type { Job, UndertakedJob } from "@/types";
 
-// Leaflet CSSをインポート
-import "leaflet/dist/leaflet.css";
-
 // SSR無効化でMapコンポーネントをdynamic import
 const MapComponent = dynamic(() => import("./MapComponent"), {
   ssr: false,

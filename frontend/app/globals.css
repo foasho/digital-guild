@@ -3,6 +3,18 @@
 @source "../components";
 @source "../app";
 
+/* Leaflet (react-leaflet) global styles */
+@import "leaflet/dist/leaflet.css";
+
+/* Tailwind preflight sets img { max-width: 100% } which breaks Leaflet tiles/markers */
+.leaflet-pane img,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  max-width: none !important;
+  max-height: none !important;
+}
+
 /* Worker Theme CSS Variables */
 :root {
   /* Background colors */
@@ -114,4 +126,304 @@ body {
   border: 1px solid var(--worker-card-border);
   backdrop-filter: blur(10px);
   border-radius: 1rem;
+}
+
+/* Skeleton shimmer animation */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Custom loading animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out forwards;
+}
+
+/* Staggered animation delays */
+.animate-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animate-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animate-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animate-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animate-delay-500 {
+  animation-delay: 500ms;
+}
+
+/* ============================================
+   Custom Scrollbar Styles
+   ============================================ */
+
+/* Enable smooth scrolling globally */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mobile touch scrolling optimization */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent overscroll bounce on the body */
+body {
+  overscroll-behavior: none;
+}
+
+/* Scrollbar CSS Variables */
+:root {
+  --scrollbar-width: 6px;
+  --scrollbar-width-hover: 10px;
+  --scrollbar-track-bg: rgba(0, 0, 0, 0.05);
+  --scrollbar-thumb-bg: #d97706;
+  --scrollbar-thumb-hover-bg: #b45309;
+  --scrollbar-border-radius: 10px;
+  --scrollbar-transition: all 0.2s ease-in-out;
+}
+
+/* Dark mode scrollbar colors */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --scrollbar-track-bg: rgba(255, 255, 255, 0.05);
+    --scrollbar-thumb-bg: #f59e0b;
+    --scrollbar-thumb-hover-bg: #fbbf24;
+  }
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+  transition: var(--scrollbar-transition);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+  border-radius: var(--scrollbar-border-radius);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: var(--scrollbar-border-radius);
+  transition: var(--scrollbar-transition);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Expand scrollbar on container hover */
+.scrollbar-expand:hover::-webkit-scrollbar {
+  width: var(--scrollbar-width-hover);
+  height: var(--scrollbar-width-hover);
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
+}
+
+/* Thin scrollbar utility class */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+/* Hide scrollbar utility class */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================
+   Scroll Snap Utilities
+   ============================================ */
+
+/* Horizontal scroll snap container */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-snap-x-proximity {
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Vertical scroll snap container */
+.scroll-snap-y {
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-snap-y-proximity {
+  scroll-snap-type: y proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Scroll snap child items */
+.scroll-snap-start {
+  scroll-snap-align: start;
+}
+
+.scroll-snap-center {
+  scroll-snap-align: center;
+}
+
+.scroll-snap-end {
+  scroll-snap-align: end;
+}
+
+/* Scroll snap stop */
+.scroll-snap-stop {
+  scroll-snap-stop: always;
+}
+
+/* ============================================
+   Overscroll Behavior Utilities
+   ============================================ */
+
+.overscroll-none {
+  overscroll-behavior: none;
+}
+
+.overscroll-contain {
+  overscroll-behavior: contain;
+}
+
+.overscroll-auto {
+  overscroll-behavior: auto;
+}
+
+/* ============================================
+   Custom Scrollable Containers
+   ============================================ */
+
+/* Card list with horizontal scroll */
+.card-scroll-container {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0.5rem;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-bg) transparent;
+}
+
+.card-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.card-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.card-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: var(--scrollbar-border-radius);
+}
+
+.card-scroll-container > * {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+/* Vertical scrollable area with fade edges */
+.scroll-fade-container {
+  position: relative;
+  overflow-y: auto;
+}
+
+.scroll-fade-container::before,
+.scroll-fade-container::after {
+  content: "";
+  position: sticky;
+  left: 0;
+  right: 0;
+  height: 2rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.scroll-fade-container::before {
+  top: 0;
+  background: linear-gradient(to bottom, var(--background), transparent);
+}
+
+.scroll-fade-container::after {
+  bottom: 0;
+  background: linear-gradient(to top, var(--background), transparent);
 }
