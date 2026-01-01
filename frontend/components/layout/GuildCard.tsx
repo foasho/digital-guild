@@ -16,14 +16,17 @@ const DEFAULT_CERT_ID = "17695712143";
 // Rank-based styling configurations
 const rankStyles = {
   BRONZE: {
+    opacity: 0.5,
     ringColor: "ring-white/90",
-    frameFrom: "#E7C892",
-    frameTo: "#A8772D",
-    bgFrom: "#C98C3B",
-    bgMid: "#E1C08A",
-    bgTo: "#7A4D1B",
+    // Bronze: GOLDと区別しやすいように、赤みのある銅色寄りに
+    frameFrom: "#D8A37A",
+    frameTo: "#7A3A12",
+    bgFrom: "#B86B2E",
+    bgMid: "#D9A06B",
+    bgTo: "#5A260D",
   },
   SILVER: {
+    opacity: 0.5,
     ringColor: "ring-white/90",
     frameFrom: "#E5E7EB",
     frameTo: "#9CA3AF",
@@ -32,6 +35,7 @@ const rankStyles = {
     bgTo: "#6B7280",
   },
   GOLD: {
+    opacity: 0.8,
     ringColor: "ring-white/90",
     frameFrom: "#FDE68A",
     frameTo: "#D97706",
@@ -40,6 +44,7 @@ const rankStyles = {
     bgTo: "#8A5A18",
   },
   PLATINUM: {
+    opacity: 0.9,
     ringColor: "ring-white/90",
     frameFrom: "#BAE6FD",
     frameTo: "#67E8F9",
@@ -121,34 +126,52 @@ export function GuildCard() {
       >
         <div
           className="relative rounded-[16px] p-[2px] shadow-[0_14px_28px_rgba(0,0,0,0.35)] active:scale-[0.99] transition-transform"
-          style={{
-            background: `linear-gradient(135deg, ${currentRankStyle.frameFrom}, ${currentRankStyle.frameTo})`,
-          }}
         >
+          {/* フレーム（opacity適用。子要素は透過させないため、背景レイヤーとして描画） */}
+          <div
+            className="absolute inset-0 rounded-[16px] pointer-events-none"
+            style={{
+              background: `linear-gradient(135deg, ${currentRankStyle.frameFrom}, ${currentRankStyle.frameTo})`,
+              opacity: currentRankStyle.opacity,
+            }}
+          />
+
           <Card
-            className="relative overflow-hidden rounded-[14px] border border-white/25"
+            className="relative overflow-hidden rounded-[14px] border"
             shadow="none"
             radius="none"
             style={{
-              background: `linear-gradient(135deg, ${currentRankStyle.bgFrom}, ${currentRankStyle.bgMid} 55%, ${currentRankStyle.bgTo})`,
+              background: "transparent",
+              borderColor: `rgba(255,255,255,${0.25 * currentRankStyle.opacity})`,
             }}
           >
+            {/* 背景グラデ（rankStyles.opacity で透過。文字/枠は透過させない） */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: `linear-gradient(135deg, ${currentRankStyle.bgFrom}, ${currentRankStyle.bgMid} 55%, ${currentRankStyle.bgTo})`,
+                opacity: currentRankStyle.opacity,
+              }}
+            />
+
             {/* 中央の光沢ストライプ */}
             <div
-              className="absolute inset-0 pointer-events-none opacity-60"
+              className="absolute inset-0 pointer-events-none"
               style={{
                 background:
                   "linear-gradient(90deg, rgba(255,255,255,0) 35%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0) 65%)",
+                opacity: 0.6 * currentRankStyle.opacity,
               }}
             />
 
             {/* 微細パターン */}
             <div
-              className="absolute inset-0 pointer-events-none opacity-[0.10]"
+              className="absolute inset-0 pointer-events-none"
               style={{
                 backgroundImage:
                   "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.35) 1px, transparent 0)",
                 backgroundSize: "18px 18px",
+                opacity: 0.1 * currentRankStyle.opacity,
               }}
             />
 
