@@ -1,0 +1,152 @@
+"use client";
+
+import { Button, Card, CardBody } from "@heroui/react";
+import type { Job } from "@/types";
+
+interface JobCardProps {
+  job: Job;
+  isRecommended?: boolean;
+  isBookmarked?: boolean;
+  onDetailClick: () => void;
+  onBookmarkClick: () => void;
+}
+
+export function JobCard({
+  job,
+  isRecommended = false,
+  isBookmarked = false,
+  onDetailClick,
+  onBookmarkClick,
+}: JobCardProps) {
+  // 報酬合計（reward + aiInsentiveReward）
+  const totalReward = job.reward + job.aiInsentiveReward;
+
+  // 日付フォーマット（2026年1月6日〜）
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}年${month}月${day}日〜`;
+  };
+
+  return (
+    <Card
+      className="relative w-full overflow-hidden rounded-xl"
+      radius="lg"
+      shadow="md"
+    >
+      {/* 背景画像 + 50%黒マスク */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${job.imageUrl})` }}
+      />
+      <div className="absolute inset-0 bg-black/50" />
+
+      {/* コンテンツ */}
+      <CardBody className="relative z-10 flex flex-col min-h-[200px] p-4">
+        {/* 上部: 報酬とおすすめバッジ */}
+        <div className="flex justify-between items-start">
+          {/* 左上: 報酬額 */}
+          <div className="text-white font-bold text-lg">
+            ¥{totalReward.toLocaleString()} / 回
+          </div>
+
+          {/* 右上: AIレコメンドバッジ（斜めリボン風） */}
+          {isRecommended && (
+            <div className="absolute top-0 right-0 overflow-hidden w-24 h-24">
+              <div className="absolute top-3 right-[-28px] w-32 text-center text-xs font-bold text-white bg-rose-500 py-1 transform rotate-45 shadow-md">
+                あなたにおすすめ
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 中央スペーサー */}
+        <div className="flex-1" />
+
+        {/* 下部: ジョブ情報とアクション */}
+        <div className="flex justify-between items-end gap-2">
+          {/* 左下: ジョブ情報 */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-white font-bold text-lg mb-1 truncate">
+              {job.title}
+            </h3>
+            <div className="flex items-center gap-1 text-white/90 text-sm mb-1">
+              <svg
+                className="w-4 h-4 shrink-0"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="truncate">{job.location}</span>
+            </div>
+            <div className="flex items-center gap-1 text-white/90 text-sm mb-2">
+              <svg
+                className="w-4 h-4 shrink-0"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>{formatDate(job.scheduledDate)}</span>
+            </div>
+            <p className="text-white/80 text-sm line-clamp-1">
+              {job.description}
+            </p>
+          </div>
+
+          {/* 右下: ブックマークとボタン */}
+          <div className="flex flex-col items-end gap-2 shrink-0">
+            {/* ブックマークアイコン */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onBookmarkClick();
+              }}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              aria-label={isBookmarked ? "ブックマーク解除" : "ブックマーク"}
+            >
+              <svg
+                className={`w-6 h-6 ${isBookmarked ? "text-amber-400 fill-amber-400" : "text-white"}`}
+                fill={isBookmarked ? "currentColor" : "none"}
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                />
+              </svg>
+            </button>
+
+            {/* 詳細ボタン */}
+            <Button
+              size="sm"
+              className="bg-amber-100 text-amber-900 font-semibold px-4"
+              radius="full"
+              onPress={onDetailClick}
+            >
+              詳細はこちら
+            </Button>
+          </div>
+        </div>
+      </CardBody>
+    </Card>
+  );
+}

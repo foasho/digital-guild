@@ -19,7 +19,7 @@
  */
 export function calculateAiIncentive(
   subsidyAmount: number,
-  jobReward: number
+  jobReward: number,
 ): number {
   // 補助金の0.5%
   const baseIncentive = subsidyAmount * 0.005;

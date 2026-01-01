@@ -27,15 +27,10 @@ export function BackgroundImage({ children }: BackgroundImageProps) {
       />
 
       {/* Black Overlay - 50% opacity */}
-      <div
-        className="fixed inset-0 bg-black/50"
-        aria-hidden="true"
-      />
+      <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
 
       {/* Content - Positioned above the overlay */}
-      <div className="relative z-10">
-        {children}
-      </div>
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }

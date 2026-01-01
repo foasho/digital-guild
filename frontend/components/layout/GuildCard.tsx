@@ -25,7 +25,8 @@ export function GuildCard() {
 
   // Use default values until hydration is complete or if store is empty
   const displayName = isHydrated && worker?.name ? worker.name : DEFAULT_NAME;
-  const displayBalance = isHydrated && jpycBalance > 0 ? jpycBalance : DEFAULT_BALANCE;
+  const displayBalance =
+    isHydrated && jpycBalance > 0 ? jpycBalance : DEFAULT_BALANCE;
   const displayRank = isHydrated ? getRank().toUpperCase() : DEFAULT_RANK;
 
   const formattedBalance = displayBalance.toLocaleString();

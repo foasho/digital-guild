@@ -31,9 +31,7 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
         </div>
 
         {/* Scrollable content area */}
-        <main className="flex-1 overflow-y-auto pb-20">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto pb-20">{children}</main>
       </div>
 
       {/* Footer - Fixed at bottom */}

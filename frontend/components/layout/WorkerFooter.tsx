@@ -47,7 +47,9 @@ export function WorkerFooter() {
                 width={24}
                 height={24}
                 className={`object-contain ${
-                  isActive ? "opacity-100 brightness-125" : "opacity-70 brightness-100"
+                  isActive
+                    ? "opacity-100 brightness-125"
+                    : "opacity-70 brightness-100"
                 }`}
               />
               <span

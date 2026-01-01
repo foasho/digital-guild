@@ -82,7 +82,7 @@ export interface UndertakedJob {
   id: string;
   workerId: string;
   jobId: string;
-  status: 'accepted' | 'in_progress' | 'completed' | 'canceled';
+  status: "accepted" | "in_progress" | "completed" | "canceled";
   requesterEvalScore: number | null;
   acceptedAt: string;
   canceledAt: string | null;
@@ -131,4 +131,4 @@ export interface TransactionHistory {
 }
 
 // ランク
-export type Rank = 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
+export type Rank = "Bronze" | "Silver" | "Gold" | "Platinum";
