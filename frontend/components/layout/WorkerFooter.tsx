@@ -26,14 +26,14 @@ export function WorkerFooter() {
 
   return (
     <footer className="fixed bottom-0 left-0 right-0 bg-neutral-900/95 backdrop-blur-sm border-t border-neutral-800">
-      <nav className="flex items-center justify-around py-3 px-4">
+      <nav className="flex items-center justify-around py-2 px-3">
         {navItems.map((item) => {
           const isActive = pathname === item.path;
           return (
             <button
               key={item.path}
               onClick={() => handleNavigation(item.path)}
-              className={`flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all ${
+              className={`flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-lg transition-all ${
                 isActive
                   ? "text-amber-400 bg-amber-400/20"
                   : "text-neutral-400 hover:text-white"
@@ -44,8 +44,8 @@ export function WorkerFooter() {
               <Image
                 src={item.icon}
                 alt={item.label}
-                width={28}
-                height={28}
+                width={24}
+                height={24}
                 className={`object-contain ${
                   isActive
                     ? "opacity-100 brightness-125"
@@ -53,7 +53,7 @@ export function WorkerFooter() {
                 }`}
               />
               <span
-                className={`text-sm font-medium ${
+                className={`text-xs leading-none font-medium ${
                   isActive ? "text-amber-400" : "text-neutral-400"
                 }`}
               >
