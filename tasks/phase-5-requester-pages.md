@@ -6,6 +6,9 @@
 ## 前提条件
 - Phase 1-4が完了している
 - 発注者レイアウトが使用可能
+- backup/requester直下の旧デザインのコード(tsxファイル)を読みコンテキストを理解している。※今回の新デザインとはデータ構造がことなるためあくまで参考程度
+
+
 
 ## タスク一覧
 
@@ -146,6 +149,9 @@
   3. `components/requester/StatsSummary.tsx` - 統計サマリー
 - **対象ファイル**: `frontend/components/requester/`配下
 - **完了条件**: 各コンポーネントが正しく機能する
+
+### Task 5.9: PlaywrightMCPによる確認
+
 
 ## 完了条件
 - [ ] ダッシュボードページが完成
