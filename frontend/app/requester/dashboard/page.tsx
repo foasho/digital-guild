@@ -2,16 +2,17 @@
 
 import { Button, Card, CardBody, Tab, Tabs } from "@heroui/react";
 import {
+  AlertCircle,
   Briefcase,
   CheckCircle,
   Clock,
   Plus,
-  Users,
-  TrendingUp,
   MapPin,
   Calendar,
   ChevronRight,
-  Wallet,
+  ArrowRight,
+  Users,
+  TrendingUp,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -160,6 +161,22 @@ export default function RequesterDashboardPage() {
     });
   }, [allJobs, undertakedJobs, selectedFilter]);
 
+  // 確認待ちのUndertakedJob一覧（緊急度高）
+  const pendingReviewUndertakedJobs = useMemo(() => {
+    const requesterId = requester?.id || 1;
+    const requesterJobIds = allJobs.map((job) => job.id);
+    return undertakedJobs.filter(
+      (uj) =>
+        uj.status === "completion_reported" &&
+        requesterJobIds.includes(uj.jobId)
+    );
+  }, [undertakedJobs, allJobs, requester?.id]);
+
+  // ジョブIDからジョブ情報を取得
+  const getJobInfo = (jobId: number) => {
+    return allJobs.find((job) => job.id === jobId);
+  };
+
   const getApplicantCount = (jobId: number) => {
     return undertakedJobs.filter(
       (uj) => uj.jobId === jobId && uj.status !== "canceled"
@@ -202,88 +219,66 @@ export default function RequesterDashboardPage() {
         </Link>
       </div>
 
-      {/* 統計カード - PC向けに5列表示 */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
-        <Card className="bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md transition-shadow">
-          <CardBody className="p-4 lg:p-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 lg:p-3 bg-sky-100 rounded-xl">
-                <Briefcase className="w-5 h-5 lg:w-6 lg:h-6 text-sky-600" />
-              </div>
-              <div>
-                <p className="text-2xl lg:text-3xl font-bold text-gray-800">
-                  {stats.total}
-                </p>
-                <p className="text-xs lg:text-sm text-gray-500">発注数</p>
-              </div>
+      {/* 確認待ちアラートセクション */}
+      {pendingReviewUndertakedJobs.length > 0 && (
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-4 lg:p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-amber-500 rounded-full animate-pulse">
+              <AlertCircle className="w-5 h-5 text-white" />
             </div>
-          </CardBody>
-        </Card>
+            <div>
+              <h3 className="text-lg font-bold text-amber-800">
+                確認待ちの作業報告があります
+              </h3>
+              <p className="text-sm text-amber-600">
+                {pendingReviewUndertakedJobs.length}件の作業が完了報告されています。評価をお願いします。
+              </p>
+            </div>
+          </div>
 
-        <Card className="bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md transition-shadow">
-          <CardBody className="p-4 lg:p-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 lg:p-3 bg-amber-100 rounded-xl">
-                <Clock className="w-5 h-5 lg:w-6 lg:h-6 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-2xl lg:text-3xl font-bold text-gray-800">
-                  {stats.inProgress}
-                </p>
-                <p className="text-xs lg:text-sm text-gray-500">進行中</p>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md transition-shadow">
-          <CardBody className="p-4 lg:p-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 lg:p-3 bg-green-100 rounded-xl">
-                <CheckCircle className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-2xl lg:text-3xl font-bold text-gray-800">
-                  {stats.completed}
-                </p>
-                <p className="text-xs lg:text-sm text-gray-500">完了</p>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md transition-shadow">
-          <CardBody className="p-4 lg:p-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 lg:p-3 bg-purple-100 rounded-xl">
-                <Users className="w-5 h-5 lg:w-6 lg:h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-2xl lg:text-3xl font-bold text-gray-800">
-                  {stats.totalApplicants}
-                </p>
-                <p className="text-xs lg:text-sm text-gray-500">総応募者</p>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md transition-shadow col-span-2 sm:col-span-1">
-          <CardBody className="p-4 lg:p-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 lg:p-3 bg-indigo-100 rounded-xl">
-                <Wallet className="w-5 h-5 lg:w-6 lg:h-6 text-indigo-600" />
-              </div>
-              <div>
-                <p className="text-xl lg:text-2xl font-bold text-gray-800">
-                  {(stats.totalReward / 1000).toFixed(0)}K
-                </p>
-                <p className="text-xs lg:text-sm text-gray-500">総報酬額</p>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-      </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {pendingReviewUndertakedJobs.map((uj) => {
+              const job = getJobInfo(uj.jobId);
+              if (!job) return null;
+              return (
+                <button
+                  key={uj.id}
+                  type="button"
+                  onClick={() =>
+                    router.push(`/requester/undertaked_jobs/${uj.id}`)
+                  }
+                  className="flex items-center gap-3 p-3 bg-white rounded-xl border border-amber-200 hover:border-amber-400 hover:shadow-md transition-all group text-left"
+                >
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                    <Image
+                      src={job.imageUrl || "/jobs/izakaya.jpg"}
+                      alt={job.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800 text-sm truncate">
+                      {job.title}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <MapPin size={12} />
+                      <span className="truncate">{job.location}</span>
+                    </div>
+                    <p className="text-xs text-amber-600 font-medium mt-0.5">
+                      {(job.reward + job.aiInsentiveReward).toLocaleString()} JPYC
+                    </p>
+                  </div>
+                  <ArrowRight
+                    size={18}
+                    className="text-amber-500 group-hover:translate-x-1 transition-transform flex-shrink-0"
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 補助金・銀行連携パネル - 2カラムグリッド */}
       <div className="grid lg:grid-cols-2 gap-4 lg:gap-6">
