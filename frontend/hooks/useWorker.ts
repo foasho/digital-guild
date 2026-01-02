@@ -1,27 +1,28 @@
-"use client";
-
 import { useState, useEffect } from "react";
-import { WorkerApi } from "@/constants/api-mocks";
-import type { Worker } from "@/types";
+import { workers } from "@/constants/mocks";
+import { Worker } from "@/types";
+import { useWorkerStore } from "@/stores";
 
-/**
- * 現在のワーカー情報を取得するhook
- * モックでは最初のワーカーを返す
- */
-const useWorker = (): Worker | undefined => {
-  const [worker, setWorker] = useState<Worker | undefined>(undefined);
-
+type UseWorkerProps = {
+  worker: Worker | null;
+  pending: boolean;
+};
+const useWorker = (): UseWorkerProps => {
+  const [pending, setPending] = useState(false);
+  const { worker, setWorker } = useWorkerStore();
   useEffect(() => {
     const fetchWorker = async (): Promise<void> => {
-      const workers = await WorkerApi.index();
-      if (workers.length > 0) {
-        setWorker(workers[0]);
+      setPending(true);
+      try {
+        const worker = workers[0];//TODO: 本番移行では、APIから取得する予定
+        setWorker(worker);
+      } finally {
+        setPending(false);
       }
     };
     fetchWorker();
   }, []);
-
-  return worker;
+  return { worker, pending };
 };
 
 export { useWorker };

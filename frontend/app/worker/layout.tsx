@@ -9,12 +9,17 @@ import {
   WorkerFooter,
   WorkerHeader,
 } from "@/components/layout";
+import { useWorker } from "@/hooks";
+import { Spinner } from "@heroui/react";
 
 interface WorkerLayoutProps {
   children: ReactNode;
 }
 
 export default function WorkerLayout({ children }: WorkerLayoutProps) {
+
+  const { worker, pending } = useWorker();
+
   return (
     <BackgroundImage>
       {/* MobileOnlyOverlay - sm以上で表示 */}
@@ -35,7 +40,13 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
         </div>
 
         {/* Scrollable content area */}
-        <main className="flex-1 overflow-y-auto pb-20">{children}</main>
+        <main className="flex-1 overflow-y-auto pb-20">
+          <>
+            {pending && !worker ? <div className="flex-1 flex items-center justify-center">
+              <Spinner />
+            </div> : children}
+          </>
+        </main>
       </div>
 
       {/* Footer - Fixed at bottom */}
