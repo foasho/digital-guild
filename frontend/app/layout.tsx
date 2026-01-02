@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Digital Guild - Worker",
-  description: "Digital Guild Worker Application",
+  title: "DIGITAL Guild - Worker",
+  description: "DIGITAL Guild Worker Application",
 };
 
 export default function RootLayout({

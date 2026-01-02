@@ -1,6 +1,6 @@
 import type { UndertakedJob } from "@/types";
 
-// 完了済みジョブ（評価付き）- 信頼度算出に使用
+// 完了済みジョブ（評価付き）- 信用ポイント算出に使用
 export const completedJob1: UndertakedJob = {
   id: "undertaked-1",
   workerId: "worker-1",
@@ -115,7 +115,7 @@ export const canceledJob1: UndertakedJob = {
 
 // 全undertakedJobs（初期データ）
 // 完了8件: 評価合計 5+4+5+3+4+5+4+4 = 34, 平均 = 4.25
-// 信頼度 = min(50, 8) + 4.25 * 10 = 8 + 42.5 = 50.5 → 約50
+// 信用ポイント = min(50, 8) + 4.25 * 10 = 8 + 42.5 = 50.5 → 約50
 export const undertakedJobs: UndertakedJob[] = [
   completedJob1,
   completedJob2,

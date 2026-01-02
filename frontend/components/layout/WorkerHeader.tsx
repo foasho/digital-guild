@@ -6,7 +6,7 @@ export function WorkerHeader() {
   return (
     <header className="flex items-center justify-between px-4 py-3 bg-transparent">
       <h1 className="text-xl font-semibold text-white tracking-wide">
-        Digital GUILD
+        DIGITAL GUILD
       </h1>
       <Button
         isIconOnly
