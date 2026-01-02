@@ -81,7 +81,7 @@ export const ryokanJob: Job = {
 
 export const pastJob101: Job = {
   id: 101,
-  requesterId: 1,
+  requesterId: 101,
   title: "イベント会場設営のお手伝い",
   description:
     "地域のお祭りイベント会場の設営作業をお手伝いいただきます。テントの設置や椅子・テーブルの配置などをお願いします。",
@@ -105,7 +105,7 @@ export const pastJob101: Job = {
 
 export const pastJob102: Job = {
   id: 102,
-  requesterId: 2,
+  requesterId: 102,
   title: "カフェ店舗の内装手伝い",
   description:
     "新規オープンするカフェの内装作業をお手伝いいただきます。家具の組み立てや配置、装飾品の設置などをお願いします。",
@@ -129,7 +129,7 @@ export const pastJob102: Job = {
 
 export const pastJob103: Job = {
   id: 103,
-  requesterId: 3,
+  requesterId: 103,
   title: "農産物直売所のお手伝い",
   description:
     "地元農産物の直売イベントでの販売補助をお願いします。商品の陳列や接客、レジ補助などをしていただきます。",
@@ -153,7 +153,7 @@ export const pastJob103: Job = {
 
 export const pastJob104: Job = {
   id: 104,
-  requesterId: 1,
+  requesterId: 104,
   title: "倉庫整理のお手伝い",
   description:
     "企業倉庫の在庫整理作業をお手伝いいただきます。商品の仕分けや棚への配置、在庫チェックなどをお願いします。",
@@ -177,7 +177,7 @@ export const pastJob104: Job = {
 
 export const pastJob105: Job = {
   id: 105,
-  requesterId: 2,
+  requesterId: 105,
   title: "写真撮影アシスタント",
   description:
     "観光地でのプロモーション写真撮影のアシスタントをお願いします。機材運搬や照明補助などをしていただきます。",
@@ -201,7 +201,7 @@ export const pastJob105: Job = {
 
 export const pastJob106: Job = {
   id: 106,
-  requesterId: 3,
+  requesterId: 106,
   title: "海岸清掃ボランティア",
   description:
     "地域の海岸清掃活動に参加していただきます。ゴミ拾いや分別作業をお願いします。軽食とドリンク付きです。",
@@ -225,7 +225,7 @@ export const pastJob106: Job = {
 
 export const pastJob107: Job = {
   id: 107,
-  requesterId: 1,
+  requesterId: 107,
   title: "引越し作業のお手伝い",
   description:
     "個人宅の引越し作業をお手伝いいただきます。荷物の梱包補助や運搬、新居での配置などをお願いします。",
@@ -249,7 +249,7 @@ export const pastJob107: Job = {
 
 export const pastJob108: Job = {
   id: 108,
-  requesterId: 2,
+  requesterId: 108,
   title: "クリスマスイベント補助",
   description:
     "商業施設でのクリスマスイベントの運営補助をお願いします。来場者案内やワークショップの補助などをしていただきます。",
@@ -273,7 +273,7 @@ export const pastJob108: Job = {
 
 export const pastJob109: Job = {
   id: 109,
-  requesterId: 3,
+  requesterId: 109,
   title: "年末大掃除のお手伝い",
   description:
     "オフィスビルの年末大掃除をお手伝いいただきます。窓拭きや床清掃、不用品の整理などをお願いします。",
@@ -297,7 +297,7 @@ export const pastJob109: Job = {
 
 export const pastJob110: Job = {
   id: 110,
-  requesterId: 1,
+  requesterId: 110,
   title: "地域祭りの屋台補助",
   description:
     "地域の夏祭りで屋台の運営補助をお願いします。調理補助や販売、お客様対応などをしていただきます。",

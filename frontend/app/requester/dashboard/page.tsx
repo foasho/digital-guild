@@ -18,12 +18,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { BankPartnerPanel, SubsidyPanel } from "@/components/requester";
 import {
   useJobs,
   useRequester,
   useUndertakedJobs,
-  useSubsidiesByRequesterId,
 } from "@/hooks/requesters";
 import type { Job, UndertakedJob } from "@/types";
 
@@ -91,7 +89,6 @@ export default function RequesterDashboardPage() {
   const { requester } = useRequester();
   const { jobs, pending: jobsPending, refetch: refetchJobs } = useJobs();
   const { undertakedJobs, pending: undertakedPending, refetch: refetchUndertakedJobs } = useUndertakedJobs();
-  const subsidies = useSubsidiesByRequesterId(requester?.id || 1);
 
   // ページアクセス時にLocalStorageから最新データを再取得
   useEffect(() => {
@@ -148,10 +145,6 @@ export default function RequesterDashboardPage() {
       totalApplicants,
     };
   }, [allJobs, undertakedJobs]);
-
-  const usedSubsidyAmount = useMemo(() => {
-    return allJobs.reduce((acc, job) => acc + (job.aiInsentiveReward || 0), 0);
-  }, [allJobs]);
 
   const filteredJobs = useMemo(() => {
     if (selectedFilter === "all") return allJobs;
@@ -279,16 +272,6 @@ export default function RequesterDashboardPage() {
           </div>
         </div>
       )}
-
-      {/* 補助金・銀行連携パネル - 2カラムグリッド */}
-      <div className="grid lg:grid-cols-2 gap-4 lg:gap-6">
-        <SubsidyPanel subsidies={subsidies} usedAmount={usedSubsidyAmount} />
-        <BankPartnerPanel
-          bankName="原資地方銀行"
-          isConnected={true}
-          kycStatus="verified"
-        />
-      </div>
 
       {/* ジョブ一覧セクション */}
       <Card className="bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden">
