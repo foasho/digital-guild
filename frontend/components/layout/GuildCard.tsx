@@ -1,17 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardBody } from "@heroui/react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { useWorkerStore, useTrustPassportStore } from "@/stores";
+import {
+  useWorkerStore,
+  useTrustPassportStore,
+  useUndertakedJobStore,
+} from "@/stores";
+import {
+  undertakedJobs as defaultUndertakedJobs,
+  workerSkills as defaultWorkerSkills,
+} from "@/constants/mocks";
 
 const DEFAULT_NAME = "田中　一郎";
 const DEFAULT_BALANCE = 81520;
 const DEFAULT_RANK = "BRONZE";
 const DEFAULT_REGISTERED_AT = "2026-01-07T00:00:00Z";
 const DEFAULT_CERT_ID = "17695712143";
+const DEFAULT_WORKER_ID = "worker-1";
 
 // Rank-based styling configurations
 const rankStyles = {
@@ -83,11 +92,16 @@ export function GuildCard() {
   const worker = useWorkerStore((state) => state.worker);
   const jpycBalance = useWorkerStore((state) => state.jpycBalance);
   const getRank = useTrustPassportStore((state) => state.getRank);
+  const passportSkills = useTrustPassportStore((state) => state.skills);
+  const storeUndertakedJobs = useUndertakedJobStore(
+    (state) => state.undertakedJobs,
+  );
 
   // Rehydrate stores on mount
   useEffect(() => {
     useWorkerStore.persist.rehydrate();
     useTrustPassportStore.persist.rehydrate();
+    useUndertakedJobStore.persist.rehydrate();
     setIsHydrated(true);
   }, []);
 
@@ -103,6 +117,8 @@ export function GuildCard() {
   );
   const displayCertId =
     isHydrated && worker?.id ? toCertificateId(worker.id) : DEFAULT_CERT_ID;
+  const displayWorkerId =
+    isHydrated && worker?.id ? worker.id : DEFAULT_WORKER_ID;
 
   const formattedBalance = displayBalance.toLocaleString();
 
@@ -112,6 +128,84 @@ export function GuildCard() {
   // 数値のopacity=0.5でも「見た目の50%透過」に見えにくい。
   // 体感で50%くらい透けて見えるように、実際の描画は係数で落とす。
   const visualOpacity = Math.min(1, currentRankStyle.opacity * 0.6);
+
+  // ステータス詳細を undertakedJobs から算出
+  const statusDetail = useMemo(() => {
+    // storeにデータがあればそれを使う、なければモックデータをフォールバック
+    const jobs =
+      isHydrated && storeUndertakedJobs.length > 0
+        ? storeUndertakedJobs
+        : defaultUndertakedJobs;
+
+    // 完了済みジョブ（当該ワーカーの）
+    const completedJobs = jobs.filter(
+      (j) => j.workerId === displayWorkerId && j.status === "completed",
+    );
+
+    // 作業実績数（最大50）
+    const completedCount = Math.min(50, completedJobs.length);
+
+    // 評価平均（requesterEvalScore が null でないもの）
+    const scoredJobs = completedJobs.filter(
+      (j) => j.requesterEvalScore !== null,
+    );
+    const avgRating =
+      scoredJobs.length > 0
+        ? scoredJobs.reduce((sum, j) => sum + (j.requesterEvalScore ?? 0), 0) /
+          scoredJobs.length
+        : 0;
+
+    // 信頼度 = 完了ジョブ数（最大50） + 評価平均 × 10
+    const trustScore = Math.min(
+      100,
+      Math.round(completedCount + avgRating * 10),
+    );
+
+    // 直近活動（30日以内の完了ジョブ数）
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const recentActivities = completedJobs.filter((j) => {
+      if (!j.finishedAt) return false;
+      return new Date(j.finishedAt) >= thirtyDaysAgo;
+    }).length;
+
+    return {
+      completedJobs: completedCount,
+      avgRating,
+      trustScore,
+      recentActivities,
+    };
+  }, [isHydrated, storeUndertakedJobs, displayWorkerId]);
+
+  // スキル統計を workerSkills から算出
+  const skillStats = useMemo(() => {
+    // storeにデータがあればそれを使う、なければモックデータをフォールバック
+    const skills =
+      isHydrated && passportSkills.length > 0
+        ? passportSkills
+        : defaultWorkerSkills;
+
+    // 当該ワーカーのスキルのみ
+    const workerSkillList = skills.filter(
+      (s) => s.workerId === displayWorkerId,
+    );
+
+    // スキル名でグルーピングしてカウント
+    const countMap = new Map<string, number>();
+    for (const s of workerSkillList) {
+      countMap.set(s.name, (countMap.get(s.name) ?? 0) + 1);
+    }
+
+    // 配列に変換してソート
+    const sorted = Array.from(countMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const total = workerSkillList.length;
+    const topTwo = sorted.slice(0, 2);
+
+    return { total, topTwo };
+  }, [isHydrated, passportSkills, displayWorkerId]);
 
   return (
     <div className="mx-4 relative">
@@ -128,9 +222,7 @@ export function GuildCard() {
           }
         }}
       >
-        <div
-          className="relative rounded-[16px] p-[2px] shadow-[0_14px_28px_rgba(0,0,0,0.35)] active:scale-[0.99] transition-transform"
-        >
+        <div className="relative rounded-[16px] p-[2px] shadow-[0_14px_28px_rgba(0,0,0,0.35)] active:scale-[0.99] transition-transform">
           {/* フレーム（opacity適用。子要素は透過させないため、背景レイヤーとして描画） */}
           <div
             className="absolute inset-0 rounded-[16px] pointer-events-none"
@@ -259,9 +351,7 @@ export function GuildCard() {
                       </div>
 
                       <div className="mt-4 grid grid-cols-[auto_1fr] items-end gap-4">
-                        <div className="text-base">
-                          ID: {displayCertId}
-                        </div>
+                        <div className="text-base">ID: {displayCertId}</div>
                         <div className="text-base text-right">
                           デジタルギルド公式認証
                         </div>
@@ -273,6 +363,70 @@ export function GuildCard() {
             </CardBody>
           </Card>
         </div>
+
+        {/* ギルド証の下：ステータス詳細 */}
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.div
+              key="status-detail"
+              initial={{ height: 0, opacity: 0, y: -4 }}
+              animate={{ height: "auto", opacity: 1, y: 0 }}
+              exit={{ height: 0, opacity: 0, y: -4 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="overflow-hidden"
+            >
+              <div className="mt-3 rounded-2xl bg-black/45 backdrop-blur-md border border-white/10 px-4 py-3 text-white">
+                <div className="text-center text-sm font-semibold tracking-wide text-white/90">
+                  ステータス詳細
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-4">
+                  {/* 信頼度 */}
+                  <div>
+                    <div className="text-center text-xs text-white/70">
+                      信頼度
+                    </div>
+                    <div className="mt-1 text-center text-3xl font-extrabold tracking-tight">
+                      {statusDetail.trustScore}
+                    </div>
+                    <div className="mt-2 space-y-1 px-3 text-xs text-white/70">
+                      <div className="flex justify-between">
+                        <span>作業実績数</span>
+                        <span>{statusDetail.completedJobs}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>作業者評価</span>
+                        <span>{statusDetail.avgRating.toFixed(1)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>直近活動</span>
+                        <span>{statusDetail.recentActivities}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* スキル */}
+                  <div>
+                    <div className="text-center text-xs text-white/70">
+                      スキル
+                    </div>
+                    <div className="mt-1 text-center text-3xl font-extrabold tracking-tight">
+                      {skillStats.total}
+                    </div>
+                    <div className="mt-2 space-y-1 px-3 text-xs text-white/70">
+                      {skillStats.topTwo.map((s) => (
+                        <div key={s.name} className="flex justify-between">
+                          <span>{s.name}</span>
+                          <span>{s.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </button>
     </div>
   );
