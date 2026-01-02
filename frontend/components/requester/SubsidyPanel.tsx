@@ -38,7 +38,7 @@ export function SubsidyPanel({ subsidies, usedAmount }: SubsidyPanelProps) {
           </div>
           <div className="flex items-center gap-1 text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium">
             <TrendingUp className="w-3 h-3" />
-            <span>0.5%還元</span>
+            <span>インセンティブ</span>
           </div>
         </div>
 

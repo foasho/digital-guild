@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { defaultRequester } from "@/constants/mocks";
-import { useJobs, useRequester } from "@/hooks/workers";
+import { useJobs, useRequester } from "@/hooks/requesters";
 import type { ChecklistItem } from "@/types";
 
 // Leafletマップはクライアントサイドのみでレンダリング

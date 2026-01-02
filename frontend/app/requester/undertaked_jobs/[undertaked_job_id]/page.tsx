@@ -17,10 +17,12 @@ import { defaultWorker, defaultRequester } from "@/constants/mocks";
 import {
   useJobs,
   useUndertakedJobs,
+  useRequester,
+} from "@/hooks/requesters";
+import {
   useWorker,
   useTrustPassport,
   useTransactionHistories,
-  useRequester,
 } from "@/hooks/workers";
 import type { Rank, WorkerSkill } from "@/types";
 

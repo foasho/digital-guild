@@ -18,8 +18,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { BankPartnerPanel, SubsidyPanel } from "@/components/requester";
-import { useJobs, useRequester, useUndertakedJobs } from "@/hooks/workers";
-import { useSubsidiesByRequesterId } from "@/hooks/workers/useSubsidies";
+import {
+  useJobs,
+  useRequester,
+  useUndertakedJobs,
+  useSubsidiesByRequesterId,
+} from "@/hooks/requesters";
 import type { Job, UndertakedJob } from "@/types";
 
 type StatusFilter = "all" | "recruiting" | "in_progress" | "completed";
@@ -253,7 +257,7 @@ export default function RequesterDashboardPage() {
       <div className="grid lg:grid-cols-2 gap-4 lg:gap-6">
         <SubsidyPanel subsidies={subsidies} usedAmount={usedSubsidyAmount} />
         <BankPartnerPanel
-          bankName="○○地方銀行"
+          bankName="原資地方銀行"
           isConnected={true}
           kycStatus="verified"
         />

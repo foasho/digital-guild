@@ -16,7 +16,7 @@ interface BankPartnerPanelProps {
 }
 
 export function BankPartnerPanel({
-  bankName = "○○地方銀行",
+  bankName = "原資地方銀行",
   isConnected = true,
   kycStatus = "verified",
 }: BankPartnerPanelProps) {
@@ -93,15 +93,6 @@ export function BankPartnerPanel({
               有効
             </Chip>
           </div>
-        </div>
-
-        {/* 説明 */}
-        <div className="mt-4 p-3 bg-white/80 rounded-xl border border-blue-100">
-          <p className="text-xs text-gray-600 leading-relaxed">
-            地方銀行との連携により、
-            <span className="font-semibold text-blue-700">信頼のゲートウェイ</span>
-            として安心・安全な決済インフラを提供します。
-          </p>
         </div>
       </CardBody>
     </Card>
