@@ -1,52 +1,52 @@
 import type { Skill } from "@/types";
 
 export const skillReception: Skill = {
-  id: "skill-1",
+  id: 1,
   name: "接客",
 };
 
 export const skillCooking: Skill = {
-  id: "skill-2",
+  id: 2,
   name: "調理",
 };
 
 export const skillFarming: Skill = {
-  id: "skill-3",
+  id: 3,
   name: "農作業",
 };
 
 export const skillCleaning: Skill = {
-  id: "skill-4",
+  id: 4,
   name: "清掃",
 };
 
 export const skillFilming: Skill = {
-  id: "skill-5",
+  id: 5,
   name: "撮影",
 };
 
 export const skillDriving: Skill = {
-  id: "skill-6",
+  id: 6,
   name: "運転",
 };
 
 export const skillGardening: Skill = {
-  id: "skill-7",
+  id: 7,
   name: "庭仕事",
 };
 
 export const skillLightWork: Skill = {
-  id: "skill-8",
+  id: 8,
   name: "軽作業",
 };
 
 export const skillHarvesting: Skill = {
-  id: "skill-9",
+  id: 9,
   name: "収穫",
 };
 
 export const skillOutdoorWork: Skill = {
-  id: "skill-10",
+  id: 10,
   name: "屋外作業",
 };
 

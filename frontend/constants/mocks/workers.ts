@@ -1,7 +1,7 @@
 import type { Worker } from "@/types";
 
 export const defaultWorker: Worker = {
-  id: "worker-1",
+  id: 1,
   name: "田中一郎",
   birth: "1990-05-15",
   gender: "male",

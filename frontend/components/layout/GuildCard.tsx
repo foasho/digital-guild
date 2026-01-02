@@ -20,7 +20,7 @@ const DEFAULT_BALANCE = 81520;
 const DEFAULT_RANK = "BRONZE";
 const DEFAULT_REGISTERED_AT = "2026-01-07T00:00:00Z";
 const DEFAULT_CERT_ID = "17695712143";
-const DEFAULT_WORKER_ID = "worker-1";
+const DEFAULT_WORKER_ID = 1;
 
 // Rank-based styling configurations
 const rankStyles = {
@@ -75,11 +75,12 @@ function formatRegisteredAt(iso: string): string {
   }).format(d);
 }
 
-function toCertificateId(input: string): string {
-  if (/^\d{6,}$/.test(input)) return input;
+function toCertificateId(input: number | string): string {
+  const inputStr = String(input);
+  if (/^\d{6,}$/.test(inputStr)) return inputStr;
   // stable hash -> 11 digits
   let h = 5381;
-  for (let i = 0; i < input.length; i++) h = (h * 33) ^ input.charCodeAt(i);
+  for (let i = 0; i < inputStr.length; i++) h = (h * 33) ^ inputStr.charCodeAt(i);
   const mod = 100_000_000_000; // 1e11
   const n = Math.abs(h) % mod;
   return String(n).padStart(11, "0");
@@ -97,11 +98,8 @@ export function GuildCard() {
     (state) => state.undertakedJobs,
   );
 
-  // Rehydrate stores on mount
+  // Set hydrated on mount
   useEffect(() => {
-    useWorkerStore.persist.rehydrate();
-    useTrustPassportStore.persist.rehydrate();
-    useUndertakedJobStore.persist.rehydrate();
     setIsHydrated(true);
   }, []);
 

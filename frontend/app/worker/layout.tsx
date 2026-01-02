@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import {
   BackgroundImage,
   GuildCard,
@@ -9,12 +9,27 @@ import {
   WorkerFooter,
   WorkerHeader,
 } from "@/components/layout";
+import { loadMockData } from "@/constants/api-mocks";
+import { useWorker } from "@/hooks";
+import { Spinner } from "@heroui/react";
 
 interface WorkerLayoutProps {
   children: ReactNode;
 }
 
 export default function WorkerLayout({ children }: WorkerLayoutProps) {
+  const [isInitialized, setIsInitialized] = useState(false);
+  const { worker, pending } = useWorker();
+
+  // 初回起動時にモックデータをLocalStorageにロード
+  useEffect(() => {
+    const init = async () => {
+      await loadMockData();
+      setIsInitialized(true);
+    };
+    init();
+  }, []);
+
   return (
     <BackgroundImage>
       {/* MobileOnlyOverlay - sm以上で表示 */}
@@ -35,7 +50,13 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
         </div>
 
         {/* Scrollable content area */}
-        <main className="flex-1 overflow-y-auto pb-20">{children}</main>
+        <main className="flex-1 overflow-y-auto pb-[69px]">
+          <>
+            {pending && !worker ? <div className="flex-1 flex items-center justify-center">
+              <Spinner />
+            </div> : children}
+          </>
+        </main>
       </div>
 
       {/* Footer - Fixed at bottom */}

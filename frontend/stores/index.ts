@@ -1,4 +1,4 @@
-// State stores
+// State stores (純粋な状態管理のみ - LocalStorage操作はapi-mocksに移譲)
 
 export { useBookmarkStore } from "./useBookmarkStore";
 export { useJobStore } from "./useJobStore";

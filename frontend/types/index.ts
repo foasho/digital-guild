@@ -2,13 +2,13 @@
 
 // チェックリスト項目
 export interface ChecklistItem {
-  id: string;
+  id: number;
   text: string;
 }
 
 // 労働者
 export interface Worker {
-  id: string;
+  id: number;
   name: string;
   birth: string;
   gender: string;
@@ -19,15 +19,15 @@ export interface Worker {
 
 // 発注者
 export interface Requester {
-  id: string;
+  id: number;
   name: string;
   createdAt: string;
 }
 
 // ジョブ
 export interface Job {
-  id: string;
-  requesterId: string;
+  id: number;
+  requesterId: number;
   title: string;
   description: string;
   reward: number;
@@ -46,24 +46,24 @@ export interface Job {
 
 // ジョブスキル
 export interface JobSkill {
-  id: string;
-  jobId: string;
-  skillId: string;
+  id: number;
+  jobId: number;
+  skillId: number;
 }
 
 // 募集条件
 export interface RequirementSkill {
-  id: string;
-  jobId: string;
-  skillId: string;
+  id: number;
+  jobId: number;
+  skillId: number;
   skillAmount: number;
 }
 
 // AIレコメンド
 export interface JobAiRecommend {
-  id: string;
-  jobId: string;
-  workerId: string;
+  id: number;
+  jobId: number;
+  workerId: number;
   confidence: number;
   reason: string;
   createdAt: string;
@@ -72,16 +72,16 @@ export interface JobAiRecommend {
 
 // ブックマーク
 export interface BookmarkJob {
-  id: string;
-  jobId: string;
-  workerId: string;
+  id: number;
+  jobId: number;
+  workerId: number;
 }
 
 // 着手ジョブ
 export interface UndertakedJob {
-  id: string;
-  workerId: string;
-  jobId: string;
+  id: number;
+  workerId: number;
+  jobId: number;
   status: "accepted" | "in_progress" | "completed" | "canceled";
   requesterEvalScore: number | null;
   acceptedAt: string;
@@ -91,38 +91,38 @@ export interface UndertakedJob {
 
 // ギルド証
 export interface TrustPassport {
-  id: string;
-  workerId: string;
+  id: number;
+  workerId: number;
   trustScore: number;
 }
 
 // 労働者スキル
 export interface WorkerSkill {
-  id: string;
-  workerId: string;
+  id: number;
+  workerId: number;
   name: string;
   createdAt: string;
-  jobId: string;
+  jobId: number;
 }
 
 // 補助金
 export interface Subsidy {
-  id: string;
-  requesterId: string;
+  id: number;
+  requesterId: number;
   amount: number;
   sendedAt: string;
 }
 
 // スキルマスタ
 export interface Skill {
-  id: string;
+  id: number;
   name: string;
 }
 
 // 取引履歴
 export interface TransactionHistory {
-  id: string;
-  workerId: string;
+  id: number;
+  workerId: number;
   to: string;
   from: string;
   amount: number;

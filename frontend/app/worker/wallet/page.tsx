@@ -1,9 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { useWalletStore } from "@/stores/useWalletStore";
-import { useWorkerStore } from "@/stores/useWorkerStore";
+import { useTransactionHistories, useWorker } from "@/hooks";
 import type { TransactionHistory } from "@/types";
 
 // 日時フォーマット: 2026/01/05 18:12
@@ -63,29 +61,13 @@ function TransactionItem({
 }
 
 export default function WalletPage() {
-  const { jpycBalance } = useWorkerStore();
-  const { transactions, initializeMockData } = useWalletStore();
+  // hooksから取得
+  const { worker, pending: workerPending } = useWorker();
+  const { transactions, balance, pending: txPending } = useTransactionHistories();
 
-  // Hydration対策
-  const [isHydrated, setIsHydrated] = useState(false);
+  const isLoading = workerPending || txPending;
 
-  useEffect(() => {
-    useWorkerStore.persist.rehydrate();
-    useWalletStore.persist.rehydrate();
-    setIsHydrated(true);
-  }, []);
-
-  // モックデータの初期化
-  useEffect(() => {
-    if (isHydrated) {
-      initializeMockData();
-    }
-  }, [isHydrated, initializeMockData]);
-
-  // 残高を表示用に整形（モックでは81,520を使用、実際のbalanceが0の場合）
-  const displayBalance = jpycBalance > 0 ? jpycBalance : 81520;
-
-  if (!isHydrated) {
+  if (isLoading || !worker) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-white/50">Loading...</div>
@@ -96,11 +78,11 @@ export default function WalletPage() {
   return (
     <div className="flex flex-col px-4 py-4">
       {/* ウォレットカード */}
-      <div className="relative bg-gradient-to-br from-white via-gray-50 to-amber-50 rounded-2xl p-5 shadow-xl drop-shadow-2xl overflow-hidden">
+      <div className="relative bg-linear-to-br from-white via-gray-50 to-amber-50 rounded-2xl p-5 shadow-xl drop-shadow-2xl overflow-hidden">
         {/* 光沢効果 - 左上から右下へのハイライト */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-white/80 via-transparent to-transparent pointer-events-none" />
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-radial from-white/60 to-transparent rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-100/40 to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-bl from-amber-100/40 to-transparent pointer-events-none" />
 
         {/* ヘッダー: JPYCロゴ + タイトル */}
         <div className="relative flex items-center justify-between mb-4 pb-3 border-b border-amber-200/60">
@@ -139,20 +121,20 @@ export default function WalletPage() {
           <div className="flex items-baseline gap-2">
             <span className="text-gray-500 text-sm font-medium">残高</span>
             <span className="text-gray-900 font-bold text-3xl drop-shadow-sm">
-              {displayBalance.toLocaleString()}
+              {balance.toLocaleString()}
             </span>
             <span className="text-gray-500 text-sm font-medium">JPYC</span>
           </div>
         </div>
 
         {/* カード下部の光沢ライン */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-200/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r from-transparent via-amber-200/50 to-transparent" />
       </div>
 
       {/* スキャンして支払うボタン */}
       <button
         type="button"
-        className="mt-4 mx-auto flex items-center gap-2 px-8 py-3 cursor-pointer border-white/20 border bg-white/15 transition-colors duration-300 hover:bg-white/55 rounded-full shadow-md transition-colors"
+        className="mt-4 mx-auto flex items-center gap-2 px-8 py-3 cursor-pointer border-white/20 border bg-white/15 hover:bg-white/55 rounded-full shadow-md transition-colors"
       >
         <svg
           className="w-5 h-5 text-white"
@@ -174,9 +156,7 @@ export default function WalletPage() {
             d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-        <span className="text-white font-medium">
-          スキャンして支払う
-        </span>
+        <span className="text-white font-medium">スキャンして支払う</span>
       </button>
 
       {/* 取引履歴セクション */}
@@ -193,10 +173,7 @@ export default function WalletPage() {
             </div>
           ) : (
             transactions.map((transaction) => (
-              <TransactionItem
-                key={transaction.id}
-                transaction={transaction}
-              />
+              <TransactionItem key={transaction.id} transaction={transaction} />
             ))
           )}
         </div>

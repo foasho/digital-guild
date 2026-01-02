@@ -8,13 +8,15 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { loadMockData, resetMockData } from "@/constants/api-mocks";
 
 export function WorkerHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleClearLocalStorage = () => {
-    localStorage.clear();
+    resetMockData();
     window.location.reload();
   };
 

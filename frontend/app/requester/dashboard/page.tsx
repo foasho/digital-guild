@@ -4,9 +4,8 @@ import { Button, Card, CardBody, Tab, Tabs } from "@heroui/react";
 import { Briefcase, CheckCircle, Clock, Plus, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { jobs as mockJobs } from "@/constants/mocks";
-import { useJobStore, useUndertakedJobStore } from "@/stores";
+import { useMemo, useState } from "react";
+import { useJobs, useUndertakedJobs } from "@/hooks";
 import type { Job, UndertakedJob } from "@/types";
 
 type StatusFilter = "all" | "recruiting" | "in_progress" | "completed";
@@ -62,28 +61,16 @@ function getStatusStyle(status: "recruiting" | "in_progress" | "completed") {
 
 export default function RequesterDashboardPage() {
   const router = useRouter();
-  const [isHydrated, setIsHydrated] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<StatusFilter>("all");
 
-  // ストアからデータ取得
-  const storeJobs = useJobStore((state) => state.jobs);
-  const undertakedJobs = useUndertakedJobStore((state) => state.undertakedJobs);
+  // hooksからデータ取得
+  const { jobs, pending: jobsPending } = useJobs();
+  const { undertakedJobs, pending: undertakedPending } = useUndertakedJobs();
 
-  // Hydration
-  useEffect(() => {
-    useJobStore.persist.rehydrate();
-    useUndertakedJobStore.persist.rehydrate();
-    setIsHydrated(true);
-  }, []);
+  const isHydrated = !jobsPending && !undertakedPending;
 
-  // モックデータとストアのジョブを結合
-  const allJobs = useMemo(() => {
-    if (!isHydrated) return mockJobs;
-    // 重複を避けるため、モックのIDがストアに存在しない場合のみ追加
-    const storeJobIds = new Set(storeJobs.map((j) => j.id));
-    const uniqueMockJobs = mockJobs.filter((j) => !storeJobIds.has(j.id));
-    return [...uniqueMockJobs, ...storeJobs];
-  }, [isHydrated, storeJobs]);
+  // hooksから取得したジョブを使用
+  const allJobs = jobs;
 
   // 統計情報を計算
   const stats = useMemo(() => {
@@ -124,14 +111,14 @@ export default function RequesterDashboardPage() {
   }, [allJobs, undertakedJobs, selectedFilter]);
 
   // 応募者数を取得
-  const getApplicantCount = (jobId: string) => {
+  const getApplicantCount = (jobId: number) => {
     return undertakedJobs.filter(
       (uj) => uj.jobId === jobId && uj.status !== "canceled",
     ).length;
   };
 
   // ジョブカードクリック時の処理
-  const handleJobClick = (jobId: string) => {
+  const handleJobClick = (jobId: number) => {
     router.push(`/requester/jobs/${jobId}`);
   };
 

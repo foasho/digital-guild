@@ -195,6 +195,65 @@ UI切り替えによってデータを切り替えるようにしてください
 
 現状は、200がMAXになっていて評価軸も4つあるので、修正してください。
 
+【フロントエンドアーキテクチャ】
+
+本モックシステムでは、以下のアーキテクチャを採用しています。
+
+```
+┌─────────────┐     ┌─────────────┐     ┌──────────────┐
+│   Page      │ ──▶ │   Hook      │ ──▶ │   API        │
+│ (Component) │     │ (useJobs等) │     │ (JobApi等)   │
+└─────────────┘     └─────────────┘     └──────┬───────┘
+                           │                    │
+                           ▼                    ▼
+                    ┌─────────────┐     ┌──────────────┐
+                    │   Store     │     │ LocalStorage │
+                    │ (Zustand)   │     │   (Mock DB)  │
+                    └─────────────┘     └──────────────┘
+```
+
+**レイヤー構成**
+
+| レイヤー | 役割 | ファイル例 |
+|----------|------|------------|
+| Page/Component | UI表示、ユーザーインタラクション | `app/worker/request-boards/page.tsx` |
+| Hook | データ取得・操作のロジック、Storeへの反映 | `hooks/useJobs.ts` |
+| API | LocalStorage(MockDB)へのCRUD操作 | `constants/api-mocks/jobApi.ts` |
+| Store | クライアント側の状態管理（メモリ） | `stores/useJobStore.ts` |
+| LocalStorage | モックデータベース（永続化） | ブラウザのLocalStorage |
+
+**アーキテクチャルール**
+
+1. **Page → Hook → API の順序を厳守**
+   - Pageは直接Storeを使わない
+   - Pageは必ずHookを経由してデータにアクセスする
+
+2. **例外: useWorker / useRequester のみ**
+   - 現在のユーザー情報取得のみ、直接モックデータを参照可能
+
+3. **ID型はすべて`number`**
+   - 本番環境のautoincrement IDを想定
+   - 新規作成時は`maxId + 1`で生成
+
+4. **初回起動時のデータロード**
+   - `loadMockData()`がLocalStorageに初期データを投入（1回のみ）
+   - 2回目以降はLocalStorageから読み込み
+
+**Hooks一覧**
+
+| Hook | 説明 | データソース |
+|------|------|--------------|
+| `useWorker` | 現在のワーカー情報 | モック直接参照（例外） |
+| `useRequester` | 現在の発注者情報 | モック直接参照（例外） |
+| `useJobs` | ジョブ一覧・CRUD | API → LocalStorage |
+| `useUndertakedJobs` | 着手ジョブ一覧・CRUD | API → LocalStorage |
+| `useBookmarks` | ブックマーク一覧・CRUD | API → LocalStorage |
+| `useTrustPassport` | ギルド証・スキル管理 | API → LocalStorage |
+| `useTransactionHistories` | 取引履歴・残高 | API → LocalStorage |
+| `useSkills` | スキルマスタ | API → LocalStorage |
+| `useJobAiRecommends` | AIレコメンド | API → LocalStorage |
+| `useSubsidies` | 補助金 | API → LocalStorage |
+
 【全体ディレクトリ構成】
 
 今回のモックでは、ディレクトリ構成として作成しつつ、frontend直下のみを作成する。
@@ -221,22 +280,44 @@ digital-guild(root)
 
 ```markdown
 frontend
-├ app
-|  ├ worker
-|  ├ requester
-|  ├ api
-|  └ ...(その他layoutやpage.tsxなど)
-├── components/
-├── hooks/
-├── lib/
-├── utils/
-├── styles/
-├── types/
-├── stores/
-├── constants/
-├── constants/
-|  ├ mocks/#ここにモックデータを格納
-└ ...(その他package.jsonやtsconfig.json, next.config.jsなど)
+├ app/                        # Next.js App Router
+|  ├ worker/                  # 労働者向けページ
+|  |  ├ request-boards/       # 掲示板
+|  |  ├ request-map/          # マップ
+|  |  ├ jobs/                 # ジョブ管理
+|  |  └ wallet/               # ウォレット
+|  ├ requester/               # 発注者向けページ
+|  |  ├ dashboard/            # ダッシュボード
+|  |  ├ jobs/                 # ジョブ詳細・作成
+|  |  └ undertaked_jobs/      # 着手ジョブ評価
+|  ├ api/                     # API Routes
+|  └ ...(layout, page.tsx等)
+├ components/                 # 共通コンポーネント
+|  ├ layout/                  # レイアウト系
+|  ├ worker/                  # 労働者向け
+|  └ requester/               # 発注者向け
+├ hooks/                      # カスタムフック
+|  ├ useJobs.ts
+|  ├ useUndertakedJobs.ts
+|  ├ useBookmarks.ts
+|  └ ...
+├ stores/                     # Zustand ストア
+|  ├ useJobStore.ts
+|  └ ...
+├ constants/
+|  ├ api-mocks/               # モックAPI（LocalStorage操作）
+|  |  ├ index.ts              # loadMockData, API exports
+|  |  ├ jobApi.ts
+|  |  └ ...
+|  └ mocks/                   # 初期モックデータ
+|     ├ jobs.ts
+|     └ ...
+├ types/                      # 型定義
+|  ├ index.ts                 # エンティティ型
+|  └ apis/                    # API パラメータ型
+├ lib/                        # ライブラリ設定
+├ utils/                      # ユーティリティ関数
+└ ...(package.json, tsconfig.json等)
 ```
 
 フロントエンドで利用するライブラリ: バージョン指定は必ず同じものを利用

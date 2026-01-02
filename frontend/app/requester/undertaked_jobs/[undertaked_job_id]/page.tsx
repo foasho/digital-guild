@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button, Card, CardBody, Chip, Spinner } from "@heroui/react";
 import {
@@ -13,15 +13,15 @@ import {
   Briefcase,
 } from "lucide-react";
 import Image from "next/image";
+import { defaultWorker, defaultRequester } from "@/constants/mocks";
 import {
-  useUndertakedJobStore,
-  useJobStore,
-  useWorkerStore,
-  useTrustPassportStore,
-  useWalletStore,
-  useRequesterStore,
-} from "@/stores";
-import { jobs as mockJobs, defaultWorker, defaultRequester } from "@/constants/mocks";
+  useJobs,
+  useUndertakedJobs,
+  useWorker,
+  useTrustPassport,
+  useTransactionHistories,
+  useRequester,
+} from "@/hooks";
 import type { Rank, WorkerSkill } from "@/types";
 
 // ランク計算
@@ -46,56 +46,26 @@ const getRankStyle = (rank: Rank) => {
   }
 };
 
-// ID生成
-const generateId = () => {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-};
-
 export default function UndertakedJobEvaluationPage() {
   const params = useParams();
   const router = useRouter();
-  const undertakedJobId = params.undertaked_job_id as string;
+  const undertakedJobId = Number(params.undertaked_job_id);
 
-  const [isHydrated, setIsHydrated] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState("");
   const [isCompleted, setIsCompleted] = useState(false);
 
-  // ストア
-  const undertakedJobs = useUndertakedJobStore((state) => state.undertakedJobs);
-  const getById = useUndertakedJobStore((state) => state.getById);
-  const updateUndertakedJob = useUndertakedJobStore(
-    (state) => state.updateUndertakedJob
-  );
+  // hooksからデータ取得
+  const { getJobById, pending: jobsPending } = useJobs();
+  const { undertakedJobs, getById, updateUndertakedJob, pending: undertakedPending } = useUndertakedJobs();
+  const { worker, pending: workerPending } = useWorker();
+  const { passport, updateTrustScore, addSkill, pending: passportPending } = useTrustPassport();
+  const { addTransaction } = useTransactionHistories();
+  const { requester } = useRequester();
 
-  const storeJobs = useJobStore((state) => state.jobs);
-  const getJobById = useJobStore((state) => state.getJobById);
-
-  const worker = useWorkerStore((state) => state.worker);
-  const updateBalance = useWorkerStore((state) => state.updateBalance);
-
-  const passport = useTrustPassportStore((state) => state.passport);
-  const updateTrustScore = useTrustPassportStore(
-    (state) => state.updateTrustScore
-  );
-  const addSkill = useTrustPassportStore((state) => state.addSkill);
-
-  const addTransaction = useWalletStore((state) => state.addTransaction);
-
-  const requester = useRequesterStore((state) => state.requester);
-
-  // Hydration
-  useEffect(() => {
-    useUndertakedJobStore.persist.rehydrate();
-    useJobStore.persist.rehydrate();
-    useWorkerStore.persist.rehydrate();
-    useTrustPassportStore.persist.rehydrate();
-    useWalletStore.persist.rehydrate();
-    useRequesterStore.persist.rehydrate();
-    setIsHydrated(true);
-  }, []);
+  const isHydrated = !jobsPending && !undertakedPending && !workerPending && !passportPending;
 
   // 対象のUndertakedJob取得
   const undertakedJob = useMemo(() => {
@@ -106,11 +76,8 @@ export default function UndertakedJobEvaluationPage() {
   // 対象のJob取得
   const job = useMemo(() => {
     if (!isHydrated || !undertakedJob) return undefined;
-    // まずストアから検索、なければモックから
-    const storeJob = getJobById(undertakedJob.jobId);
-    if (storeJob) return storeJob;
-    return mockJobs.find((j) => j.id === undertakedJob.jobId);
-  }, [isHydrated, undertakedJob, getJobById, storeJobs]);
+    return getJobById(undertakedJob.jobId);
+  }, [isHydrated, undertakedJob, getJobById]);
 
   // Worker情報（モックまたはストア）
   const displayWorker = worker || defaultWorker;
@@ -151,14 +118,7 @@ export default function UndertakedJobEvaluationPage() {
       await new Promise((r) => setTimeout(r, 500));
       if (job.tags && job.tags.length > 0) {
         job.tags.forEach((tag) => {
-          const newSkill: WorkerSkill = {
-            id: generateId(),
-            workerId: displayWorker.id,
-            name: tag,
-            createdAt: new Date().toISOString(),
-            jobId: job.id,
-          };
-          addSkill(newSkill);
+          addSkill(tag, job.id);
         });
       }
 
@@ -182,17 +142,13 @@ export default function UndertakedJobEvaluationPage() {
       const newTrustScore = Math.min(100, completedCount + avgEvalScore * 10);
       updateTrustScore(newTrustScore);
 
-      // Step 4: 報酬のJPYC振込（Workerの残高増加）
+      // Step 4: 報酬のJPYC振込（TransactionHistory追加で残高自動更新）
       setProcessingStep("報酬を振り込み中...");
       await new Promise((r) => setTimeout(r, 800));
       const totalReward = job.reward + job.aiInsentiveReward;
-      updateBalance(totalReward);
 
-      // Step 5: TransactionHistory追加
-      setProcessingStep("取引履歴を記録中...");
-      await new Promise((r) => setTimeout(r, 500));
+      // TransactionHistory追加（IDは自動生成）
       addTransaction({
-        id: generateId(),
         workerId: displayWorker.id,
         to: displayWorker.name,
         from: displayRequester.name,

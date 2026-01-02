@@ -14,9 +14,9 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { jobs as mockJobs, workers as mockWorkers } from "@/constants/mocks";
-import { useJobStore, useUndertakedJobStore, useWorkerStore } from "@/stores";
+import { useMemo } from "react";
+import { workers as mockWorkers } from "@/constants/mocks";
+import { useJobs, useUndertakedJobs, useWorker } from "@/hooks";
 import type { Rank, UndertakedJob, Worker } from "@/types";
 
 // ランク計算関数
@@ -98,8 +98,9 @@ const formatDate = (dateString: string) => {
 };
 
 // モック用Trust Score (ワーカーIDに基づくシンプルなハッシュ)
-const getMockTrustScore = (workerId: string): number => {
-  const hash = workerId
+const getMockTrustScore = (workerId: number): number => {
+  // numberを文字列に変換してハッシュ計算
+  const hash = String(workerId)
     .split("")
     .reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return 50 + (hash % 50); // 50-99の範囲
@@ -108,46 +109,28 @@ const getMockTrustScore = (workerId: string): number => {
 export default function RequesterJobDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const jobId = params.job_id as string;
+  const jobId = Number(params.job_id);
 
-  const [isHydrated, setIsHydrated] = useState(false);
+  // hooksからデータ取得
+  const { getJobById, pending: jobsPending } = useJobs();
+  const { undertakedJobs, pending: undertakedPending } = useUndertakedJobs();
+  const { worker } = useWorker();
 
-  // ストアからデータ取得
-  const jobs = useJobStore((state) => state.jobs);
-  const undertakedJobs = useUndertakedJobStore((state) => state.undertakedJobs);
-  const storeWorker = useWorkerStore((state) => state.worker);
-
-  // Hydration
-  useEffect(() => {
-    useJobStore.persist.rehydrate();
-    useUndertakedJobStore.persist.rehydrate();
-    useWorkerStore.persist.rehydrate();
-    setIsHydrated(true);
-  }, []);
-
-  // ジョブを取得 (ストア優先、なければモック)
-  const job = useMemo(() => {
-    if (!isHydrated) {
-      return mockJobs.find((j) => j.id === jobId);
-    }
-    const storeJob = jobs.find((j) => j.id === jobId);
-    if (storeJob) return storeJob;
-    return mockJobs.find((j) => j.id === jobId);
-  }, [isHydrated, jobId, jobs]);
+  // ジョブを取得
+  const job = getJobById(jobId);
 
   // このジョブに対する応募者(undertakedJobs)を取得
   const applicants = useMemo(() => {
-    if (!isHydrated) return [];
     return undertakedJobs.filter(
-      (uj) => uj.jobId === jobId && uj.status !== "canceled",
+      (uj) => uj.jobId === jobId && uj.status !== "canceled"
     );
-  }, [isHydrated, undertakedJobs, jobId]);
+  }, [undertakedJobs, jobId]);
 
   // ワーカー情報を取得する関数
-  const getWorkerInfo = (workerId: string): Worker | undefined => {
+  const getWorkerInfo = (workerId: number): Worker | undefined => {
     // ストアのワーカーと一致する場合
-    if (storeWorker && storeWorker.id === workerId) {
-      return storeWorker;
+    if (worker && worker.id === workerId) {
+      return worker;
     }
     // モックワーカーから検索
     return mockWorkers.find((w) => w.id === workerId);

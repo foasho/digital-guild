@@ -25,12 +25,12 @@ export function CompletionReportModal({
   job,
   onSubmit,
 }: CompletionReportModalProps) {
-  const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
+  const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
   const [memo, setMemo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // チェックリストのチェック状態を切り替え
-  const handleCheckChange = (itemId: string, isChecked: boolean) => {
+  const handleCheckChange = (itemId: number, isChecked: boolean) => {
     const newCheckedItems = new Set(checkedItems);
     if (isChecked) {
       newCheckedItems.add(itemId);

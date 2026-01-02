@@ -12,7 +12,7 @@ interface JobMapMarkerProps {
 
 // カスタムマーカーアイコンを作成
 function createMarkerIcon(job: Job, isBookmarked: boolean): L.DivIcon {
-  const borderColor = isBookmarked ? "#f59e0b" : "#6b7280";
+  const borderColor = isBookmarked ? "#f59e0b" : "#60a5fa";
   const borderWidth = isBookmarked ? "3px" : "2px";
 
   // ブックマークアイコン（右上に小さく表示）
