@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { requesters as mockRequesters } from "@/constants/mocks";
-import { useRequesterStore } from "@/stores";
+import { useRequesterStore } from "@/stores/workers";
 import type { Requester } from "@/types";
 
 interface UseRequesterResult {

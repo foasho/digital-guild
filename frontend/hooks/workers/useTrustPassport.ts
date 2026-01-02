@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { TrustPassportApi, WorkerSkillApi } from "@/constants/api-mocks";
-import { useTrustPassportStore, useWorkerStore } from "@/stores";
+import { useTrustPassportStore, useWorkerStore } from "@/stores/workers";
 import type { TrustPassport, WorkerSkill, Rank } from "@/types";
 
 const calculateRank = (score: number): Rank => {

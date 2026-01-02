@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { TransactionHistoryApi } from "@/constants/api-mocks";
-import { useWalletStore, useWorkerStore } from "@/stores";
+import { useWalletStore, useWorkerStore } from "@/stores/workers";
 import type { TransactionHistory } from "@/types";
 
 const INITIAL_BALANCE = 20000;
