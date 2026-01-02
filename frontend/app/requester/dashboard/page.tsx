@@ -82,8 +82,10 @@ export default function RequesterDashboardPage() {
   const subsidies = useSubsidiesByRequesterId(requester?.id || 1);
 
   const allJobs = useMemo(() => {
-    return jobs.filter((job) => job.id <= 10);
-  }, [jobs]);
+    // requesterId でフィルタリング（新規作成したジョブも表示）
+    const requesterId = requester?.id || 1;
+    return jobs.filter((job) => job.requesterId === requesterId);
+  }, [jobs, requester?.id]);
 
   const stats = useMemo(() => {
     let recruiting = 0;

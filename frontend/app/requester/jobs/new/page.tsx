@@ -206,7 +206,7 @@ export default function NewJobPage() {
   };
 
   // フォーム送信
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // フォームデータを構築
@@ -241,28 +241,29 @@ export default function NewJobPage() {
     // 使用するリクエスターID
     const requesterId = requester?.id || defaultRequester.id;
 
-    // hookでジョブを作成
-    addJob({
-      requesterId,
-      title: formData.title,
-      description: formData.description,
-      reward: formData.reward,
-      aiInsentiveReward: Math.min(
-        formData.reward * 0.005,
-        formData.reward * 0.5
-      ),
-      location: formData.location,
-      latitude: formData.latitude,
-      longitude: formData.longitude,
-      imageUrl: formData.imageUrl || "/jobs/izakaya.jpg",
-      tags: formData.tags,
-      capacity: formData.capacity,
-      checklist: formData.checklist as ChecklistItem[],
-      scheduledDate: formData.scheduledDate,
-    });
+    // hookでジョブを作成（awaitで完了を待つ）
+    try {
+      await addJob({
+        requesterId,
+        title: formData.title,
+        description: formData.description,
+        reward: formData.reward,
+        aiInsentiveReward: aiIncentive, // 計算済みのAIインセンティブを使用
+        location: formData.location,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        imageUrl: formData.imageUrl || "/jobs/izakaya.jpg",
+        tags: formData.tags,
+        capacity: formData.capacity,
+        checklist: formData.checklist as ChecklistItem[],
+        scheduledDate: formData.scheduledDate,
+      });
 
-    // ダッシュボードへリダイレクト
-    router.push("/requester/dashboard");
+      // ダッシュボードへリダイレクト
+      router.push("/requester/dashboard");
+    } catch (error) {
+      console.error("ジョブ作成エラー:", error);
+    }
   };
 
   if (!isHydrated) {
@@ -668,7 +669,7 @@ export default function NewJobPage() {
                   <h3 className={`text-lg font-bold ${
                     isRequiredFieldsValid ? "text-gray-800 dark:text-white" : "text-gray-400 dark:text-gray-500"
                   }`}>
-                    AIインセンティブ算出
+                    AIインセンティブを付与
                   </h3>
                   <p className={`text-sm mt-0.5 ${
                     isRequiredFieldsValid ? "text-gray-500 dark:text-gray-400" : "text-gray-400 dark:text-gray-500"
