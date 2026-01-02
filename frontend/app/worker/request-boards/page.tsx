@@ -6,8 +6,8 @@ import { useCallback, useMemo, useState } from "react";
 import { JobCard } from "@/components/worker/JobCard";
 import { JobDetailModal } from "@/components/worker/JobDetailModal";
 import { type FilterValues, JobFilter } from "@/components/worker/JobFilter";
-import { useJobs, useBookmarks, useUndertakedJobs, useRecommendedJobs } from "@/hooks";
-import { useUndertakedJobStore, useWorkerStore } from "@/stores";
+import { useJobs, useBookmarks, useUndertakedJobs, useRecommendedJobs } from "@/hooks/workers";
+import { useUndertakedJobStore, useWorkerStore } from "@/stores/workers";
 import { UndertakedJobApi } from "@/constants/api-mocks";
 import type { Job, UndertakedJob } from "@/types";
 
@@ -153,8 +153,11 @@ export default function RequestBoardsPage() {
       status: "accepted",
       requesterEvalScore: null,
       acceptedAt: new Date().toISOString(),
+      completionReportedAt: null,
       canceledAt: null,
       finishedAt: null,
+      completionMemo: null,
+      completedChecklistIds: null,
     };
 
     // APIに保存

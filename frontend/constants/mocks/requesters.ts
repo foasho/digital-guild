@@ -2,7 +2,7 @@ import type { Requester } from "@/types";
 
 export const defaultRequester: Requester = {
   id: 1,
-  name: "湯煙町観光協会",
+  name: "湯煙町自治体",
   createdAt: "2025-01-01T00:00:00Z",
 };
 

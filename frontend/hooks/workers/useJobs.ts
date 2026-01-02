@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { JobApi } from "@/constants/api-mocks";
-import { useJobStore } from "@/stores";
+import { useJobStore } from "@/stores/workers";
 import type { Job, ChecklistItem } from "@/types";
 
 interface UseJobsResult {

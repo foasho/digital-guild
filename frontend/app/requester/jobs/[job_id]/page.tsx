@@ -16,7 +16,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { workers as mockWorkers } from "@/constants/mocks";
-import { useJobs, useUndertakedJobs, useWorker } from "@/hooks";
+import { useJobs, useUndertakedJobs } from "@/hooks/requesters";
+import { useWorker } from "@/hooks/workers";
 import type { Rank, UndertakedJob, Worker } from "@/types";
 
 // ランク計算関数
@@ -67,21 +68,21 @@ const getStatusStyle = (status: UndertakedJob["status"]) => {
   switch (status) {
     case "accepted":
       return {
-        label: "承認済み",
-        style:
-          "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm font-semibold",
-      };
-    case "in_progress":
-      return {
-        label: "作業中",
+        label: "着手中",
         style:
           "bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-sm font-semibold",
+      };
+    case "completion_reported":
+      return {
+        label: "確認待ち",
+        style:
+          "bg-gradient-to-r from-purple-500 to-violet-500 text-white shadow-sm font-semibold",
       };
     case "completed":
       return {
         label: "完了",
         style:
-          "bg-gradient-to-r from-blue-500 to-sky-500 text-white shadow-sm font-semibold",
+          "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm font-semibold",
       };
     case "canceled":
       return {

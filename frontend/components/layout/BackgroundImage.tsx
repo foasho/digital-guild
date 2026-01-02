@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { useTimeBasedBackground } from "@/hooks/useTimeBasedBackground";
+import { useTimeBasedBackground } from "@/hooks/workers/useTimeBasedBackground";
 
 interface BackgroundImageProps {
   children: ReactNode;

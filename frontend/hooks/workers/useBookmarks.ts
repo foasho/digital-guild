@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { BookmarkJobApi } from "@/constants/api-mocks";
-import { useBookmarkStore, useWorkerStore } from "@/stores";
+import { useBookmarkStore, useWorkerStore } from "@/stores/workers";
 import type { BookmarkJob } from "@/types";
 
 interface UseBookmarksResult {

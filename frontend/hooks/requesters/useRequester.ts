@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { requesters as mockRequesters } from "@/constants/mocks";
-import { useRequesterStore } from "@/stores";
+import { useRequesterStore } from "@/stores/requesters";
 import type { Requester } from "@/types";
 
 interface UseRequesterResult {
@@ -11,21 +11,8 @@ interface UseRequesterResult {
 }
 
 /**
- * 発注者一覧を取得するhook
- */
-const useRequesters = (): Requester[] => {
-  const [requesters, setRequesters] = useState<Requester[]>([]);
-
-  useEffect(() => {
-    // TODO: 本番移行では、APIから取得する予定
-    setRequesters(mockRequesters);
-  }, []);
-
-  return requesters;
-};
-
-/**
  * 現在の発注者を取得し、Storeに格納するhook
+ * 例外: 直接モックデータを参照
  */
 const useRequester = (): UseRequesterResult => {
   const [pending, setPending] = useState(false);
@@ -65,4 +52,5 @@ const useRequesterById = (id: number): Requester | undefined => {
   return requester;
 };
 
-export { useRequesters, useRequester, useRequesterById };
+export { useRequester, useRequesterById };
+

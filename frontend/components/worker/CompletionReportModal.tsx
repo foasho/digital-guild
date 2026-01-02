@@ -15,7 +15,7 @@ interface CompletionReportModalProps {
   onClose: () => void;
   undertakedJob: UndertakedJob;
   job: Job;
-  onSubmit: () => void;
+  onSubmit: (memo: string, completedChecklistIds: number[]) => void;
 }
 
 export function CompletionReportModal({
@@ -50,7 +50,8 @@ export function CompletionReportModal({
     try {
       // 少し遅延を入れてUX向上
       await new Promise((resolve) => setTimeout(resolve, 500));
-      onSubmit();
+      // memoと完了したチェックリストIDを渡す
+      onSubmit(memo, Array.from(checkedItems));
       // モーダルを閉じる前に状態をリセット
       setCheckedItems(new Set());
       setMemo("");

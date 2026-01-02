@@ -7,17 +7,18 @@ import type { Job } from "@/types";
 interface RequesterJobCardProps {
   job: Job;
   applicantCount: number;
-  status: "open" | "in_progress" | "completed";
+  status: "open" | "in_progress" | "pending_review" | "completed";
   onClick?: () => void;
 }
 
 // ステータスラベルと色の定義
 const statusConfig: Record<
   RequesterJobCardProps["status"],
-  { label: string; color: "success" | "warning" | "default" }
+  { label: string; color: "success" | "warning" | "secondary" | "default" }
 > = {
   open: { label: "募集中", color: "success" },
   in_progress: { label: "進行中", color: "warning" },
+  pending_review: { label: "確認待ち", color: "secondary" },
   completed: { label: "完了", color: "default" },
 };
 

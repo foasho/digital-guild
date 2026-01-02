@@ -10,7 +10,7 @@ import {
   WorkerHeader,
 } from "@/components/layout";
 import { loadMockData } from "@/constants/api-mocks";
-import { useWorker } from "@/hooks";
+import { useWorker } from "@/hooks/workers";
 import { Spinner } from "@heroui/react";
 
 interface WorkerLayoutProps {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { workers } from "@/constants/mocks";
 import { Worker } from "@/types";
-import { useWorkerStore } from "@/stores";
+import { useWorkerStore } from "@/stores/workers";
 
 type UseWorkerProps = {
   worker: Worker | null;

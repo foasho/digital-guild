@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { UndertakedJobApi } from "@/constants/api-mocks";
-import { useUndertakedJobStore, useWorkerStore } from "@/stores";
+import { useUndertakedJobStore, useWorkerStore } from "@/stores/workers";
 import type { UndertakedJob } from "@/types";
 
 interface UseUndertakedJobsResult {

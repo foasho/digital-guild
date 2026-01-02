@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useTransactionHistories, useWorker } from "@/hooks";
+import { useTransactionHistories, useWorker } from "@/hooks/workers";
 import type { TransactionHistory } from "@/types";
 
 // 日時フォーマット: 2026/01/05 18:12

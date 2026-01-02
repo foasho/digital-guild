@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { JobAiRecommendApi } from "@/constants/api-mocks";
-import { useWorkerStore } from "@/stores";
+import { useWorkerStore } from "@/stores/workers";
 import type { JobAiRecommend } from "@/types";
 
 /**

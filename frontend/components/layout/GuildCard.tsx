@@ -9,7 +9,7 @@ import {
   useWorkerStore,
   useTrustPassportStore,
   useUndertakedJobStore,
-} from "@/stores";
+} from "@/stores/workers";
 import {
   undertakedJobs as defaultUndertakedJobs,
   workerSkills as defaultWorkerSkills,
