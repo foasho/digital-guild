@@ -50,7 +50,7 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
         </div>
 
         {/* Scrollable content area */}
-        <main className="flex-1 overflow-y-auto pb-20">
+        <main className="flex-1 overflow-y-auto pb-[69px]">
           <>
             {pending && !worker ? <div className="flex-1 flex items-center justify-center">
               <Spinner />

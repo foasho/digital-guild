@@ -11,9 +11,9 @@ import {
   Tab,
   Tabs,
 } from "@heroui/react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CompletionReportModal } from "@/components/worker";
-import { useJobStore } from "@/stores/useJobStore";
+import { useJobs, useUndertakedJobs } from "@/hooks";
 import { useUndertakedJobStore } from "@/stores/useUndertakedJobStore";
 import type { Job, UndertakedJob } from "@/types";
 
@@ -469,8 +469,10 @@ function EmptyState({ message }: { message: string }) {
 }
 
 export default function WorkerJobsPage() {
-  const { getJobById } = useJobStore();
-  const { undertakedJobs, updateUndertakedJob } = useUndertakedJobStore();
+  // フックからデータ取得
+  const { jobs, getJobById } = useJobs();
+  const { undertakedJobs } = useUndertakedJobs();
+  const { updateUndertakedJob } = useUndertakedJobStore();
 
   const [selectedTab, setSelectedTab] = useState<string>("in_progress");
   const [isModalOpen, setIsModalOpen] = useState(false);

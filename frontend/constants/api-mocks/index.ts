@@ -1,7 +1,7 @@
 import {
   bookmarkJobs,
   jobAiRecommends,
-  jobs,
+  allJobs,
   jobSkills,
   requesters,
   requirementSkills,
@@ -43,7 +43,7 @@ const loadMockData = async (): Promise<void> => {
   // モックデータをロード
   localStorage.setItem("bookmarkJobs", JSON.stringify(bookmarkJobs));
   localStorage.setItem("jobAiRecommends", JSON.stringify(jobAiRecommends));
-  localStorage.setItem("jobs", JSON.stringify(jobs));
+  localStorage.setItem("jobs", JSON.stringify(allJobs));
   localStorage.setItem("jobSkills", JSON.stringify(jobSkills));
   localStorage.setItem("requesters", JSON.stringify(requesters));
   localStorage.setItem("requirementSkills", JSON.stringify(requirementSkills));

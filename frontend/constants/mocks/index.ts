@@ -10,7 +10,7 @@ export {
 } from "./requesters";
 
 // Jobs
-export { izakayaJob, noukaJob, ryokanJob, jobs } from "./jobs";
+export { izakayaJob, noukaJob, ryokanJob, jobs, pastJobs, allJobs } from "./jobs";
 
 // Subsidies
 export { defaultSubsidy, subsidies } from "./subsidies";
