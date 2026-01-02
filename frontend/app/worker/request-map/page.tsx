@@ -5,7 +5,7 @@ import { debounce } from "es-toolkit";
 import dynamic from "next/dynamic";
 import { useCallback, useMemo, useState } from "react";
 import { JobDetailModal } from "@/components/worker/JobDetailModal";
-import { useJobs, useBookmarks, useUndertakedJobs, useWorker } from "@/hooks";
+import { useJobs, useBookmarks, useUndertakedJobs, useWorker } from "@/hooks/workers";
 import type { Job, UndertakedJob } from "@/types";
 
 // SSR無効化でMapコンポーネントをdynamic import

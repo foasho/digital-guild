@@ -13,7 +13,7 @@ import {
 } from "@heroui/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CompletionReportModal } from "@/components/worker";
-import { useJobs, useUndertakedJobs } from "@/hooks";
+import { useJobs, useUndertakedJobs } from "@/hooks/workers";
 import { useUndertakedJobStore } from "@/stores/useUndertakedJobStore";
 import type { Job, UndertakedJob } from "@/types";
 

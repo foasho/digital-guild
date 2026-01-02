@@ -16,7 +16,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { workers as mockWorkers } from "@/constants/mocks";
-import { useJobs, useUndertakedJobs, useWorker } from "@/hooks";
+import { useJobs, useUndertakedJobs, useWorker } from "@/hooks/workers";
 import type { Rank, UndertakedJob, Worker } from "@/types";
 
 // ランク計算関数

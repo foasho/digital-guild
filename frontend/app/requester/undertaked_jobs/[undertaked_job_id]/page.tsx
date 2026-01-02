@@ -21,7 +21,7 @@ import {
   useTrustPassport,
   useTransactionHistories,
   useRequester,
-} from "@/hooks";
+} from "@/hooks/workers";
 import type { Rank, WorkerSkill } from "@/types";
 
 // ランク計算
