@@ -23,4 +23,3 @@ export type {
   GetSubsidiesByRequesterIdParams,
   DeleteSubsidyByIdParams,
 };
-

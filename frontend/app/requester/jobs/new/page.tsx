@@ -15,8 +15,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { defaultRequester } from "@/constants/mocks";
-import { useJobStore, useRequesterStore } from "@/stores";
-import type { Job } from "@/types";
+import { useJobs, useRequester } from "@/hooks";
+import type { ChecklistItem } from "@/types";
 
 // タグ選択肢
 const TAG_OPTIONS = [
@@ -41,14 +41,14 @@ const jobFormSchema = z.object({
   imageUrl: z.string().optional(),
   tags: z.array(z.string()),
   capacity: z.number().min(1).default(1),
-  checklist: z.array(z.object({ id: z.string(), text: z.string() })),
+  checklist: z.array(z.object({ id: z.number(), text: z.string() })),
   scheduledDate: z.string().min(1, "予定日は必須です"),
 });
 
 type JobFormData = z.infer<typeof jobFormSchema>;
 
 interface ChecklistItemInput {
-  id: string;
+  id: number;
   text: string;
 }
 
@@ -72,8 +72,8 @@ function SectionHeader({
 
 export default function NewJobPage() {
   const router = useRouter();
-  const addJob = useJobStore((state) => state.addJob);
-  const requester = useRequesterStore((state) => state.requester);
+  const { jobs, addJob } = useJobs();
+  const { requester } = useRequester();
   const [isHydrated, setIsHydrated] = useState(false);
 
   // フォーム状態
@@ -109,20 +109,21 @@ export default function NewJobPage() {
 
   // チェックリスト追加
   const handleAddChecklistItem = () => {
+    const maxId = checklist.length > 0 ? Math.max(...checklist.map((c) => c.id)) : 0;
     const newItem: ChecklistItemInput = {
-      id: `checklist-${Date.now()}`,
+      id: maxId + 1,
       text: "",
     };
     setChecklist([...checklist, newItem]);
   };
 
   // チェックリスト削除
-  const handleRemoveChecklistItem = (id: string) => {
+  const handleRemoveChecklistItem = (id: number) => {
     setChecklist(checklist.filter((item) => item.id !== id));
   };
 
   // チェックリストテキスト更新
-  const handleChecklistTextChange = (id: string, text: string) => {
+  const handleChecklistTextChange = (id: number, text: string) => {
     setChecklist(
       checklist.map((item) => (item.id === id ? { ...item, text } : item)),
     );
@@ -164,9 +165,8 @@ export default function NewJobPage() {
     // 使用するリクエスターID（ストアにない場合はデフォルト使用）
     const requesterId = requester?.id || defaultRequester.id;
 
-    // 新規ジョブを作成
-    const newJob: Job = {
-      id: `job-${Date.now()}`,
+    // hookでジョブを作成（ID, createdAt, updatedAtは自動生成）
+    addJob({
       requesterId,
       title: formData.title,
       description: formData.description,
@@ -181,14 +181,9 @@ export default function NewJobPage() {
       imageUrl: formData.imageUrl || "/jobs/izakaya.jpg",
       tags: formData.tags,
       capacity: formData.capacity,
-      checklist: formData.checklist,
+      checklist: formData.checklist as ChecklistItem[],
       scheduledDate: formData.scheduledDate,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    // ストアに追加
-    addJob(newJob);
+    });
 
     // AIレコメンドAPI呼び出し (Task 5.6で実装予定)
     // await fetch('/api/ai/recommend', { method: 'POST', body: JSON.stringify({ jobId: newJob.id }) });

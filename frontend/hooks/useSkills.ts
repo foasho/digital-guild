@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { SkillApi, JobSkillApi, RequirementSkillApi } from "@/constants/api-mocks";
+import {
+  skills as mockSkills,
+  jobSkills as mockJobSkills,
+  requirementSkills as mockRequirementSkills,
+} from "@/constants/mocks";
 import type { Skill, JobSkill, RequirementSkill } from "@/types";
 
 /**
@@ -11,11 +15,8 @@ const useSkills = (): Skill[] => {
   const [skills, setSkills] = useState<Skill[]>([]);
 
   useEffect(() => {
-    const fetchSkills = async (): Promise<void> => {
-      const list = await SkillApi.index();
-      setSkills(list);
-    };
-    fetchSkills();
+    // TODO: 本番移行では、APIから取得する予定
+    setSkills(mockSkills);
   }, []);
 
   return skills;
@@ -28,13 +29,9 @@ const useJobSkills = (jobId: number): JobSkill[] => {
   const [jobSkills, setJobSkills] = useState<JobSkill[]>([]);
 
   useEffect(() => {
-    const fetchJobSkills = async (): Promise<void> => {
-      const list = await JobSkillApi.getByJobId({ jobId });
-      setJobSkills(list);
-    };
-    if (jobId) {
-      fetchJobSkills();
-    }
+    // TODO: 本番移行では、APIから取得する予定
+    const filtered = mockJobSkills.filter((s) => s.jobId === jobId);
+    setJobSkills(filtered);
   }, [jobId]);
 
   return jobSkills;
@@ -44,20 +41,17 @@ const useJobSkills = (jobId: number): JobSkill[] => {
  * ジョブの募集条件スキルを取得するhook
  */
 const useRequirementSkills = (jobId: number): RequirementSkill[] => {
-  const [requirementSkills, setRequirementSkills] = useState<RequirementSkill[]>([]);
+  const [requirementSkills, setRequirementSkills] = useState<
+    RequirementSkill[]
+  >([]);
 
   useEffect(() => {
-    const fetchRequirementSkills = async (): Promise<void> => {
-      const list = await RequirementSkillApi.getByJobId({ jobId });
-      setRequirementSkills(list);
-    };
-    if (jobId) {
-      fetchRequirementSkills();
-    }
+    // TODO: 本番移行では、APIから取得する予定
+    const filtered = mockRequirementSkills.filter((s) => s.jobId === jobId);
+    setRequirementSkills(filtered);
   }, [jobId]);
 
   return requirementSkills;
 };
 
 export { useSkills, useJobSkills, useRequirementSkills };
-

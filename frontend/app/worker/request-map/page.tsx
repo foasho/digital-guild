@@ -3,10 +3,9 @@
 import { Input } from "@heroui/react";
 import { debounce } from "es-toolkit";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { JobDetailModal } from "@/components/worker/JobDetailModal";
-import { jobs as mockJobs } from "@/constants/mocks/jobs";
-import { useBookmarkStore, useJobStore, useUndertakedJobStore } from "@/stores";
+import { useJobs, useBookmarks, useUndertakedJobs, useWorker } from "@/hooks";
 import type { Job, UndertakedJob } from "@/types";
 
 // SSR無効化でMapコンポーネントをdynamic import
@@ -19,39 +18,20 @@ const MapComponent = dynamic(() => import("./MapComponent"), {
   ),
 });
 
-// 現在のワーカーID（モック）
-const CURRENT_WORKER_ID = "worker-1";
-
 export default function RequestMapPage() {
-  const [isHydrated, setIsHydrated] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  // ストアからデータ取得
-  const jobs = useJobStore((state) => state.jobs);
-  const setJobs = useJobStore((state) => state.setJobs);
-  const addBookmark = useBookmarkStore((state) => state.addBookmark);
-  const removeBookmark = useBookmarkStore((state) => state.removeBookmark);
-  const isBookmarked = useBookmarkStore((state) => state.isBookmarked);
-  const addUndertakedJob = useUndertakedJobStore(
-    (state) => state.addUndertakedJob,
-  );
-  const getByJobId = useUndertakedJobStore((state) => state.getByJobId);
+  // hooksからデータ取得
+  const { worker } = useWorker();
+  const { jobs, pending: jobsPending } = useJobs();
+  const { addBookmark, removeBookmark, isBookmarked } = useBookmarks();
+  const { addUndertakedJob, getByJobId, pending: undertakedPending } = useUndertakedJobs();
 
-  // 初期化・ハイドレーション
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  // モックデータの初期化
-  useEffect(() => {
-    if (isHydrated && jobs.length === 0) {
-      setJobs(mockJobs);
-    }
-  }, [isHydrated, jobs.length, setJobs]);
+  const isHydrated = !jobsPending && !undertakedPending;
 
   // debounce検索（300ms）
   const debouncedSetQuery = useMemo(
@@ -86,18 +66,15 @@ export default function RequestMapPage() {
 
   // ブックマークのトグル
   const handleBookmarkToggle = useCallback(
-    (jobId: string) => {
+    (jobId: number) => {
+      if (!worker) return;
       if (isBookmarked(jobId)) {
         removeBookmark(jobId);
       } else {
-        addBookmark({
-          id: `bookmark-${Date.now()}`,
-          jobId,
-          workerId: CURRENT_WORKER_ID,
-        });
+        addBookmark(jobId);
       }
     },
-    [isBookmarked, addBookmark, removeBookmark],
+    [worker, isBookmarked, addBookmark, removeBookmark]
   );
 
   // マーカークリックで詳細モーダルを開く
@@ -114,27 +91,25 @@ export default function RequestMapPage() {
 
   // 受注処理
   const handleAccept = useCallback(() => {
-    if (!selectedJob) return;
+    if (!selectedJob || !worker) return;
 
     // 既に受注済みかチェック
     if (getByJobId(selectedJob.id)) {
       return;
     }
 
-    const newUndertakedJob: UndertakedJob = {
-      id: `undertaked-${Date.now()}`,
-      workerId: CURRENT_WORKER_ID,
+    // hooksのaddUndertakedJobを使用（IDは自動生成）
+    addUndertakedJob({
+      workerId: worker.id,
       jobId: selectedJob.id,
       status: "accepted",
       requesterEvalScore: null,
       acceptedAt: new Date().toISOString(),
       canceledAt: null,
       finishedAt: null,
-    };
-
-    addUndertakedJob(newUndertakedJob);
+    });
     handleDetailClose();
-  }, [selectedJob, getByJobId, addUndertakedJob, handleDetailClose]);
+  }, [selectedJob, worker, getByJobId, addUndertakedJob, handleDetailClose]);
 
   // 検索バーの展開/折りたたみをトグル
   const toggleSearch = useCallback(() => {

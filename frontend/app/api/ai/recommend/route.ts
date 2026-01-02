@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
         // confidence >= 0.7 の場合のみ保存
         if (result.confidence >= 0.7) {
           const recommend: JobAiRecommend = {
-            id: `recommend-${Date.now()}-${worker.id}`,
+            id: Date.now() + worker.id,
             jobId: job.id,
             workerId: worker.id,
             confidence: result.confidence,

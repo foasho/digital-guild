@@ -1,64 +1,79 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { BookmarkJobApi } from "@/constants/api-mocks";
+import { bookmarkJobs as mockBookmarkJobs } from "@/constants/mocks";
+import { useBookmarkStore, useWorkerStore } from "@/stores";
 import type { BookmarkJob } from "@/types";
 
-/**
- * ブックマーク一覧を取得・操作するhook
- */
-const useBookmarks = (workerId: number) => {
-  const [bookmarks, setBookmarks] = useState<BookmarkJob[]>([]);
-  const [loading, setLoading] = useState(true);
+interface UseBookmarksResult {
+  bookmarks: BookmarkJob[];
+  pending: boolean;
+  addBookmark: (jobId: number) => BookmarkJob;
+  removeBookmark: (jobId: number) => void;
+  isBookmarked: (jobId: number) => boolean;
+}
 
-  const fetchBookmarks = useCallback(async (): Promise<void> => {
-    if (!workerId) return;
-    setLoading(true);
-    try {
-      const bookmarkList = await BookmarkJobApi.getByWorkerId({ workerId });
-      setBookmarks(bookmarkList);
-    } finally {
-      setLoading(false);
-    }
-  }, [workerId]);
+/**
+ * 現在のワーカーのブックマーク一覧を取得し、Storeに格納するhook
+ */
+const useBookmarks = (): UseBookmarksResult => {
+  const [pending, setPending] = useState(false);
+  const { worker } = useWorkerStore();
+  const {
+    bookmarks,
+    setBookmarks,
+    addBookmark: addToStore,
+    removeBookmark: removeFromStore,
+    isBookmarked,
+  } = useBookmarkStore();
 
   useEffect(() => {
+    const fetchBookmarks = async (): Promise<void> => {
+      if (!worker || bookmarks.length > 0) return;
+      setPending(true);
+      try {
+        // TODO: 本番移行では、APIから取得する予定
+        const workerBookmarks = mockBookmarkJobs.filter(
+          (b) => b.workerId === worker.id
+        );
+        setBookmarks(workerBookmarks);
+      } finally {
+        setPending(false);
+      }
+    };
     fetchBookmarks();
-  }, [fetchBookmarks]);
+  }, [worker, bookmarks.length, setBookmarks]);
 
   const addBookmark = useCallback(
-    async (jobId: number): Promise<BookmarkJob> => {
-      const newBookmark = await BookmarkJobApi.create({ jobId, workerId });
-      setBookmarks((prev) => [...prev, newBookmark]);
+    (jobId: number): BookmarkJob => {
+      if (!worker) throw new Error("Worker not found");
+      const maxId =
+        bookmarks.length > 0 ? Math.max(...bookmarks.map((b) => b.id)) : 0;
+      const newBookmark: BookmarkJob = {
+        id: maxId + 1,
+        jobId,
+        workerId: worker.id,
+      };
+      addToStore(newBookmark);
       return newBookmark;
     },
-    [workerId]
+    [worker, bookmarks, addToStore]
   );
 
   const removeBookmark = useCallback(
-    async (jobId: number): Promise<void> => {
-      await BookmarkJobApi.deleteByJobId({ jobId, workerId });
-      setBookmarks((prev) => prev.filter((b) => b.jobId !== jobId));
+    (jobId: number): void => {
+      removeFromStore(jobId);
     },
-    [workerId]
-  );
-
-  const isBookmarked = useCallback(
-    (jobId: number): boolean => {
-      return bookmarks.some((b) => b.jobId === jobId);
-    },
-    [bookmarks]
+    [removeFromStore]
   );
 
   return {
     bookmarks,
-    loading,
+    pending,
     addBookmark,
     removeBookmark,
     isBookmarked,
-    refetch: fetchBookmarks,
   };
 };
 
 export { useBookmarks };
-

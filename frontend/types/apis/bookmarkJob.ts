@@ -21,4 +21,3 @@ export type {
   DeleteBookmarkJobByJobIdParams,
   GetBookmarksByWorkerIdParams,
 };
-

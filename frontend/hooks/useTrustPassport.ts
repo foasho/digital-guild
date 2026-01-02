@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { TrustPassportApi, WorkerSkillApi } from "@/constants/api-mocks";
+import {
+  trustPassports as mockTrustPassports,
+  workerSkills as mockWorkerSkills,
+} from "@/constants/mocks";
+import { useTrustPassportStore, useWorkerStore } from "@/stores";
 import type { TrustPassport, WorkerSkill, Rank } from "@/types";
 
 const calculateRank = (score: number): Rank => {
@@ -11,73 +15,91 @@ const calculateRank = (score: number): Rank => {
   return "Bronze";
 };
 
-/**
- * ギルド証（TrustPassport）を取得・操作するhook
- */
-const useTrustPassport = (workerId: number) => {
-  const [passport, setPassport] = useState<TrustPassport | null>(null);
-  const [skills, setSkills] = useState<WorkerSkill[]>([]);
-  const [loading, setLoading] = useState(true);
+interface UseTrustPassportResult {
+  passport: TrustPassport | null;
+  skills: WorkerSkill[];
+  pending: boolean;
+  updateTrustScore: (score: number) => void;
+  addSkill: (name: string, jobId: number) => WorkerSkill;
+  getRank: () => Rank;
+}
 
-  const fetchData = useCallback(async (): Promise<void> => {
-    if (!workerId) return;
-    setLoading(true);
-    try {
-      const [passportData, skillsData] = await Promise.all([
-        TrustPassportApi.getByWorkerId({ workerId }),
-        WorkerSkillApi.getByWorkerId({ workerId }),
-      ]);
-      setPassport(passportData || null);
-      setSkills(skillsData);
-    } finally {
-      setLoading(false);
-    }
-  }, [workerId]);
+/**
+ * ギルド証（TrustPassport）を取得し、Storeに格納するhook
+ */
+const useTrustPassport = (): UseTrustPassportResult => {
+  const [pending, setPending] = useState(false);
+  const { worker } = useWorkerStore();
+  const {
+    passport,
+    skills,
+    setPassport,
+    setSkills,
+    updateTrustScore: updateScoreInStore,
+    addSkill: addSkillToStore,
+    getRank: getRankFromStore,
+  } = useTrustPassportStore();
 
   useEffect(() => {
+    const fetchData = async (): Promise<void> => {
+      if (!worker || passport) return;
+      setPending(true);
+      try {
+        // TODO: 本番移行では、APIから取得する予定
+        const workerPassport = mockTrustPassports.find(
+          (p) => p.workerId === worker.id
+        );
+        const workerSkillsList = mockWorkerSkills.filter(
+          (s) => s.workerId === worker.id
+        );
+        if (workerPassport) {
+          setPassport(workerPassport);
+        }
+        setSkills(workerSkillsList);
+      } finally {
+        setPending(false);
+      }
+    };
     fetchData();
-  }, [fetchData]);
+  }, [worker, passport, setPassport, setSkills]);
 
   const updateTrustScore = useCallback(
-    async (score: number): Promise<void> => {
-      if (!passport) return;
+    (score: number): void => {
       const clampedScore = Math.min(100, Math.max(0, score));
-      const updated = await TrustPassportApi.update(passport.id, {
-        trustScore: clampedScore,
-      });
-      setPassport(updated);
+      updateScoreInStore(clampedScore);
     },
-    [passport]
+    [updateScoreInStore]
   );
 
   const addSkill = useCallback(
-    async (name: string, jobId: number): Promise<WorkerSkill> => {
-      const newSkill = await WorkerSkillApi.create({
-        workerId,
+    (name: string, jobId: number): WorkerSkill => {
+      if (!worker) throw new Error("Worker not found");
+      const maxId = skills.length > 0 ? Math.max(...skills.map((s) => s.id)) : 0;
+      const newSkill: WorkerSkill = {
+        id: maxId + 1,
+        workerId: worker.id,
         name,
         jobId,
         createdAt: new Date().toISOString(),
-      });
-      setSkills((prev) => [...prev, newSkill]);
+      };
+      addSkillToStore(newSkill);
       return newSkill;
     },
-    [workerId]
+    [worker, skills, addSkillToStore]
   );
 
   const getRank = useCallback((): Rank => {
-    return passport ? calculateRank(passport.trustScore) : "Bronze";
-  }, [passport]);
+    return getRankFromStore();
+  }, [getRankFromStore]);
 
   return {
     passport,
     skills,
-    loading,
+    pending,
     updateTrustScore,
     addSkill,
     getRank,
-    refetch: fetchData,
   };
 };
 
 export { useTrustPassport };
-

@@ -1,58 +1,72 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { TransactionHistoryApi } from "@/constants/api-mocks";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { transactionHistories as mockTransactionHistories } from "@/constants/mocks";
+import { useWalletStore, useWorkerStore } from "@/stores";
 import type { TransactionHistory } from "@/types";
 
 const INITIAL_BALANCE = 20000;
 
-/**
- * 取引履歴を取得・操作するhook
- */
-const useTransactionHistories = (workerId: number) => {
-  const [transactions, setTransactions] = useState<TransactionHistory[]>([]);
-  const [balance, setBalance] = useState(INITIAL_BALANCE);
-  const [loading, setLoading] = useState(true);
+interface UseTransactionHistoriesResult {
+  transactions: TransactionHistory[];
+  balance: number;
+  pending: boolean;
+  addTransaction: (params: Omit<TransactionHistory, "id">) => TransactionHistory;
+}
 
-  const fetchData = useCallback(async (): Promise<void> => {
-    if (!workerId) return;
-    setLoading(true);
-    try {
-      const [txList, calculatedBalance] = await Promise.all([
-        TransactionHistoryApi.getByWorkerId({ workerId }),
-        TransactionHistoryApi.calculateBalance(workerId),
-      ]);
-      setTransactions(txList);
-      setBalance(calculatedBalance);
-    } finally {
-      setLoading(false);
-    }
-  }, [workerId]);
+/**
+ * 取引履歴を取得し、Storeに格納するhook
+ */
+const useTransactionHistories = (): UseTransactionHistoriesResult => {
+  const [pending, setPending] = useState(false);
+  const { worker } = useWorkerStore();
+  const { transactions, setTransactions, addTransaction: addToStore } =
+    useWalletStore();
 
   useEffect(() => {
+    const fetchData = async (): Promise<void> => {
+      if (!worker || transactions.length > 0) return;
+      setPending(true);
+      try {
+        // TODO: 本番移行では、APIから取得する予定
+        const workerTx = mockTransactionHistories.filter(
+          (tx) => tx.workerId === worker.id
+        );
+        setTransactions(workerTx);
+      } finally {
+        setPending(false);
+      }
+    };
     fetchData();
-  }, [fetchData]);
+  }, [worker, transactions.length, setTransactions]);
+
+  // 残高計算
+  const balance = useMemo(() => {
+    return transactions.reduce((sum, tx) => sum + tx.amount, INITIAL_BALANCE);
+  }, [transactions]);
 
   const addTransaction = useCallback(
-    async (
-      params: Omit<TransactionHistory, "id">
-    ): Promise<TransactionHistory> => {
-      const newTx = await TransactionHistoryApi.create(params);
-      setTransactions((prev) => [newTx, ...prev]);
-      setBalance((prev) => prev + params.amount);
+    (params: Omit<TransactionHistory, "id">): TransactionHistory => {
+      const maxId =
+        transactions.length > 0
+          ? Math.max(...transactions.map((t) => t.id))
+          : 0;
+      const newTx: TransactionHistory = {
+        ...params,
+        id: maxId + 1,
+      };
+      addToStore(newTx);
       return newTx;
     },
-    []
+    [transactions, addToStore]
   );
 
   return {
     transactions,
     balance,
-    loading,
+    pending,
     addTransaction,
-    refetch: fetchData,
   };
 };
 
 export { useTransactionHistories };
-

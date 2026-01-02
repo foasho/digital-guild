@@ -7,7 +7,7 @@ import type { Job } from "@/types";
 
 interface MapComponentProps {
   jobs: Job[];
-  isBookmarked: (jobId: string) => boolean;
+  isBookmarked: (jobId: number) => boolean;
   onMarkerClick: (job: Job) => void;
 }
 

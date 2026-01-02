@@ -1,8 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RequesterApi } from "@/constants/api-mocks";
+import { requesters as mockRequesters } from "@/constants/mocks";
+import { useRequesterStore } from "@/stores";
 import type { Requester } from "@/types";
+
+interface UseRequesterResult {
+  requester: Requester | null;
+  pending: boolean;
+}
 
 /**
  * 発注者一覧を取得するhook
@@ -11,34 +17,37 @@ const useRequesters = (): Requester[] => {
   const [requesters, setRequesters] = useState<Requester[]>([]);
 
   useEffect(() => {
-    const fetchRequesters = async (): Promise<void> => {
-      const list = await RequesterApi.index();
-      setRequesters(list);
-    };
-    fetchRequesters();
+    // TODO: 本番移行では、APIから取得する予定
+    setRequesters(mockRequesters);
   }, []);
 
   return requesters;
 };
 
 /**
- * 特定の発注者を取得するhook
- * モックでは最初の発注者を返す
+ * 現在の発注者を取得し、Storeに格納するhook
  */
-const useRequester = (): Requester | undefined => {
-  const [requester, setRequester] = useState<Requester | undefined>(undefined);
+const useRequester = (): UseRequesterResult => {
+  const [pending, setPending] = useState(false);
+  const { requester, setRequester } = useRequesterStore();
 
   useEffect(() => {
     const fetchRequester = async (): Promise<void> => {
-      const list = await RequesterApi.index();
-      if (list.length > 0) {
-        setRequester(list[0]);
+      if (requester) return;
+      setPending(true);
+      try {
+        // TODO: 本番移行では、APIから取得する予定
+        if (mockRequesters.length > 0) {
+          setRequester(mockRequesters[0]);
+        }
+      } finally {
+        setPending(false);
       }
     };
     fetchRequester();
-  }, []);
+  }, [requester, setRequester]);
 
-  return requester;
+  return { requester, pending };
 };
 
 /**
@@ -48,21 +57,12 @@ const useRequesterById = (id: number): Requester | undefined => {
   const [requester, setRequester] = useState<Requester | undefined>(undefined);
 
   useEffect(() => {
-    const fetchRequester = async (): Promise<void> => {
-      try {
-        const data = await RequesterApi.getById({ id });
-        setRequester(data);
-      } catch {
-        setRequester(undefined);
-      }
-    };
-    if (id) {
-      fetchRequester();
-    }
+    // TODO: 本番移行では、APIから取得する予定
+    const found = mockRequesters.find((r) => r.id === id);
+    setRequester(found);
   }, [id]);
 
   return requester;
 };
 
 export { useRequesters, useRequester, useRequesterById };
-

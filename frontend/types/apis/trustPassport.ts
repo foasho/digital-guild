@@ -23,4 +23,3 @@ export type {
   GetTrustPassportByWorkerIdParams,
   DeleteTrustPassportByIdParams,
 };
-

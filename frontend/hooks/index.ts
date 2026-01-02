@@ -13,7 +13,7 @@ export { useRequesters, useRequester, useRequesterById } from "./useRequester";
 export { useJobs, useJobById, useJobsByRequesterId } from "./useJobs";
 
 // Undertaked Jobs
-export { useUndertakedJobs, useUndertakedJobsByWorkerId } from "./useUndertakedJobs";
+export { useUndertakedJobs } from "./useUndertakedJobs";
 
 // Bookmarks
 export { useBookmarks } from "./useBookmarks";

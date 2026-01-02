@@ -53,8 +53,8 @@ const getConfidenceTextColor = (confidence: number): string => {
 };
 
 // モック用Trust Score (ワーカーIDに基づくシンプルなハッシュ)
-const getMockTrustScore = (workerId: string): number => {
-  const hash = workerId
+const getMockTrustScore = (workerId: number): number => {
+  const hash = String(workerId)
     .split("")
     .reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return 50 + (hash % 50); // 50-99の範囲

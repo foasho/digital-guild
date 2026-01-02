@@ -1,13 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { TransactionHistoryApi } from "@/constants/api-mocks";
+import { useTransactionHistories, useWorker } from "@/hooks";
 import type { TransactionHistory } from "@/types";
-
-// 現在のワーカーID（モック）
-const CURRENT_WORKER_ID = 1;
-const INITIAL_BALANCE = 20000;
 
 // 日時フォーマット: 2026/01/05 18:12
 function formatDateTime(dateString: string): string {
@@ -66,31 +61,13 @@ function TransactionItem({
 }
 
 export default function WalletPage() {
-  const [transactions, setTransactions] = useState<TransactionHistory[]>([]);
-  const [balance, setBalance] = useState(INITIAL_BALANCE);
-  const [isLoading, setIsLoading] = useState(true);
+  // hooksから取得
+  const { worker, pending: workerPending } = useWorker();
+  const { transactions, balance, pending: txPending } = useTransactionHistories();
 
-  // データ取得
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [txList, calculatedBalance] = await Promise.all([
-          TransactionHistoryApi.getByWorkerId({ workerId: CURRENT_WORKER_ID }),
-          TransactionHistoryApi.calculateBalance(CURRENT_WORKER_ID),
-        ]);
-        setTransactions(txList);
-        setBalance(calculatedBalance);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const isLoading = workerPending || txPending;
 
-  // 残高を表示用に整形
-  const displayBalance = balance;
-
-  if (isLoading) {
+  if (isLoading || !worker) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-white/50">Loading...</div>
@@ -144,7 +121,7 @@ export default function WalletPage() {
           <div className="flex items-baseline gap-2">
             <span className="text-gray-500 text-sm font-medium">残高</span>
             <span className="text-gray-900 font-bold text-3xl drop-shadow-sm">
-              {displayBalance.toLocaleString()}
+              {balance.toLocaleString()}
             </span>
             <span className="text-gray-500 text-sm font-medium">JPYC</span>
           </div>

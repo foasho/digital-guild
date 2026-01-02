@@ -18,4 +18,3 @@ export type {
   GetRequirementSkillsByJobIdParams,
   DeleteRequirementSkillByIdParams,
 };
-

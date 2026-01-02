@@ -2,22 +2,16 @@
 
 import { Input } from "@heroui/react";
 import { debounce } from "es-toolkit";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { JobCard } from "@/components/worker/JobCard";
 import { JobDetailModal } from "@/components/worker/JobDetailModal";
 import { type FilterValues, JobFilter } from "@/components/worker/JobFilter";
-import { jobs as mockJobs } from "@/constants/mocks/jobs";
-import { useBookmarkStore, useJobStore, useUndertakedJobStore } from "@/stores";
+import { useJobs, useBookmarks, useUndertakedJobs, useRecommendedJobs } from "@/hooks";
+import { useUndertakedJobStore, useWorkerStore } from "@/stores";
+import { UndertakedJobApi } from "@/constants/api-mocks";
 import type { Job, UndertakedJob } from "@/types";
 
-// AIレコメンドのモックデータ（最初のジョブをおすすめとする）
-const RECOMMENDED_JOB_IDS = [1];
-
-// 現在のワーカーID（モック）
-const CURRENT_WORKER_ID = 1;
-
 export default function RequestBoardsPage() {
-  const [isHydrated, setIsHydrated] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -30,28 +24,23 @@ export default function RequestBoardsPage() {
     selectedTags: [],
   });
 
-  // ストアからデータ取得
-  const jobs = useJobStore((state) => state.jobs);
-  const setJobs = useJobStore((state) => state.setJobs);
-  const addBookmark = useBookmarkStore((state) => state.addBookmark);
-  const removeBookmark = useBookmarkStore((state) => state.removeBookmark);
-  const isBookmarked = useBookmarkStore((state) => state.isBookmarked);
-  const addUndertakedJob = useUndertakedJobStore(
-    (state) => state.addUndertakedJob,
-  );
+  // Storeからworker取得
+  const { worker } = useWorkerStore();
+
+  // hooksからデータ取得（Storeに格納される）
+  const { jobs } = useJobs();
+  const { isBookmarked, addBookmark, removeBookmark } = useBookmarks();
+  const { undertakedJobs } = useUndertakedJobs();
+  const recommendedJobs = useRecommendedJobs();
+
+  // Store操作
+  const addUndertakedJob = useUndertakedJobStore((state) => state.addUndertakedJob);
   const getByJobId = useUndertakedJobStore((state) => state.getByJobId);
 
-  // 初期化・ハイドレーション
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  // モックデータの初期化
-  useEffect(() => {
-    if (isHydrated && jobs.length === 0) {
-      setJobs(mockJobs);
-    }
-  }, [isHydrated, jobs.length, setJobs]);
+  // AIレコメンドされたジョブIDリスト
+  const recommendedJobIds = useMemo(() => {
+    return recommendedJobs.map((r) => r.jobId);
+  }, [recommendedJobs]);
 
   // debounce検索（300ms）
   const debouncedSetQuery = useMemo(
@@ -59,7 +48,7 @@ export default function RequestBoardsPage() {
       debounce((query: string) => {
         setDebouncedQuery(query);
       }, 300),
-    [],
+    []
   );
 
   const handleSearchChange = useCallback(
@@ -67,7 +56,7 @@ export default function RequestBoardsPage() {
       setSearchQuery(value);
       debouncedSetQuery(value);
     },
-    [debouncedSetQuery],
+    [debouncedSetQuery]
   );
 
   // フィルタリングされたジョブ一覧
@@ -82,7 +71,7 @@ export default function RequestBoardsPage() {
           job.title.toLowerCase().includes(query) ||
           job.description.toLowerCase().includes(query) ||
           job.location.toLowerCase().includes(query) ||
-          job.tags.some((tag) => tag.toLowerCase().includes(query)),
+          job.tags.some((tag) => tag.toLowerCase().includes(query))
       );
     }
 
@@ -98,14 +87,14 @@ export default function RequestBoardsPage() {
     if (filters.minReward !== null) {
       const minReward = filters.minReward;
       result = result.filter(
-        (job) => job.reward + job.aiInsentiveReward >= minReward,
+        (job) => job.reward + job.aiInsentiveReward >= minReward
       );
     }
 
     // タグフィルター
     if (filters.selectedTags.length > 0) {
       result = result.filter((job) =>
-        filters.selectedTags.some((tag) => job.tags.includes(tag)),
+        filters.selectedTags.some((tag) => job.tags.includes(tag))
       );
     }
 
@@ -125,18 +114,15 @@ export default function RequestBoardsPage() {
 
   // ブックマークのトグル
   const handleBookmarkToggle = useCallback(
-    (jobId: number) => {
+    async (jobId: number) => {
+      if (!worker) return;
       if (isBookmarked(jobId)) {
-        removeBookmark(jobId);
+        await removeBookmark(jobId);
       } else {
-        addBookmark({
-          id: Date.now(),
-          jobId,
-          workerId: CURRENT_WORKER_ID,
-        });
+        await addBookmark(jobId);
       }
     },
-    [isBookmarked, addBookmark, removeBookmark],
+    [worker, isBookmarked, addBookmark, removeBookmark]
   );
 
   // 詳細モーダルを開く
@@ -152,8 +138,8 @@ export default function RequestBoardsPage() {
   }, []);
 
   // 受注処理
-  const handleAccept = useCallback(() => {
-    if (!selectedJob) return;
+  const handleAccept = useCallback(async () => {
+    if (!selectedJob || !worker) return;
 
     // 既に受注済みかチェック
     if (getByJobId(selectedJob.id)) {
@@ -162,7 +148,7 @@ export default function RequestBoardsPage() {
 
     const newUndertakedJob: UndertakedJob = {
       id: Date.now(),
-      workerId: CURRENT_WORKER_ID,
+      workerId: worker.id,
       jobId: selectedJob.id,
       status: "accepted",
       requesterEvalScore: null,
@@ -171,9 +157,12 @@ export default function RequestBoardsPage() {
       finishedAt: null,
     };
 
+    // APIに保存
+    await UndertakedJobApi.create(newUndertakedJob);
+    // Storeに追加
     addUndertakedJob(newUndertakedJob);
     handleDetailClose();
-  }, [selectedJob, getByJobId, addUndertakedJob, handleDetailClose]);
+  }, [selectedJob, worker, getByJobId, addUndertakedJob, handleDetailClose]);
 
   // フィルター適用
   const handleFilterApply = useCallback((newFilters: FilterValues) => {
@@ -208,7 +197,8 @@ export default function RequestBoardsPage() {
           }
           classNames={{
             input: "text-white placeholder:text-white/50 rounded-xl",
-            inputWrapper: "bg-white/10 border-white/20 hover:bg-white/15 rounded-xl",
+            inputWrapper:
+              "bg-white/10 border-white/20 hover:bg-white/15 rounded-xl",
           }}
           className="flex-1"
         />
@@ -276,8 +266,8 @@ export default function RequestBoardsPage() {
             <JobCard
               key={job.id}
               job={job}
-              isRecommended={RECOMMENDED_JOB_IDS.includes(job.id)}
-              isBookmarked={isHydrated && isBookmarked(job.id)}
+              isRecommended={recommendedJobIds.includes(job.id)}
+              isBookmarked={isBookmarked(job.id)}
               onDetailClick={() => handleDetailClick(job)}
               onBookmarkClick={() => handleBookmarkToggle(job.id)}
             />
@@ -307,9 +297,7 @@ export default function RequestBoardsPage() {
       <JobDetailModal
         job={selectedJob}
         isOpen={isDetailModalOpen}
-        isBookmarked={
-          selectedJob ? isHydrated && isBookmarked(selectedJob.id) : false
-        }
+        isBookmarked={selectedJob ? isBookmarked(selectedJob.id) : false}
         isAlreadyAccepted={selectedJob ? !!getByJobId(selectedJob.id) : false}
         onClose={handleDetailClose}
         onBookmarkClick={() =>
