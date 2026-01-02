@@ -25,7 +25,7 @@ export function WorkerFooter() {
   };
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 bg-neutral-900/95 backdrop-blur-sm border-t border-neutral-800">
+    <footer className="fixed bottom-0 left-0 right-0 z-50 bg-neutral-900/95 backdrop-blur-sm border-t border-neutral-800">
       <nav className="flex items-center justify-around py-2 px-3">
         {navItems.map((item) => {
           const isActive = pathname === item.path;

@@ -215,7 +215,7 @@ export function JobDetailModal({
                     ? "bg-gray-500 text-white font-bold"
                     : "bg-amber-500 text-white font-bold"
                 }
-                radius="lg"
+                radius="full"
                 onPress={onAcceptClick}
                 isDisabled={isAlreadyAccepted}
               >

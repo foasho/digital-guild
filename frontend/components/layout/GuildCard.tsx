@@ -161,19 +161,16 @@ export function GuildCard() {
       Math.round(completedCount + avgRating * 10),
     );
 
-    // 直近活動（30日以内の完了ジョブ数）
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const recentActivities = completedJobs.filter((j) => {
-      if (!j.finishedAt) return false;
-      return new Date(j.finishedAt) >= thirtyDaysAgo;
-    }).length;
+  
+    const canceledJobs = jobs.filter(
+      (j) => j.workerId === displayWorkerId && j.status === "canceled",
+    );
 
     return {
       completedJobs: completedCount,
       avgRating,
       trustScore,
-      recentActivities,
+      canceledJobs: canceledJobs.length,
     };
   }, [isHydrated, storeUndertakedJobs, displayWorkerId]);
 
@@ -364,6 +361,46 @@ export function GuildCard() {
           </Card>
         </div>
 
+        {/* ワンポイントヒント */}
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.div
+              key="rank-hint"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="overflow-hidden"
+            >
+              <div className="mt-2 px-1 text-center text-xs text-white/80">
+                {displayRank === "PLATINUM" ? (
+                  <span>🎉 最高ランク達成！</span>
+                ) : (
+                  <span>
+                    💡 あと{" "}
+                    <span className="font-bold text-white">
+                      {displayRank === "BRONZE"
+                        ? 70 - statusDetail.trustScore
+                        : displayRank === "SILVER"
+                          ? 80 - statusDetail.trustScore
+                          : 90 - statusDetail.trustScore}
+                    </span>{" "}
+                    ポイントで{" "}
+                    <span className="font-bold text-white">
+                      {displayRank === "BRONZE"
+                        ? "SILVER"
+                        : displayRank === "SILVER"
+                          ? "GOLD"
+                          : "PLATINUM"}
+                    </span>{" "}
+                    へ昇格
+                  </span>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* ギルド証の下：ステータス詳細 */}
         <AnimatePresence initial={false}>
           {isExpanded && (
@@ -399,8 +436,8 @@ export function GuildCard() {
                         <span>{statusDetail.avgRating.toFixed(1)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>直近活動</span>
-                        <span>{statusDetail.recentActivities}</span>
+                        <span>ドタキャン数</span>
+                        <span>{statusDetail.canceledJobs}</span>
                       </div>
                     </div>
                   </div>
