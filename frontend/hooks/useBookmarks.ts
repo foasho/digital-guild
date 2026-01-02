@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { BookmarkJobApi } from "@/constants/api-mocks";
 import { useBookmarkStore, useWorkerStore } from "@/stores";
 import type { BookmarkJob } from "@/types";
@@ -19,21 +19,30 @@ interface UseBookmarksResult {
  */
 const useBookmarks = (): UseBookmarksResult => {
   const [pending, setPending] = useState(false);
+  const hasFetched = useRef(false);
   const { worker } = useWorkerStore();
   const {
     bookmarks,
     setBookmarks,
     addBookmark: addToStore,
     removeBookmark: removeFromStore,
-    isBookmarked,
   } = useBookmarkStore();
+
+  // bookmarksの変更を追跡するためにuseCallbackでラップ
+  const isBookmarked = useCallback(
+    (jobId: number): boolean => {
+      return bookmarks.some((b) => b.jobId === jobId);
+    },
+    [bookmarks]
+  );
 
   useEffect(() => {
     const fetchBookmarks = async (): Promise<void> => {
-      if (!worker || bookmarks.length > 0) return;
+      if (!worker || hasFetched.current) return;
+      hasFetched.current = true;
       setPending(true);
       try {
-        // APIからデータ取得
+        // APIからデータ取得（LocalStorageと同期）
         const data = await BookmarkJobApi.getByWorkerId({ workerId: worker.id });
         setBookmarks(data);
       } finally {
@@ -41,7 +50,7 @@ const useBookmarks = (): UseBookmarksResult => {
       }
     };
     fetchBookmarks();
-  }, [worker, bookmarks.length, setBookmarks]);
+  }, [worker, setBookmarks]);
 
   const addBookmark = useCallback(
     async (jobId: number): Promise<BookmarkJob> => {

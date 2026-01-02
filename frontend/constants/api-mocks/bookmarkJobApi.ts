@@ -32,13 +32,13 @@ class BookmarkJobApi {
 
   static async create(params: CreateBookmarkJobParams): Promise<BookmarkJob> {
     const items = await this.index();
-    // 既にブックマーク済みかチェック
-    const exists = items.some(
+    // 既にブックマーク済みなら既存のものを返す（べき等な作成）
+    const existing = items.find(
       (bookmark) =>
         bookmark.jobId === params.jobId && bookmark.workerId === params.workerId
     );
-    if (exists) {
-      throw new Error("Already bookmarked");
+    if (existing) {
+      return existing;
     }
     const maxId = items.reduce((max, item) => Math.max(max, item.id), 0);
     const newItem: BookmarkJob = { ...params, id: maxId + 1 };
@@ -51,7 +51,8 @@ class BookmarkJobApi {
     const items = await this.index();
     const index = items.findIndex((bookmark) => bookmark.id === params.id);
     if (index === -1) {
-      throw new Error("Bookmark not found");
+      // 既に削除済みの場合は何もしない（べき等な削除）
+      return;
     }
     items.splice(index, 1);
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(items));
@@ -66,7 +67,8 @@ class BookmarkJobApi {
         bookmark.jobId === params.jobId && bookmark.workerId === params.workerId
     );
     if (index === -1) {
-      throw new Error("Bookmark not found");
+      // 既に削除済みの場合は何もしない（べき等な削除）
+      return;
     }
     items.splice(index, 1);
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(items));
