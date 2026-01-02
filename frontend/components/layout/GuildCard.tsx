@@ -287,9 +287,9 @@ export function GuildCard() {
 
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-semibold tracking-wider opacity-95">
-                    探索者
+                    冒険者
                   </div>
-                  <div className="mt-1 text-xl font-extrabold tracking-wide truncate">
+                  <div className="mt-1 text-lg font-extrabold tracking-wide truncate">
                     {displayName}
                   </div>
                 </div>
@@ -302,7 +302,7 @@ export function GuildCard() {
                   <div className="my-1 flex items-center justify-end gap-2">
                     {!isExpanded && (
                       <>
-                        <div className="text-xs opacity-90">class</div>
+                        <div className="text-xs opacity-90">Rank</div>
                         <div className="text-sm font-extrabold tracking-widest">
                           {displayRank}
                         </div>
@@ -333,23 +333,63 @@ export function GuildCard() {
                     transition={{ duration: 0.28, ease: "easeOut" }}
                     className="overflow-hidden"
                   >
-                    <div className="px-4 pt-5">
-                      <div className="text-lg font-semibold opacity-95">
-                        class
+                    <div className="px-4 pt-5 flex items-end justify-between">
+                      <div>
+                        <div className="text-xs font-semibold opacity-90 tracking-wider">
+                          CURRENT RANK
+                        </div>
+                        <div className="mt-2 text-4xl leading-none font-extrabold tracking-widest drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]">
+                          {displayRank}
+                        </div>
                       </div>
-                      <div className="mt-2 text-4xl leading-none font-extrabold tracking-widest drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]">
-                        {displayRank}
+
+                      {/* eKYC 取得済みバッジ */}
+                      <div className="flex flex-col items-center gap-1">
+                        <svg
+                          viewBox="0 0 64 80"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="w-10 h-12 drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
+                        >
+                          {/* メダル本体 */}
+                          <circle
+                            cx="32"
+                            cy="28"
+                            r="20"
+                            fill="rgba(255,255,255,0.15)"
+                            stroke="rgba(255,255,255,0.8)"
+                            strokeWidth="2"
+                          />
+                          <circle
+                            cx="32"
+                            cy="28"
+                            r="14"
+                            fill="rgba(255,255,255,0.1)"
+                            stroke="rgba(255,255,255,0.5)"
+                            strokeWidth="1"
+                          />
+                          {/* リボン */}
+                          <path
+                            d="M24 44 L20 72 L32 64 L44 72 L40 44"
+                            fill="rgba(255,255,255,0.25)"
+                            stroke="rgba(255,255,255,0.6)"
+                            strokeWidth="1"
+                          />
+                        </svg>
+                        <div className="text-xs font-semibold opacity-90 whitespace-nowrap">
+                          eKYC 取得済み
+                        </div>
                       </div>
                     </div>
 
-                    <div className="px-4 pb-4 pt-6">
-                      <div className="flex justify-end text-base">
+                    <div className="px-4 pb-4 pt-3">
+                      <div className="flex justify-end text-sm">
                         登録: {displayRegisteredAt}
                       </div>
 
-                      <div className="mt-4 grid grid-cols-[auto_1fr] items-end gap-4">
-                        <div className="text-base">ID: {displayCertId}</div>
-                        <div className="text-base text-right">
+                      <div className="mt-2 grid grid-cols-[auto_1fr] items-end gap-4">
+                        <div className="text-sm">ID: {displayCertId}</div>
+                        <div className="text-right text-sm">
                           デジタルギルド公式認証
                         </div>
                       </div>
@@ -436,8 +476,8 @@ export function GuildCard() {
                         <span>{statusDetail.avgRating.toFixed(1)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>ドタキャン数</span>
-                        <span>{statusDetail.canceledJobs}</span>
+                        <span>キャンセル率</span>
+                        <span>2.0%</span>
                       </div>
                     </div>
                   </div>
