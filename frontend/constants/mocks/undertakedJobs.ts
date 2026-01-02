@@ -1,9 +1,5 @@
 import type { UndertakedJob } from "@/types";
 
-// 完了済みジョブ（評価付き）- 信用ポイント算出に使用
-// 合計25件: 評価合計 108, 平均 4.32 ≈ 4.3
-// 信用ポイント = min(50, 25) + 4.32 * 10 = 25 + 43 = 68
-
 export const completedJob1: UndertakedJob = {
   id: "undertaked-1",
   workerId: "worker-1",
