@@ -88,12 +88,6 @@ export default function UndertakedJobEvaluationPage() {
 
   // Hydration
   useEffect(() => {
-    useUndertakedJobStore.persist.rehydrate();
-    useJobStore.persist.rehydrate();
-    useWorkerStore.persist.rehydrate();
-    useTrustPassportStore.persist.rehydrate();
-    useWalletStore.persist.rehydrate();
-    useRequesterStore.persist.rehydrate();
     setIsHydrated(true);
   }, []);
 

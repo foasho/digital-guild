@@ -1,27 +1,20 @@
-type CreateUndertakedJobParams = {
-  workerId: string;
-  jobId: string;
-  status: "accepted" | "in_progress" | "completed" | "canceled";
-  requesterEvalScore: number | null;
-  acceptedAt: string;
-  canceledAt: string | null;
-  finishedAt: string | null;
-}
+import type { UndertakedJob } from "@/types";
 
-type UpdateUndertakedJobParams = {
-  status: "accepted" | "in_progress" | "completed" | "canceled";
-  requesterEvalScore: number | null;
-  acceptedAt: string;
-  canceledAt: string | null;
-  finishedAt: string | null;
-}
+type CreateUndertakedJobParams = Omit<UndertakedJob, "id">;
+
+type UpdateUndertakedJobParams = Partial<Omit<UndertakedJob, "id">>;
 
 type GetUndertakedJobByIdParams = {
-  id: string;
-}
+  id: number;
+};
 
 type DeleteUndertakedJobByIdParams = {
-  id: string;
-}
+  id: number;
+};
 
-export type { CreateUndertakedJobParams, UpdateUndertakedJobParams, GetUndertakedJobByIdParams, DeleteUndertakedJobByIdParams };
+export type {
+  CreateUndertakedJobParams,
+  UpdateUndertakedJobParams,
+  GetUndertakedJobByIdParams,
+  DeleteUndertakedJobByIdParams,
+};

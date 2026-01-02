@@ -119,9 +119,6 @@ export default function RequesterJobDetailPage() {
 
   // Hydration
   useEffect(() => {
-    useJobStore.persist.rehydrate();
-    useUndertakedJobStore.persist.rehydrate();
-    useWorkerStore.persist.rehydrate();
     setIsHydrated(true);
   }, []);
 

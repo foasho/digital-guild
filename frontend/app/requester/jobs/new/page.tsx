@@ -94,8 +94,6 @@ export default function NewJobPage() {
 
   // Hydration
   useEffect(() => {
-    useJobStore.persist.rehydrate();
-    useRequesterStore.persist.rehydrate();
     setIsHydrated(true);
   }, []);
 

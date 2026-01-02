@@ -11,10 +11,10 @@ import { useBookmarkStore, useJobStore, useUndertakedJobStore } from "@/stores";
 import type { Job, UndertakedJob } from "@/types";
 
 // AIレコメンドのモックデータ（最初のジョブをおすすめとする）
-const RECOMMENDED_JOB_IDS = ["job-1"];
+const RECOMMENDED_JOB_IDS = [1];
 
 // 現在のワーカーID（モック）
-const CURRENT_WORKER_ID = "worker-1";
+const CURRENT_WORKER_ID = 1;
 
 export default function RequestBoardsPage() {
   const [isHydrated, setIsHydrated] = useState(false);
@@ -43,9 +43,6 @@ export default function RequestBoardsPage() {
 
   // 初期化・ハイドレーション
   useEffect(() => {
-    useJobStore.persist.rehydrate();
-    useBookmarkStore.persist.rehydrate();
-    useUndertakedJobStore.persist.rehydrate();
     setIsHydrated(true);
   }, []);
 
@@ -128,12 +125,12 @@ export default function RequestBoardsPage() {
 
   // ブックマークのトグル
   const handleBookmarkToggle = useCallback(
-    (jobId: string) => {
+    (jobId: number) => {
       if (isBookmarked(jobId)) {
         removeBookmark(jobId);
       } else {
         addBookmark({
-          id: `bookmark-${Date.now()}`,
+          id: Date.now(),
           jobId,
           workerId: CURRENT_WORKER_ID,
         });
@@ -164,7 +161,7 @@ export default function RequestBoardsPage() {
     }
 
     const newUndertakedJob: UndertakedJob = {
-      id: `undertaked-${Date.now()}`,
+      id: Date.now(),
       workerId: CURRENT_WORKER_ID,
       jobId: selectedJob.id,
       status: "accepted",

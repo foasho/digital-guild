@@ -482,8 +482,6 @@ export default function WorkerJobsPage() {
   // Hydration対策
   const [isHydrated, setIsHydrated] = useState(false);
   useEffect(() => {
-    useJobStore.persist.rehydrate();
-    useUndertakedJobStore.persist.rehydrate();
     setIsHydrated(true);
   }, []);
 

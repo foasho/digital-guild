@@ -2,8 +2,8 @@ import type { TransactionHistory } from "@/types";
 
 // 取引履歴（過去の報酬受け取り）
 export const transaction1: TransactionHistory = {
-  id: "tx-1",
-  workerId: "worker-1",
+  id: 1,
+  workerId: 1,
   to: "田中一郎",
   from: "山形市役所",
   amount: 8000,
@@ -12,8 +12,8 @@ export const transaction1: TransactionHistory = {
 };
 
 export const transaction2: TransactionHistory = {
-  id: "tx-2",
-  workerId: "worker-1",
+  id: 2,
+  workerId: 1,
   to: "田中一郎",
   from: "みかん里町農協",
   amount: 7500,
@@ -22,8 +22,8 @@ export const transaction2: TransactionHistory = {
 };
 
 export const transaction3: TransactionHistory = {
-  id: "tx-3",
-  workerId: "worker-1",
+  id: 3,
+  workerId: 1,
   to: "田中一郎",
   from: "温泉郷旅館組合",
   amount: 9000,
@@ -32,8 +32,8 @@ export const transaction3: TransactionHistory = {
 };
 
 export const transaction4: TransactionHistory = {
-  id: "tx-4",
-  workerId: "worker-1",
+  id: 4,
+  workerId: 1,
   to: "田中一郎",
   from: "地方創生支援センター",
   amount: 6500,
@@ -42,8 +42,8 @@ export const transaction4: TransactionHistory = {
 };
 
 export const transaction5: TransactionHistory = {
-  id: "tx-5",
-  workerId: "worker-1",
+  id: 5,
+  workerId: 1,
   to: "田中一郎",
   from: "みかん里町農協",
   amount: 8000,
@@ -52,8 +52,8 @@ export const transaction5: TransactionHistory = {
 };
 
 export const transaction6: TransactionHistory = {
-  id: "tx-6",
-  workerId: "worker-1",
+  id: 6,
+  workerId: 1,
   to: "田中一郎",
   from: "山形市商工会",
   amount: 7000,
@@ -62,8 +62,8 @@ export const transaction6: TransactionHistory = {
 };
 
 export const transaction7: TransactionHistory = {
-  id: "tx-7",
-  workerId: "worker-1",
+  id: 7,
+  workerId: 1,
   to: "田中一郎",
   from: "みかん里町農協",
   amount: 8500,
@@ -72,8 +72,8 @@ export const transaction7: TransactionHistory = {
 };
 
 export const transaction8: TransactionHistory = {
-  id: "tx-8",
-  workerId: "worker-1",
+  id: 8,
+  workerId: 1,
   to: "田中一郎",
   from: "温泉郷旅館組合",
   amount: 8520,
@@ -83,8 +83,8 @@ export const transaction8: TransactionHistory = {
 
 // 支払い（コンビニ等での利用）
 export const transaction9: TransactionHistory = {
-  id: "tx-9",
-  workerId: "worker-1",
+  id: 9,
+  workerId: 1,
   to: "セブンイレブン山形駅前店",
   from: "田中一郎",
   amount: -520,
@@ -93,8 +93,8 @@ export const transaction9: TransactionHistory = {
 };
 
 export const transaction10: TransactionHistory = {
-  id: "tx-10",
-  workerId: "worker-1",
+  id: 10,
+  workerId: 1,
   to: "ローソン温泉郷店",
   from: "田中一郎",
   amount: -980,
@@ -118,4 +118,3 @@ export const transactionHistories: TransactionHistory[] = [
   transaction9,
   transaction10,
 ];
-

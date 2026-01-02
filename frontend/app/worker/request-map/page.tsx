@@ -43,9 +43,6 @@ export default function RequestMapPage() {
 
   // 初期化・ハイドレーション
   useEffect(() => {
-    useJobStore.persist.rehydrate();
-    useBookmarkStore.persist.rehydrate();
-    useUndertakedJobStore.persist.rehydrate();
     setIsHydrated(true);
   }, []);
 

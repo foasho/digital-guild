@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useWalletStore } from "@/stores/useWalletStore";
-import { useWorkerStore } from "@/stores/useWorkerStore";
+import { TransactionHistoryApi } from "@/constants/api-mocks";
 import type { TransactionHistory } from "@/types";
+
+// 現在のワーカーID（モック）
+const CURRENT_WORKER_ID = 1;
+const INITIAL_BALANCE = 20000;
 
 // 日時フォーマット: 2026/01/05 18:12
 function formatDateTime(dateString: string): string {
@@ -63,29 +66,31 @@ function TransactionItem({
 }
 
 export default function WalletPage() {
-  const { jpycBalance } = useWorkerStore();
-  const { transactions, initializeMockData } = useWalletStore();
+  const [transactions, setTransactions] = useState<TransactionHistory[]>([]);
+  const [balance, setBalance] = useState(INITIAL_BALANCE);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Hydration対策
-  const [isHydrated, setIsHydrated] = useState(false);
-
+  // データ取得
   useEffect(() => {
-    useWorkerStore.persist.rehydrate();
-    useWalletStore.persist.rehydrate();
-    setIsHydrated(true);
+    const fetchData = async () => {
+      try {
+        const [txList, calculatedBalance] = await Promise.all([
+          TransactionHistoryApi.getByWorkerId({ workerId: CURRENT_WORKER_ID }),
+          TransactionHistoryApi.calculateBalance(CURRENT_WORKER_ID),
+        ]);
+        setTransactions(txList);
+        setBalance(calculatedBalance);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  // モックデータの初期化
-  useEffect(() => {
-    if (isHydrated) {
-      initializeMockData();
-    }
-  }, [isHydrated, initializeMockData]);
+  // 残高を表示用に整形
+  const displayBalance = balance;
 
-  // 残高を表示用に整形（モックでは81,520を使用、実際のbalanceが0の場合）
-  const displayBalance = jpycBalance > 0 ? jpycBalance : 81520;
-
-  if (!isHydrated) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-white/50">Loading...</div>
@@ -96,11 +101,11 @@ export default function WalletPage() {
   return (
     <div className="flex flex-col px-4 py-4">
       {/* ウォレットカード */}
-      <div className="relative bg-gradient-to-br from-white via-gray-50 to-amber-50 rounded-2xl p-5 shadow-xl drop-shadow-2xl overflow-hidden">
+      <div className="relative bg-linear-to-br from-white via-gray-50 to-amber-50 rounded-2xl p-5 shadow-xl drop-shadow-2xl overflow-hidden">
         {/* 光沢効果 - 左上から右下へのハイライト */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-white/80 via-transparent to-transparent pointer-events-none" />
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-radial from-white/60 to-transparent rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-100/40 to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-bl from-amber-100/40 to-transparent pointer-events-none" />
 
         {/* ヘッダー: JPYCロゴ + タイトル */}
         <div className="relative flex items-center justify-between mb-4 pb-3 border-b border-amber-200/60">
@@ -146,13 +151,13 @@ export default function WalletPage() {
         </div>
 
         {/* カード下部の光沢ライン */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-200/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r from-transparent via-amber-200/50 to-transparent" />
       </div>
 
       {/* スキャンして支払うボタン */}
       <button
         type="button"
-        className="mt-4 mx-auto flex items-center gap-2 px-8 py-3 cursor-pointer border-white/20 border bg-white/15 transition-colors duration-300 hover:bg-white/55 rounded-full shadow-md transition-colors"
+        className="mt-4 mx-auto flex items-center gap-2 px-8 py-3 cursor-pointer border-white/20 border bg-white/15 hover:bg-white/55 rounded-full shadow-md transition-colors"
       >
         <svg
           className="w-5 h-5 text-white"
@@ -174,9 +179,7 @@ export default function WalletPage() {
             d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-        <span className="text-white font-medium">
-          スキャンして支払う
-        </span>
+        <span className="text-white font-medium">スキャンして支払う</span>
       </button>
 
       {/* 取引履歴セクション */}
@@ -193,10 +196,7 @@ export default function WalletPage() {
             </div>
           ) : (
             transactions.map((transaction) => (
-              <TransactionItem
-                key={transaction.id}
-                transaction={transaction}
-              />
+              <TransactionItem key={transaction.id} transaction={transaction} />
             ))
           )}
         </div>

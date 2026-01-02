@@ -71,8 +71,6 @@ export default function RequesterDashboardPage() {
 
   // Hydration
   useEffect(() => {
-    useJobStore.persist.rehydrate();
-    useUndertakedJobStore.persist.rehydrate();
     setIsHydrated(true);
   }, []);
 
