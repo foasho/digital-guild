@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { JobApi } from "@/constants/api-mocks";
 import { useJobStore } from "@/stores/requesters";
 import type { Job } from "@/types";
@@ -12,6 +12,7 @@ interface UseJobsResult {
   updateJob: (id: number, updates: Partial<Job>) => Promise<void>;
   deleteJob: (id: number) => Promise<void>;
   getJobById: (id: number) => Job | undefined;
+  refetch: () => Promise<void>;
 }
 
 /**
@@ -20,6 +21,7 @@ interface UseJobsResult {
  */
 const useJobs = (): UseJobsResult => {
   const [pending, setPending] = useState(false);
+  const hasFetched = useRef(false);
   const {
     jobs,
     setJobs,
@@ -29,20 +31,24 @@ const useJobs = (): UseJobsResult => {
     getJobById,
   } = useJobStore();
 
+  const fetchJobs = useCallback(async (): Promise<void> => {
+    setPending(true);
+    try {
+      // 常にLocalStorageから最新データを取得
+      const data = await JobApi.index();
+      setJobs(data);
+    } finally {
+      setPending(false);
+    }
+  }, [setJobs]);
+
   useEffect(() => {
-    const fetchJobs = async (): Promise<void> => {
-      if (jobs.length > 0) return; // 既にロード済み
-      setPending(true);
-      try {
-        // APIからデータ取得
-        const data = await JobApi.index();
-        setJobs(data);
-      } finally {
-        setPending(false);
-      }
-    };
-    fetchJobs();
-  }, [jobs.length, setJobs]);
+    // 初回マウント時のみフェッチ
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      fetchJobs();
+    }
+  }, [fetchJobs]);
 
   const addJob = useCallback(
     async (params: Omit<Job, "id" | "createdAt" | "updatedAt">): Promise<Job> => {
@@ -72,7 +78,7 @@ const useJobs = (): UseJobsResult => {
     [deleteJobFromStore]
   );
 
-  return { jobs, pending, addJob, updateJob, deleteJob, getJobById };
+  return { jobs, pending, addJob, updateJob, deleteJob, getJobById, refetch: fetchJobs };
 };
 
 interface UseJobByIdResult {

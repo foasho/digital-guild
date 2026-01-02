@@ -153,8 +153,11 @@ export default function RequestBoardsPage() {
       status: "accepted",
       requesterEvalScore: null,
       acceptedAt: new Date().toISOString(),
+      completionReportedAt: null,
       canceledAt: null,
       finishedAt: null,
+      completionMemo: null,
+      completedChecklistIds: null,
     };
 
     // APIに保存

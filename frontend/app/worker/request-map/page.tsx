@@ -105,8 +105,11 @@ export default function RequestMapPage() {
       status: "accepted",
       requesterEvalScore: null,
       acceptedAt: new Date().toISOString(),
+      completionReportedAt: null,
       canceledAt: null,
       finishedAt: null,
+      completionMemo: null,
+      completedChecklistIds: null,
     });
     handleDetailClose();
   }, [selectedJob, worker, getByJobId, addUndertakedJob, handleDetailClose]);

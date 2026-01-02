@@ -16,7 +16,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BankPartnerPanel, SubsidyPanel } from "@/components/requester";
 import {
   useJobs,
@@ -26,13 +26,13 @@ import {
 } from "@/hooks/requesters";
 import type { Job, UndertakedJob } from "@/types";
 
-type StatusFilter = "all" | "recruiting" | "in_progress" | "completed";
+type StatusFilter = "all" | "recruiting" | "in_progress" | "pending_review" | "completed";
 
 // ジョブのステータスを判定する関数
 function getJobStatus(
   job: Job,
   undertakedJobs: UndertakedJob[]
-): "recruiting" | "in_progress" | "completed" {
+): "recruiting" | "in_progress" | "pending_review" | "completed" {
   const relatedUndertakedJobs = undertakedJobs.filter(
     (uj) => uj.jobId === job.id
   );
@@ -42,31 +42,42 @@ function getJobStatus(
     relatedUndertakedJobs.every((uj) => uj.status === "completed");
   if (allCompleted) return "completed";
 
+  // 確認待ち（completion_reported）がある場合
+  const hasPendingReview = relatedUndertakedJobs.some(
+    (uj) => uj.status === "completion_reported"
+  );
+  if (hasPendingReview) return "pending_review";
+
+  // 進行中（accepted）がある場合
   const hasInProgress = relatedUndertakedJobs.some(
-    (uj) => uj.status === "in_progress" || uj.status === "accepted"
+    (uj) => uj.status === "accepted"
   );
   if (hasInProgress) return "in_progress";
 
   return "recruiting";
 }
 
-function getStatusLabel(status: "recruiting" | "in_progress" | "completed") {
+function getStatusLabel(status: "recruiting" | "in_progress" | "pending_review" | "completed") {
   switch (status) {
     case "recruiting":
       return "募集中";
     case "in_progress":
       return "進行中";
+    case "pending_review":
+      return "確認待ち";
     case "completed":
       return "完了";
   }
 }
 
-function getStatusStyle(status: "recruiting" | "in_progress" | "completed") {
+function getStatusStyle(status: "recruiting" | "in_progress" | "pending_review" | "completed") {
   switch (status) {
     case "recruiting":
       return "bg-sky-100 text-sky-700 border-sky-200";
     case "in_progress":
       return "bg-amber-100 text-amber-700 border-amber-200";
+    case "pending_review":
+      return "bg-purple-100 text-purple-700 border-purple-200";
     case "completed":
       return "bg-green-100 text-green-700 border-green-200";
   }
@@ -77,9 +88,15 @@ export default function RequesterDashboardPage() {
   const [selectedFilter, setSelectedFilter] = useState<StatusFilter>("all");
 
   const { requester } = useRequester();
-  const { jobs, pending: jobsPending } = useJobs();
-  const { undertakedJobs, pending: undertakedPending } = useUndertakedJobs();
+  const { jobs, pending: jobsPending, refetch: refetchJobs } = useJobs();
+  const { undertakedJobs, pending: undertakedPending, refetch: refetchUndertakedJobs } = useUndertakedJobs();
   const subsidies = useSubsidiesByRequesterId(requester?.id || 1);
+
+  // ページアクセス時にLocalStorageから最新データを再取得
+  useEffect(() => {
+    refetchJobs();
+    refetchUndertakedJobs();
+  }, [refetchJobs, refetchUndertakedJobs]);
 
   const allJobs = useMemo(() => {
     // requesterId でフィルタリング（新規作成したジョブも表示）
@@ -90,6 +107,7 @@ export default function RequesterDashboardPage() {
   const stats = useMemo(() => {
     let recruiting = 0;
     let inProgress = 0;
+    let pendingReview = 0;
     let completed = 0;
     let totalReward = 0;
     let totalApplicants = 0;
@@ -103,6 +121,9 @@ export default function RequesterDashboardPage() {
           break;
         case "in_progress":
           inProgress++;
+          break;
+        case "pending_review":
+          pendingReview++;
           break;
         case "completed":
           completed++;
@@ -120,6 +141,7 @@ export default function RequesterDashboardPage() {
       total: allJobs.length,
       recruiting,
       inProgress,
+      pendingReview,
       completed,
       totalReward,
       totalApplicants,
@@ -145,7 +167,15 @@ export default function RequesterDashboardPage() {
   };
 
   const handleJobClick = (jobId: number) => {
-    router.push(`/requester/jobs/${jobId}`);
+    // 確認待ちのジョブの場合は評価ページへ
+    const pendingUndertakedJob = undertakedJobs.find(
+      (uj) => uj.jobId === jobId && uj.status === "completion_reported"
+    );
+    if (pendingUndertakedJob) {
+      router.push(`/requester/undertaked_jobs/${pendingUndertakedJob.id}`);
+    } else {
+      router.push(`/requester/jobs/${jobId}`);
+    }
   };
 
   return (
@@ -289,6 +319,7 @@ export default function RequesterDashboardPage() {
               <Tab key="all" title={`全て (${stats.total})`} />
               <Tab key="recruiting" title={`募集中 (${stats.recruiting})`} />
               <Tab key="in_progress" title={`進行中 (${stats.inProgress})`} />
+              <Tab key="pending_review" title={`確認待ち (${stats.pendingReview})`} />
               <Tab key="completed" title={`完了 (${stats.completed})`} />
             </Tabs>
           </div>

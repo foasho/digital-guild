@@ -14,13 +14,12 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CompletionReportModal } from "@/components/worker";
 import { useJobs, useUndertakedJobs } from "@/hooks/workers";
-import { useUndertakedJobStore } from "@/stores/workers/useUndertakedJobStore";
 import type { Job, UndertakedJob } from "@/types";
 
 // ステータスの日本語ラベル
 const statusLabels: Record<UndertakedJob["status"], string> = {
   accepted: "着手中",
-  in_progress: "作業中",
+  completion_reported: "確認待ち",
   completed: "完了",
   canceled: "キャンセル",
 };
@@ -31,7 +30,7 @@ const statusStyles: Record<
   { bg: string; text: string; border: string }
 > = {
   accepted: { bg: "bg-amber-500/25", text: "text-amber-300", border: "border-amber-400/50" },
-  in_progress: { bg: "bg-blue-500/25", text: "text-blue-300", border: "border-blue-400/50" },
+  completion_reported: { bg: "bg-blue-500/25", text: "text-blue-300", border: "border-blue-400/50" },
   completed: { bg: "bg-emerald-500/25", text: "text-emerald-300", border: "border-emerald-400/50" },
   canceled: { bg: "bg-red-500/25", text: "text-red-300", border: "border-red-400/50" },
 };
@@ -95,9 +94,8 @@ function UndertakedJobCard({
     return `${year}年${month}月${day}日`;
   };
 
-  const isInProgress =
-    undertakedJob.status === "accepted" ||
-    undertakedJob.status === "in_progress";
+  const isInProgress = undertakedJob.status === "accepted";
+  const isPendingReview = undertakedJob.status === "completion_reported";
   const isCompleted = undertakedJob.status === "completed";
 
   return (
@@ -244,9 +242,7 @@ function UndertakedJobDetailModal({
   if (!job || !undertakedJob) return null;
 
   const totalReward = job.reward + job.aiInsentiveReward;
-  const isInProgress =
-    undertakedJob.status === "accepted" ||
-    undertakedJob.status === "in_progress";
+  const isInProgress = undertakedJob.status === "accepted";
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -471,8 +467,7 @@ function EmptyState({ message }: { message: string }) {
 export default function WorkerJobsPage() {
   // フックからデータ取得
   const { jobs, getJobById } = useJobs();
-  const { undertakedJobs } = useUndertakedJobs();
-  const { updateUndertakedJob } = useUndertakedJobStore();
+  const { undertakedJobs, updateUndertakedJob } = useUndertakedJobs();
 
   const [selectedTab, setSelectedTab] = useState<string>("in_progress");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -487,11 +482,14 @@ export default function WorkerJobsPage() {
     setIsHydrated(true);
   }, []);
 
-  // 着手中のジョブ（accepted または in_progress）
+  // 着手中のジョブ（accepted のみ）
   const inProgressJobs = useMemo(() => {
-    return undertakedJobs.filter(
-      (uj) => uj.status === "accepted" || uj.status === "in_progress",
-    );
+    return undertakedJobs.filter((uj) => uj.status === "accepted");
+  }, [undertakedJobs]);
+
+  // 確認待ちのジョブ（completion_reported）
+  const pendingReviewJobs = useMemo(() => {
+    return undertakedJobs.filter((uj) => uj.status === "completion_reported");
   }, [undertakedJobs]);
 
   // 完了済みのジョブ
@@ -519,15 +517,19 @@ export default function WorkerJobsPage() {
     }
   };
 
-  // 完了報告の送信処理
-  const handleCompletionSubmit = () => {
+  // 完了報告の送信処理（発注者の確認待ちへ）
+  const handleCompletionSubmit = (
+    memo: string,
+    completedChecklistIds: number[]
+  ) => {
     if (selectedUndertakedJob) {
-      // ステータスを completed に更新し、finishedAt を設定
+      // ステータスを completion_reported に更新（発注者の確認待ち）
       updateUndertakedJob(selectedUndertakedJob.id, {
-        status: "completed",
-        finishedAt: new Date().toISOString(),
-        // モックとしてランダムな評価スコアを設定（実際は発注者が評価）
-        requesterEvalScore: Math.round((3.5 + Math.random() * 1.5) * 10) / 10,
+        status: "completion_reported",
+        completionReportedAt: new Date().toISOString(),
+        completionMemo: memo || null,
+        completedChecklistIds:
+          completedChecklistIds.length > 0 ? completedChecklistIds : null,
       });
     }
   };
@@ -575,10 +577,27 @@ export default function WorkerJobsPage() {
             }
           />
           <Tab
+            key="pending_review"
+            title={
+              <div className="flex items-center gap-2">
+                <span>確認待ち</span>
+                {pendingReviewJobs.length > 0 && (
+                  <Chip
+                    size="sm"
+                    variant="flat"
+                    className="bg-blue-500/20 text-blue-400"
+                  >
+                    {pendingReviewJobs.length}
+                  </Chip>
+                )}
+              </div>
+            }
+          />
+          <Tab
             key="completed"
             title={
               <div className="flex items-center gap-2">
-                <span>完了済み</span>
+                <span>完了</span>
                 {completedJobs.length > 0 && (
                   <Chip
                     size="sm"
@@ -612,6 +631,24 @@ export default function WorkerJobsPage() {
                   onCompletionReportClick={() =>
                     handleOpenCompletionModal(undertakedJob)
                   }
+                />
+              );
+            })
+          ))}
+
+        {selectedTab === "pending_review" &&
+          (pendingReviewJobs.length === 0 ? (
+            <EmptyState message="確認待ちのジョブがありません" />
+          ) : (
+            pendingReviewJobs.map((undertakedJob) => {
+              const job = getJobById(undertakedJob.jobId);
+              if (!job) return null;
+              return (
+                <UndertakedJobCard
+                  key={undertakedJob.id}
+                  undertakedJob={undertakedJob}
+                  job={job}
+                  onDetailClick={() => handleOpenDetailModal(undertakedJob)}
                 />
               );
             })

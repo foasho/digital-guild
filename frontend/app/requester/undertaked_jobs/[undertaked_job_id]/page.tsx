@@ -339,22 +339,56 @@ export default function UndertakedJobEvaluationPage() {
           {job.checklist && job.checklist.length > 0 && (
             <div>
               <h4 className="text-sm font-semibold text-gray-600 mb-3">
-                完了報告内容
+                作業チェックリスト
               </h4>
               <div className="space-y-2">
-                {job.checklist.map((item, index) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100"
-                  >
-                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center shrink-0">
-                      <CheckCircle size={14} className="text-white" />
+                {job.checklist.map((item, index) => {
+                  // 労働者が完了したチェックリスト項目かどうか
+                  const isCompleted = undertakedJob.completedChecklistIds?.includes(item.id) ?? false;
+                  return (
+                    <div
+                      key={item.id}
+                      className={`flex items-center gap-3 p-3 rounded-xl border ${
+                        isCompleted
+                          ? "bg-green-50 border-green-200"
+                          : "bg-gray-50 border-gray-100"
+                      }`}
+                    >
+                      <div
+                        className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                          isCompleted ? "bg-green-500" : "bg-gray-300"
+                        }`}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle size={14} className="text-white" />
+                        ) : (
+                          <span className="text-white text-xs">{index + 1}</span>
+                        )}
+                      </div>
+                      <span
+                        className={`text-sm ${
+                          isCompleted ? "text-gray-700" : "text-gray-400"
+                        }`}
+                      >
+                        {item.text}
+                      </span>
                     </div>
-                    <span className="text-gray-700 text-sm">
-                      {index + 1}. {item.text}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 労働者のメモ */}
+          {undertakedJob.completionMemo && (
+            <div className="mt-4">
+              <h4 className="text-sm font-semibold text-gray-600 mb-3">
+                労働者からのメモ
+              </h4>
+              <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                <p className="text-gray-700 text-sm whitespace-pre-wrap">
+                  {undertakedJob.completionMemo}
+                </p>
               </div>
             </div>
           )}

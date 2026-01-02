@@ -82,11 +82,22 @@ export interface UndertakedJob {
   id: number;
   workerId: number;
   jobId: number;
-  status: "accepted" | "in_progress" | "completed" | "canceled";
+  /**
+   * ステータスフロー:
+   * 1. accepted - 労働者が着手開始
+   * 2. completion_reported - 労働者が作業完了報告
+   * 3. completed - 発注者が確認して評価完了
+   * 4. canceled - キャンセル
+   */
+  status: "accepted" | "completion_reported" | "completed" | "canceled";
   requesterEvalScore: number | null;
   acceptedAt: string;
+  completionReportedAt: string | null; // 労働者が完了報告した日時
   canceledAt: string | null;
   finishedAt: string | null;
+  // 完了報告時の情報
+  completionMemo: string | null; // 労働者のメモ
+  completedChecklistIds: number[] | null; // 完了したチェックリストのID配列
 }
 
 // ギルド証
