@@ -5,7 +5,7 @@ import { Providers } from "./providers";
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
-  subsets: ["latin", "japanese"],
+  subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "700"],
 });
