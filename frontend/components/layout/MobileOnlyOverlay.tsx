@@ -20,7 +20,7 @@ export function MobileOnlyOverlay() {
 
       {/* タイトル */}
       <h1 className="text-2xl font-bold text-gray-800 mb-2 text-center">
-        Digital GUILD
+        DIGITAL GUILD
       </h1>
 
       {/* QRコード */}

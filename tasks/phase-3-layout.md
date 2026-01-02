@@ -38,7 +38,7 @@
 - **作業内容**:
   1. `components/layout/WorkerHeader.tsx`を作成
   2. UI:
-     - 左: 「Digital GUILD」タイトル（クリックしても何も起きない）
+     - 左: 「DIGITAL GUILD」タイトル（クリックしても何も起きない）
      - 右: ハンバーガーメニューアイコン（クリックしても何も起きない）
   3. 白文字、透明背景
 - **対象ファイル**: `frontend/components/layout/WorkerHeader.tsx`

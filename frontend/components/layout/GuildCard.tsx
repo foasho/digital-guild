@@ -155,7 +155,7 @@ export function GuildCard() {
           scoredJobs.length
         : 0;
 
-    // 信頼度 = 完了ジョブ数（最大50） + 評価平均 × 10
+    // 信用ポイント = 完了ジョブ数（最大50） + 評価平均 × 10
     const trustScore = Math.min(
       100,
       Math.round(completedCount + avgRating * 10),
@@ -417,7 +417,7 @@ export function GuildCard() {
                   <span>🎉 最高ランク達成！</span>
                 ) : (
                   <span>
-                    💡 あと{" "}
+                    💡 信用ポイントを{" "}
                     <span className="font-bold text-white">
                       {displayRank === "BRONZE"
                         ? 70 - statusDetail.trustScore
@@ -425,7 +425,7 @@ export function GuildCard() {
                           ? 80 - statusDetail.trustScore
                           : 90 - statusDetail.trustScore}
                     </span>{" "}
-                    ポイントで{" "}
+                    上げると{" "}
                     <span className="font-bold text-white">
                       {displayRank === "BRONZE"
                         ? "SILVER"
@@ -458,10 +458,10 @@ export function GuildCard() {
                 </div>
 
                 <div className="mt-3 grid grid-cols-2 gap-4">
-                  {/* 信頼度 */}
+                  {/* 信用ポイント */}
                   <div>
                     <div className="text-center text-xs text-white/70">
-                      信頼度
+                      信用ポイント
                     </div>
                     <div className="mt-1 text-center text-3xl font-extrabold tracking-tight">
                       {statusDetail.trustScore}
