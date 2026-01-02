@@ -7,16 +7,22 @@ import {
   Chip,
   Input,
   Slider,
+  Spinner,
 } from "@heroui/react";
-import { ArrowLeft, Plus, Trash2, Check, GripVertical, Minus } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Check, GripVertical, Minus, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { defaultRequester } from "@/constants/mocks";
-import { useJobs, useRequester } from "@/hooks/requesters";
+import { useJobs, useRequester, useSubsidiesByRequesterId } from "@/hooks/requesters";
 import type { ChecklistItem } from "@/types";
+import {
+  simulateAiIncentiveCalculation,
+  AI_INCENTIVE_STEP_MESSAGES,
+  type AiIncentiveStep,
+} from "@/utils/mocks";
 
 // Leafletマップはクライアントサイドのみでレンダリング
 const LocationPicker = dynamic(
@@ -96,6 +102,7 @@ export default function NewJobPage() {
   const router = useRouter();
   const { jobs, addJob } = useJobs();
   const { requester } = useRequester();
+  const subsidies = useSubsidiesByRequesterId(requester?.id || 1);
   const [isHydrated, setIsHydrated] = useState(false);
 
   // フォーム状態
@@ -115,20 +122,61 @@ export default function NewJobPage() {
   // エラー状態
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // AIインセンティブ状態
+  const [aiIncentiveStep, setAiIncentiveStep] = useState<AiIncentiveStep>("idle");
+  const [aiIncentive, setAiIncentive] = useState<number>(0);
+  const [isCalculatingIncentive, setIsCalculatingIncentive] = useState(false);
+  const calculationAbortRef = useRef<boolean>(false);
+
+  // 補助金残高を計算
+  const subsidyBalance = useMemo(() => {
+    return subsidies.reduce((acc, s) => acc + s.amount, 0);
+  }, [subsidies]);
+
   // Hydration
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
-  // AIインセンティブ計算
-  const calculateAiIncentive = (rewardAmount: number): number => {
-    const incentive = rewardAmount * 0.005;
-    const maxIncentive = rewardAmount * 0.5;
-    return Math.min(incentive, maxIncentive);
-  };
-
   const rewardNumber = Number(reward) || 0;
-  const aiIncentive = calculateAiIncentive(rewardNumber);
+
+  // 必須項目のバリデーション
+  const isRequiredFieldsValid = useMemo(() => {
+    return (
+      title.trim() !== "" &&
+      description.trim() !== "" &&
+      rewardNumber > 0 &&
+      location.trim() !== "" &&
+      scheduledDate.trim() !== ""
+    );
+  }, [title, description, rewardNumber, location, scheduledDate]);
+
+  // AIインセンティブ算出を手動で実行
+  const handleCalculateIncentive = useCallback(async () => {
+    if (!isRequiredFieldsValid || subsidyBalance <= 0) {
+      return;
+    }
+
+    calculationAbortRef.current = false;
+    setIsCalculatingIncentive(true);
+    setAiIncentiveStep("idle");
+
+    await simulateAiIncentiveCalculation(
+      (step) => {
+        if (!calculationAbortRef.current) {
+          setAiIncentiveStep(step);
+        }
+      },
+      (incentive) => {
+        if (!calculationAbortRef.current) {
+          setAiIncentive(incentive);
+          setIsCalculatingIncentive(false);
+        }
+      },
+      subsidyBalance,
+      rewardNumber
+    );
+  }, [isRequiredFieldsValid, subsidyBalance, rewardNumber]);
 
   // スキル選択トグル
   const handleSkillToggle = (skillLabel: string) => {
@@ -382,25 +430,6 @@ export default function NewJobPage() {
                   </div>
                 </div>
 
-                {/* AIインセンティブ表示 */}
-                {rewardNumber > 0 && (
-                  <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-amber-800">
-                          AIインセンティブ報酬
-                        </p>
-                        <p className="text-xs text-amber-600 mt-0.5">
-                          報酬の0.5%（最大50%）が自動付与されます
-                        </p>
-                      </div>
-                      <p className="text-2xl font-bold text-amber-700">
-                        +{aiIncentive.toLocaleString()}
-                        <span className="text-sm font-normal ml-1">JPYC</span>
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
             </CardBody>
           </Card>
@@ -620,17 +649,186 @@ export default function NewJobPage() {
             </CardBody>
           </Card>
 
+          {/* セクション4: AIインセンティブ算出 */}
+          <Card className={`border shadow-sm rounded-2xl overflow-hidden transition-all duration-300 ${
+            isRequiredFieldsValid
+              ? "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-700"
+              : "bg-gray-100 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 opacity-60"
+          }`}>
+            <CardBody className="p-6">
+              <div className="flex items-start gap-3 mb-5">
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md ${
+                  isRequiredFieldsValid
+                    ? "bg-gradient-to-br from-amber-500 to-orange-600"
+                    : "bg-gray-400 dark:bg-gray-600"
+                }`}>
+                  4
+                </div>
+                <div>
+                  <h3 className={`text-lg font-bold ${
+                    isRequiredFieldsValid ? "text-gray-800 dark:text-white" : "text-gray-400 dark:text-gray-500"
+                  }`}>
+                    AIインセンティブ算出
+                  </h3>
+                  <p className={`text-sm mt-0.5 ${
+                    isRequiredFieldsValid ? "text-gray-500 dark:text-gray-400" : "text-gray-400 dark:text-gray-500"
+                  }`}>
+                    {isRequiredFieldsValid
+                      ? "AIがジョブ内容を分析し、最適なインセンティブを算出します"
+                      : "1〜3の必須項目をすべて入力してください"}
+                  </p>
+                </div>
+              </div>
+
+              {!isRequiredFieldsValid ? (
+                <div className="p-4 bg-gray-200/50 dark:bg-gray-700/50 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gray-300 dark:bg-gray-600 rounded-lg">
+                      <Sparkles className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-400 dark:text-gray-500">
+                        必須項目を入力すると算出できます
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {!title.trim() && (
+                          <span className="text-xs px-2 py-1 bg-gray-300 dark:bg-gray-600 rounded-full text-gray-500 dark:text-gray-400">タイトル</span>
+                        )}
+                        {!description.trim() && (
+                          <span className="text-xs px-2 py-1 bg-gray-300 dark:bg-gray-600 rounded-full text-gray-500 dark:text-gray-400">説明</span>
+                        )}
+                        {rewardNumber <= 0 && (
+                          <span className="text-xs px-2 py-1 bg-gray-300 dark:bg-gray-600 rounded-full text-gray-500 dark:text-gray-400">報酬</span>
+                        )}
+                        {!location.trim() && (
+                          <span className="text-xs px-2 py-1 bg-gray-300 dark:bg-gray-600 rounded-full text-gray-500 dark:text-gray-400">場所</span>
+                        )}
+                        {!scheduledDate.trim() && (
+                          <span className="text-xs px-2 py-1 bg-gray-300 dark:bg-gray-600 rounded-full text-gray-500 dark:text-gray-400">予定日</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : aiIncentiveStep === "complete" ? (
+                <div className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border border-amber-200 dark:border-amber-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-100 dark:bg-green-800/50 rounded-lg">
+                        <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                          インセンティブ算出完了
+                        </p>
+                        <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">
+                          AIがジョブ内容を分析しました
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-3xl font-bold text-amber-700 dark:text-amber-300">
+                        +{aiIncentive.toLocaleString()}
+                        <span className="text-base font-normal ml-1">JPYC</span>
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        報酬に自動付与されます
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : isCalculatingIncentive ? (
+                <div className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border border-amber-200 dark:border-amber-700">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-amber-100 dark:bg-amber-800/50 rounded-lg">
+                        <Spinner size="sm" color="warning" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                          算出中...
+                        </p>
+                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5 animate-pulse">
+                          {AI_INCENTIVE_STEP_MESSAGES[aiIncentiveStep]}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {/* プログレス表示 */}
+                  <div className="flex items-center gap-2">
+                    {["analyzing", "calculating", "finalizing"].map((step, index) => (
+                      <div key={step} className="flex items-center gap-2 flex-1">
+                        <div
+                          className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                            aiIncentiveStep === step
+                              ? "bg-amber-500 animate-pulse scale-125"
+                              : ["analyzing", "calculating", "finalizing"].indexOf(aiIncentiveStep) > index
+                              ? "bg-green-500"
+                              : "bg-gray-300 dark:bg-gray-600"
+                          }`}
+                        />
+                        <span
+                          className={`text-sm ${
+                            aiIncentiveStep === step
+                              ? "text-amber-700 dark:text-amber-300 font-medium"
+                              : "text-gray-400 dark:text-gray-500"
+                          }`}
+                        >
+                          {index === 0 ? "分析" : index === 1 ? "計算" : "決定"}
+                        </span>
+                        {index < 2 && (
+                          <div className="flex-1 h-0.5 bg-gray-200 dark:bg-gray-700 rounded" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border border-amber-200 dark:border-amber-700">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-amber-100 dark:bg-amber-800/50 rounded-lg">
+                        <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                          AIインセンティブ報酬
+                        </p>
+                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                          AIによるジョブの平準化を支援するため、インセンティブを算出します
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    size="lg"
+                    className="w-full h-14 text-lg font-bold text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.01] transition-all duration-200"
+                    onPress={handleCalculateIncentive}
+                    isDisabled={isCalculatingIncentive}
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    インセンティブを算出する
+                  </Button>
+                </div>
+              )}
+            </CardBody>
+          </Card>
+
           {/* 送信ボタン */}
           <div className="pt-2 pb-8">
             <Button
               type="submit"
               size="lg"
               className="w-full h-14 text-lg font-bold text-white bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.01] transition-all duration-200"
+              isDisabled={!isRequiredFieldsValid || aiIncentiveStep !== "complete"}
             >
               ジョブを作成する
             </Button>
             <p className="text-center text-xs text-gray-500 mt-3">
-              作成後、ダッシュボードで確認・管理できます
+              {aiIncentiveStep !== "complete"
+                ? "インセンティブを算出してからジョブを作成できます"
+                : "作成後、ダッシュボードで確認・管理できます"}
             </p>
           </div>
         </form>
