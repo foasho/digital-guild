@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { transactionHistories as mockTransactionHistories } from "@/constants/mocks";
+import { TransactionHistoryApi } from "@/constants/api-mocks";
 import { useWalletStore, useWorkerStore } from "@/stores";
 import type { TransactionHistory } from "@/types";
 
@@ -11,11 +11,12 @@ interface UseTransactionHistoriesResult {
   transactions: TransactionHistory[];
   balance: number;
   pending: boolean;
-  addTransaction: (params: Omit<TransactionHistory, "id">) => TransactionHistory;
+  addTransaction: (params: Omit<TransactionHistory, "id">) => Promise<TransactionHistory>;
 }
 
 /**
  * 取引履歴を取得し、Storeに格納するhook
+ * データ取得: hooks → API → LocalStorage
  */
 const useTransactionHistories = (): UseTransactionHistoriesResult => {
   const [pending, setPending] = useState(false);
@@ -28,10 +29,10 @@ const useTransactionHistories = (): UseTransactionHistoriesResult => {
       if (!worker || transactions.length > 0) return;
       setPending(true);
       try {
-        // TODO: 本番移行では、APIから取得する予定
-        const workerTx = mockTransactionHistories.filter(
-          (tx) => tx.workerId === worker.id
-        );
+        // APIからデータ取得
+        const workerTx = await TransactionHistoryApi.getByWorkerId({
+          workerId: worker.id,
+        });
         setTransactions(workerTx);
       } finally {
         setPending(false);
@@ -46,19 +47,13 @@ const useTransactionHistories = (): UseTransactionHistoriesResult => {
   }, [transactions]);
 
   const addTransaction = useCallback(
-    (params: Omit<TransactionHistory, "id">): TransactionHistory => {
-      const maxId =
-        transactions.length > 0
-          ? Math.max(...transactions.map((t) => t.id))
-          : 0;
-      const newTx: TransactionHistory = {
-        ...params,
-        id: maxId + 1,
-      };
+    async (params: Omit<TransactionHistory, "id">): Promise<TransactionHistory> => {
+      // APIで作成（IDは自動生成）
+      const newTx = await TransactionHistoryApi.create(params);
       addToStore(newTx);
       return newTx;
     },
-    [transactions, addToStore]
+    [addToStore]
   );
 
   return {

@@ -1,22 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  skills as mockSkills,
-  jobSkills as mockJobSkills,
-  requirementSkills as mockRequirementSkills,
-} from "@/constants/mocks";
+import { SkillApi, JobSkillApi, RequirementSkillApi } from "@/constants/api-mocks";
 import type { Skill, JobSkill, RequirementSkill } from "@/types";
 
 /**
  * スキルマスタを取得するhook
+ * データ取得: hooks → API → LocalStorage
  */
 const useSkills = (): Skill[] => {
   const [skills, setSkills] = useState<Skill[]>([]);
 
   useEffect(() => {
-    // TODO: 本番移行では、APIから取得する予定
-    setSkills(mockSkills);
+    const fetchSkills = async (): Promise<void> => {
+      const data = await SkillApi.index();
+      setSkills(data);
+    };
+    fetchSkills();
   }, []);
 
   return skills;
@@ -24,14 +24,17 @@ const useSkills = (): Skill[] => {
 
 /**
  * ジョブに紐づくスキルを取得するhook
+ * データ取得: hooks → API → LocalStorage
  */
 const useJobSkills = (jobId: number): JobSkill[] => {
   const [jobSkills, setJobSkills] = useState<JobSkill[]>([]);
 
   useEffect(() => {
-    // TODO: 本番移行では、APIから取得する予定
-    const filtered = mockJobSkills.filter((s) => s.jobId === jobId);
-    setJobSkills(filtered);
+    const fetchJobSkills = async (): Promise<void> => {
+      const data = await JobSkillApi.getByJobId({ jobId });
+      setJobSkills(data);
+    };
+    fetchJobSkills();
   }, [jobId]);
 
   return jobSkills;
@@ -39,6 +42,7 @@ const useJobSkills = (jobId: number): JobSkill[] => {
 
 /**
  * ジョブの募集条件スキルを取得するhook
+ * データ取得: hooks → API → LocalStorage
  */
 const useRequirementSkills = (jobId: number): RequirementSkill[] => {
   const [requirementSkills, setRequirementSkills] = useState<
@@ -46,9 +50,11 @@ const useRequirementSkills = (jobId: number): RequirementSkill[] => {
   >([]);
 
   useEffect(() => {
-    // TODO: 本番移行では、APIから取得する予定
-    const filtered = mockRequirementSkills.filter((s) => s.jobId === jobId);
-    setRequirementSkills(filtered);
+    const fetchRequirementSkills = async (): Promise<void> => {
+      const data = await RequirementSkillApi.getByJobId({ jobId });
+      setRequirementSkills(data);
+    };
+    fetchRequirementSkills();
   }, [jobId]);
 
   return requirementSkills;

@@ -1,13 +1,19 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { MockSwitchBar } from "@/components/layout";
+import { loadMockData } from "@/constants/api-mocks";
 
 interface RequesterLayoutProps {
   children: ReactNode;
 }
 
 export default function RequesterLayout({ children }: RequesterLayoutProps) {
+  // 初回起動時にモックデータをLocalStorageにロード
+  useEffect(() => {
+    loadMockData();
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* MockSwitchBar - Fixed at top */}

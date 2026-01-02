@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  trustPassports as mockTrustPassports,
-  workerSkills as mockWorkerSkills,
-} from "@/constants/mocks";
+import { TrustPassportApi, WorkerSkillApi } from "@/constants/api-mocks";
 import { useTrustPassportStore, useWorkerStore } from "@/stores";
 import type { TrustPassport, WorkerSkill, Rank } from "@/types";
 
@@ -19,13 +16,14 @@ interface UseTrustPassportResult {
   passport: TrustPassport | null;
   skills: WorkerSkill[];
   pending: boolean;
-  updateTrustScore: (score: number) => void;
-  addSkill: (name: string, jobId: number) => WorkerSkill;
+  updateTrustScore: (score: number) => Promise<void>;
+  addSkill: (name: string, jobId: number) => Promise<WorkerSkill>;
   getRank: () => Rank;
 }
 
 /**
  * ギルド証（TrustPassport）を取得し、Storeに格納するhook
+ * データ取得: hooks → API → LocalStorage
  */
 const useTrustPassport = (): UseTrustPassportResult => {
   const [pending, setPending] = useState(false);
@@ -45,13 +43,11 @@ const useTrustPassport = (): UseTrustPassportResult => {
       if (!worker || passport) return;
       setPending(true);
       try {
-        // TODO: 本番移行では、APIから取得する予定
-        const workerPassport = mockTrustPassports.find(
-          (p) => p.workerId === worker.id
-        );
-        const workerSkillsList = mockWorkerSkills.filter(
-          (s) => s.workerId === worker.id
-        );
+        // APIからデータ取得
+        const [workerPassport, workerSkillsList] = await Promise.all([
+          TrustPassportApi.getByWorkerId({ workerId: worker.id }),
+          WorkerSkillApi.getByWorkerId({ workerId: worker.id }),
+        ]);
         if (workerPassport) {
           setPassport(workerPassport);
         }
@@ -64,28 +60,30 @@ const useTrustPassport = (): UseTrustPassportResult => {
   }, [worker, passport, setPassport, setSkills]);
 
   const updateTrustScore = useCallback(
-    (score: number): void => {
+    async (score: number): Promise<void> => {
+      if (!passport) return;
       const clampedScore = Math.min(100, Math.max(0, score));
+      // APIで更新
+      await TrustPassportApi.update(passport.id, { trustScore: clampedScore });
       updateScoreInStore(clampedScore);
     },
-    [updateScoreInStore]
+    [passport, updateScoreInStore]
   );
 
   const addSkill = useCallback(
-    (name: string, jobId: number): WorkerSkill => {
+    async (name: string, jobId: number): Promise<WorkerSkill> => {
       if (!worker) throw new Error("Worker not found");
-      const maxId = skills.length > 0 ? Math.max(...skills.map((s) => s.id)) : 0;
-      const newSkill: WorkerSkill = {
-        id: maxId + 1,
+      // APIで作成（IDは自動生成）
+      const newSkill = await WorkerSkillApi.create({
         workerId: worker.id,
         name,
         jobId,
         createdAt: new Date().toISOString(),
-      };
+      });
       addSkillToStore(newSkill);
       return newSkill;
     },
-    [worker, skills, addSkillToStore]
+    [worker, addSkillToStore]
   );
 
   const getRank = useCallback((): Rank => {

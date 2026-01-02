@@ -36,6 +36,7 @@ export { WorkerSkillApi } from "./workerSkillApi";
 const loadMockData = async (): Promise<void> => {
   // すでにLoadしたか確認
   if (localStorage.getItem("mockDataLoaded")) {
+    console.log("Mock data already loaded");
     return;
   }
 

@@ -1,21 +1,22 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { jobs as mockJobs } from "@/constants/mocks";
+import { JobApi } from "@/constants/api-mocks";
 import { useJobStore } from "@/stores";
 import type { Job, ChecklistItem } from "@/types";
 
 interface UseJobsResult {
   jobs: Job[];
   pending: boolean;
-  addJob: (params: Omit<Job, "id" | "createdAt" | "updatedAt">) => Job;
-  updateJob: (id: number, updates: Partial<Job>) => void;
-  deleteJob: (id: number) => void;
+  addJob: (params: Omit<Job, "id" | "createdAt" | "updatedAt">) => Promise<Job>;
+  updateJob: (id: number, updates: Partial<Job>) => Promise<void>;
+  deleteJob: (id: number) => Promise<void>;
   getJobById: (id: number) => Job | undefined;
 }
 
 /**
  * ジョブ一覧を取得し、Storeに格納するhook
+ * データ取得: hooks → API → LocalStorage
  */
 const useJobs = (): UseJobsResult => {
   const [pending, setPending] = useState(false);
@@ -33,8 +34,9 @@ const useJobs = (): UseJobsResult => {
       if (jobs.length > 0) return; // 既にロード済み
       setPending(true);
       try {
-        // TODO: 本番移行では、APIから取得する予定
-        setJobs(mockJobs);
+        // APIからデータ取得
+        const data = await JobApi.index();
+        setJobs(data);
       } finally {
         setPending(false);
       }
@@ -43,30 +45,28 @@ const useJobs = (): UseJobsResult => {
   }, [jobs.length, setJobs]);
 
   const addJob = useCallback(
-    (params: Omit<Job, "id" | "createdAt" | "updatedAt">): Job => {
-      const maxId = jobs.length > 0 ? Math.max(...jobs.map((j) => j.id)) : 0;
-      const now = new Date().toISOString();
-      const newJob: Job = {
-        ...params,
-        id: maxId + 1,
-        createdAt: now,
-        updatedAt: now,
-      };
+    async (params: Omit<Job, "id" | "createdAt" | "updatedAt">): Promise<Job> => {
+      // APIで作成（IDは自動生成）
+      const newJob = await JobApi.create(params);
       addJobToStore(newJob);
       return newJob;
     },
-    [jobs, addJobToStore]
+    [addJobToStore]
   );
 
   const updateJob = useCallback(
-    (id: number, updates: Partial<Job>): void => {
+    async (id: number, updates: Partial<Job>): Promise<void> => {
+      // APIで更新
+      await JobApi.update(id, updates);
       updateJobInStore(id, { ...updates, updatedAt: new Date().toISOString() });
     },
     [updateJobInStore]
   );
 
   const deleteJob = useCallback(
-    (id: number): void => {
+    async (id: number): Promise<void> => {
+      // APIで削除
+      await JobApi.delete({ id });
       deleteJobFromStore(id);
     },
     [deleteJobFromStore]
@@ -89,15 +89,22 @@ const useJobById = (id: number): UseJobByIdResult => {
   const job = getJobById(id);
 
   useEffect(() => {
-    // Storeにデータがない場合はモックからロード
-    if (jobs.length === 0) {
-      setPending(true);
-      setJobs(mockJobs);
-      setPending(false);
-    }
+    const fetchJob = async (): Promise<void> => {
+      // Storeにデータがない場合はAPIからロード
+      if (jobs.length === 0) {
+        setPending(true);
+        try {
+          const data = await JobApi.index();
+          setJobs(data);
+        } finally {
+          setPending(false);
+        }
+      }
+    };
+    fetchJob();
   }, [jobs.length, setJobs]);
 
-  return { job: job || mockJobs.find((j) => j.id === id), pending };
+  return { job, pending };
 };
 
 /**

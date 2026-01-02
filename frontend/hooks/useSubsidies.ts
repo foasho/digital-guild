@@ -1,18 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { subsidies as mockSubsidies } from "@/constants/mocks";
+import { SubsidyApi } from "@/constants/api-mocks";
 import type { Subsidy } from "@/types";
 
 /**
  * 補助金一覧を取得するhook
+ * データ取得: hooks → API → LocalStorage
  */
 const useSubsidies = (): Subsidy[] => {
   const [subsidies, setSubsidies] = useState<Subsidy[]>([]);
 
   useEffect(() => {
-    // TODO: 本番移行では、APIから取得する予定
-    setSubsidies(mockSubsidies);
+    const fetchSubsidies = async (): Promise<void> => {
+      const data = await SubsidyApi.index();
+      setSubsidies(data);
+    };
+    fetchSubsidies();
   }, []);
 
   return subsidies;
@@ -20,14 +24,17 @@ const useSubsidies = (): Subsidy[] => {
 
 /**
  * 発注者の補助金を取得するhook
+ * データ取得: hooks → API → LocalStorage
  */
 const useSubsidiesByRequesterId = (requesterId: number): Subsidy[] => {
   const [subsidies, setSubsidies] = useState<Subsidy[]>([]);
 
   useEffect(() => {
-    // TODO: 本番移行では、APIから取得する予定
-    const filtered = mockSubsidies.filter((s) => s.requesterId === requesterId);
-    setSubsidies(filtered);
+    const fetchSubsidies = async (): Promise<void> => {
+      const data = await SubsidyApi.getByRequesterId({ requesterId });
+      setSubsidies(data);
+    };
+    fetchSubsidies();
   }, [requesterId]);
 
   return subsidies;

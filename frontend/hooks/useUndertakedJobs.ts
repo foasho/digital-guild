@@ -1,22 +1,23 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { undertakedJobs as mockUndertakedJobs } from "@/constants/mocks";
+import { UndertakedJobApi } from "@/constants/api-mocks";
 import { useUndertakedJobStore, useWorkerStore } from "@/stores";
 import type { UndertakedJob } from "@/types";
 
 interface UseUndertakedJobsResult {
   undertakedJobs: UndertakedJob[];
   pending: boolean;
-  addUndertakedJob: (params: Omit<UndertakedJob, "id">) => UndertakedJob;
-  updateUndertakedJob: (id: number, updates: Partial<UndertakedJob>) => void;
-  updateStatus: (id: number, status: UndertakedJob["status"]) => void;
+  addUndertakedJob: (params: Omit<UndertakedJob, "id">) => Promise<UndertakedJob>;
+  updateUndertakedJob: (id: number, updates: Partial<UndertakedJob>) => Promise<void>;
+  updateStatus: (id: number, status: UndertakedJob["status"]) => Promise<void>;
   getByJobId: (jobId: number) => UndertakedJob | undefined;
   getById: (id: number) => UndertakedJob | undefined;
 }
 
 /**
  * 着手ジョブ一覧を取得し、Storeに格納するhook
+ * データ取得: hooks → API → LocalStorage
  */
 const useUndertakedJobs = (): UseUndertakedJobsResult => {
   const [pending, setPending] = useState(false);
@@ -36,16 +37,15 @@ const useUndertakedJobs = (): UseUndertakedJobsResult => {
       if (undertakedJobs.length > 0) return; // 既にロード済み
       setPending(true);
       try {
-        // TODO: 本番移行では、APIから取得する予定
-        // ワーカーがいる場合はそのワーカーの着手ジョブのみ
+        // APIからデータ取得
         if (worker) {
-          const workerJobs = mockUndertakedJobs.filter(
-            (job) => job.workerId === worker.id
-          );
-          setUndertakedJobs(workerJobs);
+          // ワーカーがいる場合はそのワーカーの着手ジョブのみ
+          const data = await UndertakedJobApi.getByWorkerId(worker.id);
+          setUndertakedJobs(data);
         } else {
           // 全件（発注者向け）
-          setUndertakedJobs(mockUndertakedJobs);
+          const data = await UndertakedJobApi.index();
+          setUndertakedJobs(data);
         }
       } finally {
         setPending(false);
@@ -55,30 +55,28 @@ const useUndertakedJobs = (): UseUndertakedJobsResult => {
   }, [worker, undertakedJobs.length, setUndertakedJobs]);
 
   const addUndertakedJob = useCallback(
-    (params: Omit<UndertakedJob, "id">): UndertakedJob => {
-      const maxId =
-        undertakedJobs.length > 0
-          ? Math.max(...undertakedJobs.map((j) => j.id))
-          : 0;
-      const newJob: UndertakedJob = {
-        ...params,
-        id: maxId + 1,
-      };
+    async (params: Omit<UndertakedJob, "id">): Promise<UndertakedJob> => {
+      // APIで作成（IDは自動生成）
+      const newJob = await UndertakedJobApi.create(params);
       addToStore(newJob);
       return newJob;
     },
-    [undertakedJobs, addToStore]
+    [addToStore]
   );
 
   const updateUndertakedJob = useCallback(
-    (id: number, updates: Partial<UndertakedJob>): void => {
+    async (id: number, updates: Partial<UndertakedJob>): Promise<void> => {
+      // APIで更新
+      await UndertakedJobApi.update(id, updates);
       updateInStore(id, updates);
     },
     [updateInStore]
   );
 
   const updateStatus = useCallback(
-    (id: number, status: UndertakedJob["status"]): void => {
+    async (id: number, status: UndertakedJob["status"]): Promise<void> => {
+      // APIで更新
+      await UndertakedJobApi.update(id, { status });
       updateStatusInStore(id, status);
     },
     [updateStatusInStore]

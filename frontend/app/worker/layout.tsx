@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import {
   BackgroundImage,
   GuildCard,
@@ -9,6 +9,7 @@ import {
   WorkerFooter,
   WorkerHeader,
 } from "@/components/layout";
+import { loadMockData } from "@/constants/api-mocks";
 import { useWorker } from "@/hooks";
 import { Spinner } from "@heroui/react";
 
@@ -17,8 +18,17 @@ interface WorkerLayoutProps {
 }
 
 export default function WorkerLayout({ children }: WorkerLayoutProps) {
-
+  const [isInitialized, setIsInitialized] = useState(false);
   const { worker, pending } = useWorker();
+
+  // 初回起動時にモックデータをLocalStorageにロード
+  useEffect(() => {
+    const init = async () => {
+      await loadMockData();
+      setIsInitialized(true);
+    };
+    init();
+  }, []);
 
   return (
     <BackgroundImage>
