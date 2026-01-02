@@ -298,7 +298,7 @@ export default function UndertakedJobEvaluationPage() {
                 <span className="text-sm text-gray-600">
                   Trust Score:{" "}
                   <span className="font-semibold text-gray-800">
-                    {trustScore}
+                    {Math.floor(trustScore)}
                   </span>
                 </span>
                 <Chip
