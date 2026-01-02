@@ -287,9 +287,9 @@ export function GuildCard() {
 
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-semibold tracking-wider opacity-95">
-                    探索者
+                    冒険者
                   </div>
-                  <div className="mt-1 text-xl font-extrabold tracking-wide truncate">
+                  <div className="mt-1 text-lg font-extrabold tracking-wide truncate">
                     {displayName}
                   </div>
                 </div>
@@ -302,7 +302,7 @@ export function GuildCard() {
                   <div className="my-1 flex items-center justify-end gap-2">
                     {!isExpanded && (
                       <>
-                        <div className="text-xs opacity-90">class</div>
+                        <div className="text-xs opacity-90">Rank</div>
                         <div className="text-sm font-extrabold tracking-widest">
                           {displayRank}
                         </div>
@@ -343,13 +343,13 @@ export function GuildCard() {
                     </div>
 
                     <div className="px-4 pb-4 pt-6">
-                      <div className="flex justify-end text-base">
+                      <div className="flex justify-end text-sm">
                         登録: {displayRegisteredAt}
                       </div>
 
                       <div className="mt-4 grid grid-cols-[auto_1fr] items-end gap-4">
-                        <div className="text-base">ID: {displayCertId}</div>
-                        <div className="text-base text-right">
+                        <div className="text-sm">ID: {displayCertId}</div>
+                        <div className="text-right text-sm">
                           デジタルギルド公式認証
                         </div>
                       </div>
@@ -436,8 +436,8 @@ export function GuildCard() {
                         <span>{statusDetail.avgRating.toFixed(1)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>ドタキャン数</span>
-                        <span>{statusDetail.canceledJobs}</span>
+                        <span>キャンセル率</span>
+                        <span>2.0%</span>
                       </div>
                     </div>
                   </div>
