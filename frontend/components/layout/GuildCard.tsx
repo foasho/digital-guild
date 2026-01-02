@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Card, CardBody } from "@heroui/react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
@@ -89,6 +90,7 @@ function toCertificateId(input: number | string): string {
 export function GuildCard() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const pathname = usePathname();
 
   const worker = useWorkerStore((state) => state.worker);
   const jpycBalance = useWorkerStore((state) => state.jpycBalance);
@@ -102,6 +104,11 @@ export function GuildCard() {
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  // ページ移動時にカードを閉じる
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [pathname]);
 
   // Use default values until hydration is complete or if store is empty
   const displayName = isHydrated && worker?.name ? worker.name : DEFAULT_NAME;
@@ -310,7 +317,6 @@ export function GuildCard() {
                       className="opacity-70"
                       animate={{
                         rotate: isExpanded ? 180 : 0,
-                        opacity: isExpanded ? 0 : 0.7,
                       }}
                       transition={{ duration: 0.2, ease: "easeOut" }}
                       aria-hidden="true"
