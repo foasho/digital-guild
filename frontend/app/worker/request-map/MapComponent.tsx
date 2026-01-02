@@ -9,11 +9,13 @@ interface MapComponentProps {
   jobs: Job[];
   isBookmarked: (jobId: number) => boolean;
   onMarkerClick: (job: Job) => void;
+  flyToPosition?: { lat: number; lng: number } | null;
 }
 
 // 日本の中心座標
 const JAPAN_CENTER: [number, number] = [36.5, 138];
 const DEFAULT_ZOOM = 5;
+const FLY_TO_ZOOM = 10;
 
 function MapResizer() {
   const map = useMap();
@@ -32,10 +34,26 @@ function MapResizer() {
   return null;
 }
 
+// 指定座標へスムーズに移動するコンポーネント
+function MapFlyTo({ position }: { position: { lat: number; lng: number } | null }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (position) {
+      map.flyTo([position.lat, position.lng], FLY_TO_ZOOM, {
+        duration: 1.2,
+      });
+    }
+  }, [map, position]);
+
+  return null;
+}
+
 export default function MapComponent({
   jobs,
   isBookmarked,
   onMarkerClick,
+  flyToPosition,
 }: MapComponentProps) {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -70,6 +88,7 @@ export default function MapComponent({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <MapResizer />
+      <MapFlyTo position={flyToPosition ?? null} />
       {jobs.map((job) => (
         <JobMapMarker
           key={job.id}
