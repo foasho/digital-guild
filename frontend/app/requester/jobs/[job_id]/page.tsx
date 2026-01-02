@@ -89,6 +89,11 @@ const getStatusStyle = (status: UndertakedJob["status"]) => {
         label: "キャンセル",
         style: "bg-gray-200 text-gray-500 font-medium",
       };
+    default:
+      return {
+        label: "不明",
+        style: "bg-gray-200 text-gray-500 font-medium",
+      };
   }
 };
 
@@ -286,25 +291,6 @@ export default function RequesterJobDetailPage() {
             </CardBody>
           </Card>
         )}
-
-        {/* AIレコメンド結果 (プレースホルダー) */}
-        <Card className="bg-white border border-gray-200 shadow-sm mb-6 rounded-xl">
-          <CardBody className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles size={20} className="text-purple-500" />
-              <h3 className="font-bold text-gray-800">
-                AIレコメンド - この人にオススメ
-              </h3>
-            </div>
-            {/* プレースホルダー: Task 5.7で実装予定 */}
-            <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 text-center">
-              <p className="text-gray-500 text-sm">
-                AIレコメンド機能は準備中です
-              </p>
-              <p className="text-gray-400 text-xs mt-1">(Task 5.7で実装予定)</p>
-            </div>
-          </CardBody>
-        </Card>
 
         {/* 応募者一覧 */}
         <Card className="bg-white border border-gray-200 shadow-sm rounded-xl">
