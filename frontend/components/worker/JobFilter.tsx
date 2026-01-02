@@ -9,6 +9,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Slider,
 } from "@heroui/react";
 import { useState } from "react";
 
@@ -36,8 +37,9 @@ export function JobFilter({
 }: JobFilterProps) {
   const [dateFrom, setDateFrom] = useState(initialFilters.dateFrom);
   const [dateTo, setDateTo] = useState(initialFilters.dateTo);
-  const [minReward, setMinReward] = useState<string>(
-    initialFilters.minReward?.toString() || "",
+  // Sliderの都合上、内部では number で扱う（0は「指定なし」）
+  const [minReward, setMinReward] = useState<number>(
+    initialFilters.minReward ?? 0,
   );
   const [selectedTags, setSelectedTags] = useState<string[]>(
     initialFilters.selectedTags,
@@ -53,7 +55,7 @@ export function JobFilter({
     onApply({
       dateFrom,
       dateTo,
-      minReward: minReward ? Number.parseInt(minReward, 10) : null,
+      minReward: minReward > 0 ? minReward : null,
       selectedTags,
     });
     onClose();
@@ -62,7 +64,7 @@ export function JobFilter({
   const handleReset = () => {
     setDateFrom("");
     setDateTo("");
-    setMinReward("");
+    setMinReward(0);
     setSelectedTags([]);
   };
 
@@ -99,7 +101,7 @@ export function JobFilter({
         },
       }}
     >
-      <ModalContent className="bg-zinc-900">
+      <ModalContent className="bg-zinc-900 rounded-t-3xl">
         <ModalHeader className="text-white">
           <div className="flex items-center gap-2">
             <svg
@@ -132,7 +134,8 @@ export function JobFilter({
                 onChange={(e) => setDateFrom(e.target.value)}
                 classNames={{
                   input: "text-white",
-                  inputWrapper: "bg-zinc-800 border-zinc-700",
+                  inputWrapper:
+                    "bg-zinc-800 border-zinc-700 rounded-2xl shadow-sm",
                 }}
                 size="sm"
               />
@@ -143,7 +146,8 @@ export function JobFilter({
                 onChange={(e) => setDateTo(e.target.value)}
                 classNames={{
                   input: "text-white",
-                  inputWrapper: "bg-zinc-800 border-zinc-700",
+                  inputWrapper:
+                    "bg-zinc-800 border-zinc-700 rounded-2xl shadow-sm",
                 }}
                 size="sm"
               />
@@ -155,19 +159,43 @@ export function JobFilter({
             <h3 className="text-sm font-semibold text-amber-400 mb-3">
               最低報酬額
             </h3>
-            <Input
-              type="number"
-              placeholder="例: 5000"
-              value={minReward}
-              onChange={(e) => setMinReward(e.target.value)}
-              startContent={<span className="text-white/60 text-sm">¥</span>}
-              endContent={<span className="text-white/60 text-sm">以上</span>}
-              classNames={{
-                input: "text-white",
-                inputWrapper: "bg-zinc-800 border-zinc-700",
-              }}
-              size="sm"
-            />
+            <div className="space-y-2">
+              <div className="text-xs text-white/60 pb-2">
+                {minReward > 0
+                  ? `¥${minReward.toLocaleString()}以上`
+                  : "指定なし"}
+              </div>
+              <Slider
+                aria-label="最低報酬額"
+                size="sm"
+                value={minReward}
+                onChange={(value) =>
+                  setMinReward(Array.isArray(value) ? value[0] : value)
+                }
+                minValue={0}
+                maxValue={50000}
+                step={500}
+                showTooltip
+                formatOptions={{
+                  style: "currency",
+                  currency: "JPY",
+                  maximumFractionDigits: 0,
+                }}
+                tooltipProps={{
+                  classNames: {
+                    base: "bg-zinc-800 text-white border border-white/10",
+                    content: "text-xs",
+                    arrow: "bg-zinc-800 border border-white/10",
+                  },
+                }}
+                classNames={{
+                  base: "px-1",
+                  track: "bg-white/15",
+                  filler: "bg-amber-500",
+                  thumb: "bg-amber-500 ring-2 ring-amber-300/40 shadow-md",
+                }}
+              />
+            </div>
           </div>
 
           {/* スキルタグ */}
@@ -179,12 +207,17 @@ export function JobFilter({
               {availableTags.map((tag) => (
                 <Chip
                   key={tag}
-                  variant={selectedTags.includes(tag) ? "solid" : "bordered"}
-                  className={
-                    selectedTags.includes(tag)
-                      ? "bg-amber-500 text-white cursor-pointer"
-                      : "border-white/30 text-white/70 cursor-pointer hover:border-amber-500/50"
-                  }
+                  as="button"
+                  size="sm"
+                  radius="full"
+                  variant="bordered"
+                  aria-pressed={selectedTags.includes(tag)}
+                  className="cursor-pointer px-3"
+                  classNames={{
+                    base: selectedTags.includes(tag)
+                      ? "bg-amber-500/90 border-amber-500/80 text-white"
+                      : "bg-transparent border-white/30 text-white/70 hover:border-amber-500/50 hover:bg-white/5",
+                  }}
                   onClick={() => handleTagToggle(tag)}
                 >
                   {tag}
@@ -197,13 +230,13 @@ export function JobFilter({
           <Button
             variant="ghost"
             onPress={handleReset}
-            className="text-white/70"
+            className="text-white/70 rounded-full px-6"
           >
             リセット
           </Button>
           <Button
             onPress={handleApply}
-            className="bg-amber-500 text-white font-semibold"
+            className="bg-amber-500 text-white font-semibold rounded-full px-6"
           >
             適用する
           </Button>

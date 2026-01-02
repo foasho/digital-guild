@@ -192,9 +192,10 @@ export default function RequestBoardsPage() {
           placeholder="ジョブを検索..."
           value={searchQuery}
           onChange={(e) => handleSearchChange(e.target.value)}
+          size="lg"
           startContent={
             <svg
-              className="w-5 h-5 text-white/50"
+              className="w-5 h-5 text-white/50 mr-2"
               fill="none"
               stroke="currentColor"
               strokeWidth={2}
@@ -209,8 +210,8 @@ export default function RequestBoardsPage() {
             </svg>
           }
           classNames={{
-            input: "text-white placeholder:text-white/50",
-            inputWrapper: "bg-white/10 border-white/20 hover:bg-white/15",
+            input: "text-white placeholder:text-white/50 rounded-xl",
+            inputWrapper: "bg-white/10 border-white/20 hover:bg-white/15 rounded-xl",
           }}
           className="flex-1"
         />

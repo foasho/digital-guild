@@ -103,15 +103,15 @@ export default function WalletPage() {
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-100/40 to-transparent pointer-events-none" />
 
         {/* ヘッダー: JPYCロゴ + タイトル */}
-        <div className="relative flex items-center gap-3 mb-4 pb-3 border-b border-amber-200/60">
+        <div className="relative flex items-center justify-between mb-4 pb-3 border-b border-amber-200/60">
           <Image
             src="/logo/jpyc.png"
             alt="JPYC Logo"
-            width={32}
+            width={72}
             height={32}
             className="object-contain"
           />
-          <span className="text-gray-800 font-semibold text-lg tracking-wide">
+          <span className="text-gray-800 font-semibold text-lg tracking-wide text-right">
             DIGITAL GUILD WALLET
           </span>
         </div>
@@ -152,10 +152,10 @@ export default function WalletPage() {
       {/* スキャンして支払うボタン */}
       <button
         type="button"
-        className="mt-4 mx-auto flex items-center gap-2 px-8 py-3 bg-white/90 hover:bg-white rounded-full shadow-md transition-colors"
+        className="mt-4 mx-auto flex items-center gap-2 px-8 py-3 cursor-pointer border-white/20 border bg-white/15 transition-colors duration-300 hover:bg-white/55 rounded-full shadow-md transition-colors"
       >
         <svg
-          className="w-5 h-5 text-gray-700"
+          className="w-5 h-5 text-white"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -174,7 +174,7 @@ export default function WalletPage() {
             d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-        <span className="text-gray-700 font-medium">
+        <span className="text-white font-medium">
           スキャンして支払う
         </span>
       </button>

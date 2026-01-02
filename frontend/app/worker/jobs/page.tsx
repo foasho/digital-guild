@@ -1,6 +1,16 @@
 "use client";
 
-import { Card, CardBody, Chip, Tab, Tabs } from "@heroui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  Chip,
+  Modal,
+  ModalBody,
+  ModalContent,
+  Tab,
+  Tabs,
+} from "@heroui/react";
 import { useEffect, useMemo, useState } from "react";
 import { CompletionReportModal } from "@/components/worker";
 import { useJobStore } from "@/stores/useJobStore";
@@ -15,15 +25,15 @@ const statusLabels: Record<UndertakedJob["status"], string> = {
   canceled: "キャンセル",
 };
 
-// ステータスの色
-const statusColors: Record<
+// ステータスのカスタムスタイル（透過背景でChipらしく）
+const statusStyles: Record<
   UndertakedJob["status"],
-  "warning" | "primary" | "success" | "danger"
+  { bg: string; text: string; border: string }
 > = {
-  accepted: "warning",
-  in_progress: "primary",
-  completed: "success",
-  canceled: "danger",
+  accepted: { bg: "bg-amber-500/25", text: "text-amber-300", border: "border-amber-400/50" },
+  in_progress: { bg: "bg-blue-500/25", text: "text-blue-300", border: "border-blue-400/50" },
+  completed: { bg: "bg-emerald-500/25", text: "text-emerald-300", border: "border-emerald-400/50" },
+  canceled: { bg: "bg-red-500/25", text: "text-red-300", border: "border-red-400/50" },
 };
 
 // 星評価を表示するコンポーネント
@@ -66,10 +76,12 @@ function StarRating({ score }: { score: number }) {
 function UndertakedJobCard({
   undertakedJob,
   job,
+  onDetailClick,
   onCompletionReportClick,
 }: {
   undertakedJob: UndertakedJob;
   job: Job;
+  onDetailClick?: () => void;
   onCompletionReportClick?: () => void;
 }) {
   const totalReward = job.reward + job.aiInsentiveReward;
@@ -113,11 +125,10 @@ function UndertakedJobCard({
           {/* 右上: ステータスバッジ */}
           <Chip
             size="md"
-            color={statusColors[undertakedJob.status]}
-            variant="solid"
+            variant="flat"
             classNames={{
-              base: "ring-2 ring-white px-3 py-1",
-              content: "font-semibold text-sm",
+              base: `px-3 py-1 border backdrop-blur-sm ${statusStyles[undertakedJob.status].bg} ${statusStyles[undertakedJob.status].border}`,
+              content: `font-semibold text-sm ${statusStyles[undertakedJob.status].text}`,
             }}
           >
             {statusLabels[undertakedJob.status]}
@@ -174,21 +185,263 @@ function UndertakedJobCard({
             </div>
           )}
 
-          {/* 着手中の場合: 完了報告ボタン */}
-          {isInProgress && onCompletionReportClick && (
+          {/* 着手中の場合: 詳細と完了報告ボタン */}
+          {isInProgress && (
+            <div className="flex justify-end gap-2">
+              {onDetailClick && (
+                <button
+                  type="button"
+                  onClick={onDetailClick}
+                  className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-full text-sm transition-colors backdrop-blur-sm border border-white/30"
+                >
+                  詳細
+                </button>
+              )}
+              {onCompletionReportClick && (
+                <button
+                  type="button"
+                  onClick={onCompletionReportClick}
+                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-full text-sm transition-colors"
+                >
+                  完了報告
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* 完了済みの場合: 詳細ボタン */}
+          {!isInProgress && onDetailClick && (
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={onCompletionReportClick}
-                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-full text-sm transition-colors"
+                onClick={onDetailClick}
+                className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-full text-sm transition-colors backdrop-blur-sm border border-white/30"
               >
-                完了報告
+                詳細
               </button>
             </div>
           )}
         </div>
       </CardBody>
     </Card>
+  );
+}
+
+// 着手中ジョブの詳細モーダル
+function UndertakedJobDetailModal({
+  job,
+  undertakedJob,
+  isOpen,
+  onClose,
+  onCompletionReportClick,
+}: {
+  job: Job | null;
+  undertakedJob: UndertakedJob | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onCompletionReportClick?: () => void;
+}) {
+  if (!job || !undertakedJob) return null;
+
+  const totalReward = job.reward + job.aiInsentiveReward;
+  const isInProgress =
+    undertakedJob.status === "accepted" ||
+    undertakedJob.status === "in_progress";
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}年${month}月${day}日`;
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      placement="bottom"
+      size="full"
+      scrollBehavior="inside"
+      backdrop="blur"
+      classNames={{
+        backdrop: "bg-black/75",
+        base: "m-0 sm:m-0 rounded-t-3xl rounded-b-none max-h-[75vh] bg-gray-900/95",
+        body: "p-0",
+        closeButton:
+          "top-4 right-4 z-20 bg-black/50 text-white hover:bg-black/70",
+      }}
+      motionProps={{
+        variants: {
+          enter: {
+            y: 0,
+            opacity: 1,
+            transition: { duration: 0.3, ease: "easeOut" },
+          },
+          exit: {
+            y: "100%",
+            opacity: 0,
+            transition: { duration: 0.2, ease: "easeIn" },
+          },
+        },
+      }}
+    >
+      <ModalContent>
+        <ModalBody className="p-0">
+          {/* ヘッダー画像 */}
+          <div className="relative w-full h-48 shrink-0">
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${job.imageUrl})` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+            {/* 報酬額とステータス */}
+            <div className="absolute bottom-4 left-4 text-white">
+              <div className="text-2xl font-bold">
+                ¥{totalReward.toLocaleString()} / 回
+              </div>
+            </div>
+            <div className="absolute bottom-4 right-4">
+              <Chip
+                size="md"
+                variant="flat"
+                classNames={{
+                  base: `px-3 py-1 border backdrop-blur-sm ${statusStyles[undertakedJob.status].bg} ${statusStyles[undertakedJob.status].border}`,
+                  content: `font-semibold text-sm ${statusStyles[undertakedJob.status].text}`,
+                }}
+              >
+                {statusLabels[undertakedJob.status]}
+              </Chip>
+            </div>
+          </div>
+
+          {/* コンテンツ */}
+          <div className="p-4 space-y-4">
+            {/* タイトル */}
+            <h2 className="text-xl font-bold text-white">{job.title}</h2>
+
+            {/* 場所と日時 */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-white/90">
+                <svg
+                  className="w-5 h-5 shrink-0 text-amber-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span>{job.location}</span>
+              </div>
+              <div className="flex items-center gap-2 text-white/90">
+                <svg
+                  className="w-5 h-5 shrink-0 text-amber-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span>{formatDate(job.scheduledDate)}</span>
+              </div>
+            </div>
+
+            {/* タグ */}
+            {job.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {job.tags.map((tag) => (
+                  <Chip
+                    key={tag}
+                    size="sm"
+                    variant="flat"
+                    classNames={{
+                      base: "bg-amber-500/20 border border-amber-500/30",
+                      content: "text-amber-200 text-xs",
+                    }}
+                  >
+                    {tag}
+                  </Chip>
+                ))}
+              </div>
+            )}
+
+            {/* 説明 */}
+            <div>
+              <h3 className="text-sm font-semibold text-amber-400 mb-2">
+                仕事内容
+              </h3>
+              <p className="text-white/90 text-sm leading-relaxed">
+                {job.description}
+              </p>
+            </div>
+
+            {/* チェックリスト */}
+            {job.checklist.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-amber-400 mb-2">
+                  作業チェックリスト
+                </h3>
+                <ul className="space-y-2">
+                  {job.checklist.map((item, index) => (
+                    <li
+                      key={item.id}
+                      className="flex items-center gap-2 text-white/90 text-sm"
+                    >
+                      <div className="w-5 h-5 rounded border border-white/30 shrink-0 flex items-center justify-center">
+                        <span className="text-xs text-white/50">{index + 1}</span>
+                      </div>
+                      <span>{item.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* 着手中の場合は完了報告ボタン */}
+            {isInProgress && onCompletionReportClick && (
+              <div className="pt-4 pb-8">
+                <Button
+                  fullWidth
+                  size="lg"
+                  className="bg-amber-500 text-white font-bold"
+                  radius="full"
+                  onPress={() => {
+                    onClose();
+                    onCompletionReportClick();
+                  }}
+                >
+                  完了報告
+                </Button>
+              </div>
+            )}
+
+            {/* 完了済みの場合は閉じるボタン */}
+            {!isInProgress && (
+              <div className="pt-4 pb-8">
+                <Button
+                  fullWidth
+                  size="lg"
+                  className="bg-white/20 text-white font-bold"
+                  radius="full"
+                  onPress={onClose}
+                >
+                  閉じる
+                </Button>
+              </div>
+            )}
+          </div>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -221,6 +474,7 @@ export default function WorkerJobsPage() {
 
   const [selectedTab, setSelectedTab] = useState<string>("in_progress");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedUndertakedJob, setSelectedUndertakedJob] =
     useState<UndertakedJob | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -244,6 +498,16 @@ export default function WorkerJobsPage() {
   const completedJobs = useMemo(() => {
     return undertakedJobs.filter((uj) => uj.status === "completed");
   }, [undertakedJobs]);
+
+  // 詳細モーダルを開く
+  const handleOpenDetailModal = (undertakedJob: UndertakedJob) => {
+    const job = getJobById(undertakedJob.jobId);
+    if (job) {
+      setSelectedUndertakedJob(undertakedJob);
+      setSelectedJob(job);
+      setIsDetailModalOpen(true);
+    }
+  };
 
   // 完了報告モーダルを開く
   const handleOpenCompletionModal = (undertakedJob: UndertakedJob) => {
@@ -278,14 +542,8 @@ export default function WorkerJobsPage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* ヘッダー */}
-      <div className="px-4 pt-4 pb-2">
-        <h1 className="text-2xl font-bold text-white">マイジョブ</h1>
-        <p className="text-white/60 text-sm mt-1">受注したジョブの管理</p>
-      </div>
-
       {/* タブ切り替え */}
-      <div className="px-4 py-2">
+      <div className="px-4 py-2 text-center">
         <Tabs
           selectedKey={selectedTab}
           onSelectionChange={(key) => setSelectedTab(key as string)}
@@ -350,6 +608,7 @@ export default function WorkerJobsPage() {
                   key={undertakedJob.id}
                   undertakedJob={undertakedJob}
                   job={job}
+                  onDetailClick={() => handleOpenDetailModal(undertakedJob)}
                   onCompletionReportClick={() =>
                     handleOpenCompletionModal(undertakedJob)
                   }
@@ -370,11 +629,25 @@ export default function WorkerJobsPage() {
                   key={undertakedJob.id}
                   undertakedJob={undertakedJob}
                   job={job}
+                  onDetailClick={() => handleOpenDetailModal(undertakedJob)}
                 />
               );
             })
           ))}
       </div>
+
+      {/* 詳細モーダル */}
+      <UndertakedJobDetailModal
+        job={selectedJob}
+        undertakedJob={selectedUndertakedJob}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        onCompletionReportClick={
+          selectedUndertakedJob
+            ? () => handleOpenCompletionModal(selectedUndertakedJob)
+            : undefined
+        }
+      />
 
       {/* 完了報告モーダル */}
       {selectedUndertakedJob && selectedJob && (

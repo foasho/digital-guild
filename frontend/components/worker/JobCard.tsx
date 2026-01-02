@@ -146,8 +146,9 @@ export function JobCard({
             {/* 詳細ボタン */}
             <Button
               size="sm"
-              className="bg-amber-100 text-amber-900 font-semibold px-4"
+              className="bg-white/25 transition-colors duration-300 hover:bg-white/35 text-white font-semibold px-4"
               radius="full"
+              variant="solid"
               onPress={onDetailClick}
             >
               詳細はこちら
