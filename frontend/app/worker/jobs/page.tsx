@@ -14,6 +14,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CompletionReportModal } from "@/components/worker";
 import { useJobs, useUndertakedJobs } from "@/hooks/workers";
+import { RequesterNotificationApi } from "@/constants/api-mocks";
 import type { Job, UndertakedJob } from "@/types";
 
 // ステータスの日本語ラベル
@@ -529,7 +530,7 @@ export default function WorkerJobsPage() {
     memo: string,
     completedChecklistIds: number[]
   ) => {
-    if (selectedUndertakedJob) {
+    if (selectedUndertakedJob && selectedJob) {
       // ステータスを completion_reported に更新（発注者の確認待ち）
       updateUndertakedJob(selectedUndertakedJob.id, {
         status: "completion_reported",
@@ -537,6 +538,16 @@ export default function WorkerJobsPage() {
         completionMemo: memo || null,
         completedChecklistIds:
           completedChecklistIds.length > 0 ? completedChecklistIds : null,
+      });
+
+      // 発注者に通知を送信
+      RequesterNotificationApi.create({
+        requesterId: selectedJob.requesterId,
+        confirmedAt: null, // 未読
+        title: "作業完了報告がありました",
+        description: `「${selectedJob.title}」の作業が完了報告されました。評価をお願いします。`,
+        url: `/requester/undertaked_jobs/${selectedUndertakedJob.id}`,
+        createdAt: new Date().toISOString(),
       });
     }
   };

@@ -7,6 +7,7 @@ interface TrustPassportState {
   setPassport: (passport: TrustPassport) => void;
   setSkills: (skills: WorkerSkill[]) => void;
   updateTrustScore: (score: number) => void;
+  updateBalance: (amount: number) => void;
   addSkill: (skill: WorkerSkill) => void;
   removeSkill: (skillId: number) => void;
   getRank: () => Rank;
@@ -32,6 +33,15 @@ export const useTrustPassportStore = create<TrustPassportState>()(
           ? {
               ...state.passport,
               trustScore: Math.min(100, Math.max(0, score)),
+            }
+          : null,
+      })),
+    updateBalance: (amount) =>
+      set((state) => ({
+        passport: state.passport
+          ? {
+              ...state.passport,
+              balance: state.passport.balance + amount,
             }
           : null,
       })),

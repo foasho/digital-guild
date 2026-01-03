@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { defaultWorker, defaultRequester } from "@/constants/mocks";
+import { WorkerNotificationApi } from "@/constants/api-mocks";
 import {
   useJobs,
   useUndertakedJobs,
@@ -80,7 +81,7 @@ export default function UndertakedJobEvaluationPage() {
   const { getJobById, pending: jobsPending } = useJobs();
   const { undertakedJobs, getById, updateUndertakedJob, pending: undertakedPending } = useUndertakedJobs();
   const { worker, pending: workerPending } = useWorker();
-  const { passport, updateTrustScore, addSkill, pending: passportPending } = useTrustPassport();
+  const { passport, updateTrustScore, updateBalance, addSkill, pending: passportPending } = useTrustPassport();
   const { addTransaction } = useTransactionHistories();
   const { requester } = useRequester();
 
@@ -142,6 +143,18 @@ export default function UndertakedJobEvaluationPage() {
             canceledAt: new Date().toISOString(),
           });
         });
+
+      // 採用された労働者に通知を送信
+      if (job) {
+        WorkerNotificationApi.create({
+          workerId: applicantJob.workerId,
+          confirmedAt: null, // 未読
+          title: "採用されました！",
+          description: `「${job.title}」に採用されました。詳細を確認してください。`,
+          url: "/worker/jobs",
+          createdAt: new Date().toISOString(),
+        });
+      }
 
       setIsApplicantModalOpen(false);
       setIsHiringComplete(true);
@@ -207,7 +220,7 @@ export default function UndertakedJobEvaluationPage() {
       const newTrustScore = Math.min(100, completedCount + avgEvalScore * 10);
       updateTrustScore(newTrustScore);
 
-      // Step 4: 報酬のJPYC振込（TransactionHistory追加で残高自動更新）
+      // Step 4: 報酬のJPYC振込（TransactionHistory追加 + TrustPassport.balance更新）
       setProcessingStep("報酬を振り込み中...");
       await new Promise((r) => setTimeout(r, 800));
       const totalReward = job.reward + job.aiInsentiveReward;
@@ -220,6 +233,21 @@ export default function UndertakedJobEvaluationPage() {
         amount: totalReward,
         description: `報酬: ${job.title}`,
         tradedAt: new Date().toISOString(),
+      });
+
+      // TrustPassportのbalanceを更新
+      await updateBalance(totalReward);
+
+      // Step 5: 労働者に通知を送信
+      setProcessingStep("通知を送信中...");
+      await new Promise((r) => setTimeout(r, 300));
+      WorkerNotificationApi.create({
+        workerId: displayWorker.id,
+        confirmedAt: null, // 未読
+        title: "報酬が振り込まれました",
+        description: `「${job.title}」の報酬 ${totalReward.toLocaleString()} JPYC が振り込まれました。`,
+        url: `/worker/wallet`,
+        createdAt: new Date().toISOString(),
       });
 
       setIsCompleted(true);
@@ -320,7 +348,7 @@ export default function UndertakedJobEvaluationPage() {
 
         <Button
           color="primary"
-          className="bg-indigo-500 hover:bg-indigo-600"
+          className="text-white rounded-full bg-indigo-500 hover:bg-indigo-600"
           onPress={() => router.push("/requester/dashboard")}
         >
           ダッシュボードへ
@@ -361,7 +389,7 @@ export default function UndertakedJobEvaluationPage() {
 
         <Button
           color="primary"
-          className="bg-sky-500 hover:bg-sky-600"
+          className="text-white rounded-full bg-sky-500 hover:bg-sky-600"
           onPress={() => router.push("/requester/dashboard")}
         >
           ダッシュボードへ

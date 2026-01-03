@@ -9,7 +9,7 @@ import { JobDetailModal } from "@/components/worker/JobDetailModal";
 import { type FilterValues, JobFilter } from "@/components/worker/JobFilter";
 import { useJobs, useBookmarks, useUndertakedJobs, useRecommendedJobs } from "@/hooks/workers";
 import { useUndertakedJobStore, useWorkerStore } from "@/stores/workers";
-import { UndertakedJobApi } from "@/constants/api-mocks";
+import { UndertakedJobApi, RequesterNotificationApi } from "@/constants/api-mocks";
 import type { Job, UndertakedJob } from "@/types";
 
 export default function RequestBoardsPage() {
@@ -40,13 +40,13 @@ export default function RequestBoardsPage() {
   const addUndertakedJob = useUndertakedJobStore((state) => state.addUndertakedJob);
   const getByJobId = useUndertakedJobStore((state) => state.getByJobId);
 
-  // アクティブな受注かどうかをチェック（完了済み・キャンセル済みは除外）
+  // アクティブな応募/受注かどうかをチェック（完了済み・キャンセル済みは除外）
   const isActivelyAccepted = useCallback(
     (jobId: number): boolean => {
       const undertakedJob = getByJobId(jobId);
       if (!undertakedJob) return false;
-      // 進行中または確認待ちのみアクティブとみなす
-      return undertakedJob.status === "accepted" || undertakedJob.status === "completion_reported";
+      // 応募中、進行中、または確認待ちはアクティブとみなす
+      return undertakedJob.status === "applied" || undertakedJob.status === "accepted" || undertakedJob.status === "completion_reported";
     },
     [getByJobId]
   );
@@ -151,11 +151,11 @@ export default function RequestBoardsPage() {
     setSelectedJob(null);
   }, []);
 
-  // 受注処理
+  // 応募処理
   const handleAccept = useCallback(async () => {
     if (!selectedJob || !worker || isAccepting) return;
 
-    // 既にアクティブな受注があるかチェック（完了済み・キャンセル済みは除外）
+    // 既にアクティブな受注があるかチェック（完了済み・キャンセル済み・応募中は除外）
     if (isActivelyAccepted(selectedJob.id)) {
       return;
     }
@@ -167,9 +167,10 @@ export default function RequestBoardsPage() {
         id: Date.now(),
         workerId: worker.id,
         jobId: selectedJob.id,
-        status: "accepted",
+        status: "applied", // 応募中ステータスに変更
         requesterEvalScore: null,
-        acceptedAt: new Date().toISOString(),
+        appliedAt: new Date().toISOString(), // 応募日時を追加
+        acceptedAt: null,
         completionReportedAt: null,
         canceledAt: null,
         finishedAt: null,
@@ -182,13 +183,23 @@ export default function RequestBoardsPage() {
       // Storeに追加
       addUndertakedJob(newUndertakedJob);
 
+      // 発注者に通知を送信
+      RequesterNotificationApi.create({
+        requesterId: selectedJob.requesterId,
+        confirmedAt: null, // 未読
+        title: "新しい応募がありました",
+        description: `「${selectedJob.title}」に${worker.name}さんから応募がありました。`,
+        url: `/requester/undertaked_jobs/${newUndertakedJob.id}`,
+        createdAt: new Date().toISOString(),
+      });
+
       // 少し待ってからジョブ画面に遷移（UXのため）
       await new Promise((resolve) => setTimeout(resolve, 800));
 
       // ジョブ画面に遷移
       router.push("/worker/jobs");
     } catch (error) {
-      console.error("受注エラー:", error);
+      console.error("応募エラー:", error);
       setIsAccepting(false);
     }
   }, [selectedJob, worker, isAccepting, isActivelyAccepted, addUndertakedJob, router]);

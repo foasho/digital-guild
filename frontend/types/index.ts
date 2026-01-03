@@ -108,6 +108,7 @@ export interface TrustPassport {
   id: number;
   workerId: number;
   trustScore: number;
+  balance: number;
 }
 
 // 労働者スキル

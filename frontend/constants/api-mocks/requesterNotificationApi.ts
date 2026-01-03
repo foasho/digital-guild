@@ -60,5 +60,20 @@ export const RequesterNotificationApi = {
     const notifications = RequesterNotificationApi.getByRequesterId(requesterId);
     return notifications.filter((n) => !n.confirmedAt).length;
   },
+
+  /**
+   * 通知を作成
+   */
+  create: (notification: Omit<RequesterNotification, "id">): RequesterNotification => {
+    const all = RequesterNotificationApi.getAll();
+    const newId = all.length > 0 ? Math.max(...all.map((n) => n.id)) + 1 : 1;
+    const newNotification: RequesterNotification = {
+      id: newId,
+      ...notification,
+    };
+    all.unshift(newNotification); // 先頭に追加
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    return newNotification;
+  },
 };
 

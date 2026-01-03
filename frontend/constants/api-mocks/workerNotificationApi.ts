@@ -60,5 +60,20 @@ export const WorkerNotificationApi = {
     const notifications = WorkerNotificationApi.getByWorkerId(workerId);
     return notifications.filter((n) => !n.confirmedAt).length;
   },
+
+  /**
+   * 通知を作成
+   */
+  create: (notification: Omit<WorkerNotification, "id">): WorkerNotification => {
+    const all = WorkerNotificationApi.getAll();
+    const newId = all.length > 0 ? Math.max(...all.map((n) => n.id)) + 1 : 1;
+    const newNotification: WorkerNotification = {
+      id: newId,
+      ...notification,
+    };
+    all.unshift(newNotification); // 先頭に追加
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    return newNotification;
+  },
 };
 

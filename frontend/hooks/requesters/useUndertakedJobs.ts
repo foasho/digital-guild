@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { UndertakedJobApi } from "@/constants/api-mocks";
 import { useUndertakedJobStore, useJobStore } from "@/stores/requesters";
 import type { UndertakedJob } from "@/types";
@@ -24,7 +24,6 @@ interface UseUndertakedJobsResult {
  */
 const useUndertakedJobs = (): UseUndertakedJobsResult => {
   const [pending, setPending] = useState(false);
-  const hasFetched = useRef(false);
   const {
     undertakedJobs,
     setUndertakedJobs,
@@ -47,12 +46,11 @@ const useUndertakedJobs = (): UseUndertakedJobsResult => {
   }, [setUndertakedJobs]);
 
   useEffect(() => {
-    // 初回マウント時のみフェッチ
-    if (!hasFetched.current) {
-      hasFetched.current = true;
-      fetchUndertakedJobs();
-    }
-  }, [fetchUndertakedJobs]);
+    // マウント時に常にLocalStorageから最新データを取得
+    // （労働者側で更新された場合に反映するため）
+    fetchUndertakedJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateUndertakedJob = useCallback(
     async (id: number, updates: Partial<UndertakedJob>): Promise<void> => {

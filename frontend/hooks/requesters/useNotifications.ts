@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { RequesterNotificationApi } from "@/constants/api-mocks";
 import { useNotificationStore } from "@/stores/requesters";
 import type { RequesterNotification } from "@/types";
@@ -19,7 +19,6 @@ interface UseNotificationsResult {
  */
 const useNotifications = (requesterId: number = 1000): UseNotificationsResult => {
   const [pending, setPending] = useState(false);
-  const hasFetched = useRef(false);
   const { notifications, setNotifications, getUnreadCount } =
     useNotificationStore();
 
@@ -35,11 +34,10 @@ const useNotifications = (requesterId: number = 1000): UseNotificationsResult =>
   }, [setNotifications, requesterId]);
 
   useEffect(() => {
-    if (!hasFetched.current) {
-      hasFetched.current = true;
-      fetchNotifications();
-    }
-  }, [fetchNotifications]);
+    // マウント時に常にLocalStorageから最新データを取得
+    fetchNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 既読処理（LocalStorageにも保存）
   const markAsRead = useCallback((id: number) => {
