@@ -381,6 +381,23 @@ export const canceledJob1: UndertakedJob = {
   completedChecklistIds: null,
 };
 
+// ===== 大分幸子(id: 1000)のジョブに対する着手ジョブ =====
+
+// 確認待ち（completion_reported）のジョブ - 大分幸子のジョブ1001
+export const oitaPendingReviewJob: UndertakedJob = {
+  id: 28,
+  workerId: 1,
+  jobId: 1001, // 温泉旅館の接客補助
+  status: "completion_reported",
+  requesterEvalScore: null,
+  acceptedAt: "2026-01-02T09:00:00Z",
+  completionReportedAt: "2026-01-02T18:00:00Z",
+  canceledAt: null,
+  finishedAt: null,
+  completionMemo: "接客業務を無事に完了しました。お客様からもお褒めの言葉をいただきました。",
+  completedChecklistIds: [1001, 1002, 1003, 1004, 1005],
+};
+
 // 全undertakedJobs（初期データ）
 // 完了25件: 評価合計 108, 平均 = 4.32 ≈ 4.3
 // 信用ポイント = min(50, 25) + round(4.32 * 10) = 25 + 43 = 68
@@ -412,4 +429,5 @@ export const undertakedJobs: UndertakedJob[] = [
   completedJob25,
   inProgressJob1,
   canceledJob1,
+  oitaPendingReviewJob,
 ];

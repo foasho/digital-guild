@@ -826,11 +826,6 @@ export default function NewJobPage() {
             >
               ジョブを作成する
             </Button>
-            <p className="text-center text-xs text-gray-500 mt-3">
-              {aiIncentiveStep !== "complete"
-                ? "インセンティブを算出してからジョブを作成できます"
-                : "作成後、ダッシュボードで確認・管理できます"}
-            </p>
           </div>
         </form>
       </div>

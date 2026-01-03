@@ -21,6 +21,7 @@ export interface Worker {
 export interface Requester {
   id: number;
   name: string;
+  address: string;
   createdAt: string;
 }
 

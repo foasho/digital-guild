@@ -244,9 +244,8 @@ export default function RequesterLayout({ children }: RequesterLayoutProps) {
             >
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
-            <span className="text-sm text-gray-600 dark:text-gray-300">湯煙町自治体</span>
             <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-              湯
+              SO
             </div>
           </div>
         </div>
