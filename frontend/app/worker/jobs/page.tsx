@@ -581,7 +581,7 @@ export default function WorkerJobsPage() {
             key="applied"
             title={
               <div className="flex items-center gap-1">
-                <span>応募中</span>
+                <span>応募</span>
                 {appliedJobs.length > 0 && (
                   <Chip
                     size="sm"
@@ -598,7 +598,7 @@ export default function WorkerJobsPage() {
             key="in_progress"
             title={
               <div className="flex items-center gap-1">
-                <span>進行中</span>
+                <span>着手</span>
                 {inProgressJobs.length > 0 && (
                   <Chip
                     size="sm"
@@ -615,7 +615,7 @@ export default function WorkerJobsPage() {
             key="pending_review"
             title={
               <div className="flex items-center gap-1">
-                <span>確認待ち</span>
+                <span>確認中</span>
                 {pendingReviewJobs.length > 0 && (
                   <Chip
                     size="sm"
