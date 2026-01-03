@@ -108,15 +108,28 @@ digital-guild/
 │   ├── app/
 │   │   ├── worker/     # 労働者向けUI
 │   │   └── requester/  # 発注者向けUI
+│   ├── admin/          # 管理者画面（Phase 2）
 │   ├── components/     # UIコンポーネント
 │   ├── stores/         # Zustand ストア
 │   ├── hooks/          # カスタムフック
 │   ├── constants/      # モックデータ・API
 │   └── types/          # 型定義
-├── docs/
-│   └── context/        # 仕様書・ロードマップ
-└── hardhat/            # スマートコントラクト（Phase 2）
+├── expo/               # React Native アプリ（Phase 2: Worker向け）
+├── backend/            # Golang バックエンド（Phase 2）
+├── hardhat/            # スマートコントラクト（Phase 2）
+├── infra/              # IaC（Terraform）（Phase 2）
+└── docs/
+    └── context/        # 仕様書・ロードマップ
 ```
+
+| フォルダ | 説明 | Phase |
+|---------|------|-------|
+| `frontend/` | Next.js Webアプリ（Requester UI / 共通） | 1 |
+| `frontend/admin/` | 管理者画面（Requester・マスタ管理） | 2 |
+| `expo/` | React Native アプリ（Worker向けiOS/Android） | 2 |
+| `backend/` | Golang APIサーバー | 2 |
+| `hardhat/` | Solidityスマートコントラクト | 2 |
+| `infra/` | IaC（Terraform / Pulumi等） | 2 |
 
 > 📖 詳細: [Phase 1 モックシステム仕様](./docs/context/phase1-mock-system.md)
 
