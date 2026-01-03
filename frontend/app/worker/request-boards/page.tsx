@@ -194,13 +194,16 @@ export default function RequestBoardsPage() {
             </svg>
           }
           classNames={{
-            inputWrapper: "bg-white dark:bg-gray-800 shadow-sm",
+            base: "flex-1",
+            inputWrapper: "bg-gray-900/50 backdrop-blur-xs border border-gray-600/50 rounded-xl shadow-none !ring-0 !outline-none data-[focus=true]:!border-gray-500",
+            input: "text-white placeholder:text-gray-400 !outline-none !ring-0",
+            innerWrapper: "bg-transparent",
           }}
         />
         <button
           type="button"
           onClick={() => setIsFilterOpen(true)}
-          className="flex items-center justify-center w-12 h-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm shrink-0"
+          className="flex items-center justify-center w-12 h-12 bg-gray-900/50 backdrop-blur-xs border border-gray-600 rounded-xl shrink-0"
           aria-label="フィルター"
         >
           <svg
