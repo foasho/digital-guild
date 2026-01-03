@@ -2,129 +2,29 @@
 
 **JPYCを活用した地方創生ジョブマッチングプラットフォーム**
 
+[![Demo](https://img.shields.io/badge/Demo-Worker%20UI-blue)](https://digital-guild.vercel.app/worker/request-boards)
+[![Demo](https://img.shields.io/badge/Demo-Requester%20UI-green)](https://digital-guild.vercel.app/requester/dashboard)
+
 ---
 
 ## 概要
 
-DIGITAL GUILDは、自由に働きたい若者と労働者不足に悩む地方を繋ぐジョブマッチングサービスです。
+DIGITAL GUILDは、自由に働きたい若者（冒険者）と労働者不足に悩む地方（地域の人々）を繋ぐジョブマッチングサービスです。
 
-Web3技術（JPYC、スマートコントラクト）を活用することで、高速決済と透明性のある信用スコアシステムを実現し、人と人の安全なマッチングを可能にします。
+Web3技術（JPYC、スマートコントラクト）を活用し、高速決済と透明性のある信用スコアシステムを実現します。
 
----
-
-## 解決する課題
-
-### 地方の課題
-- 労働者不足による地域サービスの低下
-- 単発・短期の仕事を依頼する手段がない
-- 地方で困っている個人が気軽に仕事を発注できる仕組みがない
-
-### 若者・労働者の課題
-- 柔軟な働き方（旅行がてら働く等）の選択肢が少ない
-- 単発の仕事で信用を積み上げる仕組みがない
-- 報酬の受け取りに時間がかかる
+> 📖 詳細: [サービスコンテキスト](./docs/context/service-context-docs.md)
 
 ---
 
-## ソリューション
+## デモ
 
-### 1. AIによるジョブマッチング
-- 労働者のスキル、住所、年齢とジョブの募集条件を比較
-- Gemini AIによるマッチング精度の向上
-- 推奨ジョブの自動提案
+| 対象 | URL | 説明 |
+|------|-----|------|
+| 🧑‍💼 労働者 | [Worker UI](https://digital-guild.vercel.app/worker/request-boards) | ジョブ検索・応募・ウォレット |
+| 🏢 発注者 | [Requester UI](https://digital-guild.vercel.app/requester/dashboard) | ジョブ管理・評価・支払 |
 
-### 2. インセンティブ設計
-- 補助金等の支援金を活用したAIインセンティブ
-- 緊急度の高いジョブへの報酬上乗せ
-- 特定エリアへの需要バランス調整
-
-### 3. TrustPassport（信用ポイントNFT）
-- スマートコントラクトによる透明な信用スコア算出
-- ジョブ完了実績と人間評価の蓄積
-- NFT化による信用の可視化と持ち運び
-
-### 4. JPYC決済
-- ステーブルコイン（JPYC）による即時決済
-- 低手数料での報酬受け取り
-- QRコード/バーコードによる簡単な支払い
-
----
-
-## 主な機能
-
-### 労働者向けアプリ
-| 機能 | 説明 |
-|------|------|
-| 掲示板 | ジョブ一覧の検索・フィルター |
-| マップ | 地図上でジョブを探す |
-| ジョブ管理 | 進行中・完了済みジョブの確認 |
-| ウォレット | JPYC残高・取引履歴の確認 |
-| ギルド証 | TrustPassport（信用スコア・ランク）の表示 |
-
-### 発注者向けアプリ（個人の依頼者）
-| 機能 | 説明 |
-|------|------|
-| ダッシュボード | 発注済みジョブの管理 |
-| ジョブ作成 | 新規ジョブの発注 |
-| ジョブ詳細 | 応募者・AIレコメンドの確認 |
-| 評価 | 労働者の作業評価・承認 |
-
-### 管理者向け画面（将来実装予定）
-| 機能 | 説明 |
-|------|------|
-| 補助金管理 | 補助金の配分・管理 |
-| 銀行連携 | 地方銀行とのKYC連携 |
-| ユーザー管理 | 労働者・発注者の管理 |
-
----
-
-## システム構成
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        DIGITAL GUILD                        │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐       │
-│  │  労働者App  │   │  発注者App   │   │  管理画面   │       │
-│  │  (Worker)   │   │ (Requester)  │   │  (Admin)    │       │
-│  └──────┬──────┘   └──────┬──────┘   └──────┬──────┘       │
-│         │                 │                 │               │
-│         └────────┬────────┴────────┬────────┘               │
-│                    │                                        │
-│         ┌──────────▼──────────┐                            │
-│         │     Frontend        │                            │
-│         │   (Next.js 16)      │                            │
-│         └──────────┬──────────┘                            │
-│                    │                                        │
-│    ┌───────────────┼───────────────┐                       │
-│    │               │               │                       │
-│    ▼               ▼               ▼                       │
-│ ┌──────┐    ┌───────────┐    ┌──────────┐                 │
-│ │Gemini│    │   JPYC    │    │ Smart    │                 │
-│ │  AI  │    │ (決済)    │    │ Contract │                 │
-│ └──────┘    └───────────┘    └──────────┘                 │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 技術スタック
-
-### Frontend
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript
-- **UI**: HeroUI + Tailwind CSS
-- **State**: Zustand
-- **Validation**: Zod
-- **Map**: Leaflet
-- **AI**: Google Gemini API
-
-### Blockchain（将来実装）
-- **Smart Contract**: Solidity (Hardhat)
-- **Payment**: JPYC (ERC-20)
-- **NFT**: TrustPassport (ERC-721)
+> ⚠️ スマートフォン表示推奨（モバイルファーストUI）
 
 ---
 
@@ -132,43 +32,62 @@ Web3技術（JPYC、スマートコントラクト）を活用することで、
 
 | Phase | 内容 | 状態 |
 |-------|------|------|
-| Phase 1 | フロントエンドモック | 計画完了 |
-| Phase 2 | スマートコントラクト開発 | 未着手 |
-| Phase 3 | バックエンドAPI開発 | 未着手 |
-| Phase 4 | Web3連携・本番デプロイ | 未着手 |
+| Phase 1 | フロントエンドモック | ✅ 完了 |
+| Phase 2 | バックエンド + Expo + Web3 | 📋 計画中 |
+| Phase 3 | 全国展開 | 🔮 将来 |
 
-### Phase 1: モックシステム
-- LocalStorageによるデータ永続化
-- モックデータによる動作確認
-- UIコンポーネントの実装
-- Gemini AIレコメンド機能
+> 📖 詳細: [開発ロードマップ](./docs/context/roadmap.md)
 
-詳細は `tasks/` ディレクトリの計画書を参照。
+---
+
+## 技術スタック
+
+### Phase 1（現在）
+
+| カテゴリ | 技術 |
+|---------|------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| UI | HeroUI + Tailwind CSS |
+| State | Zustand |
+| Map | Leaflet |
+| AI | Google Gemini API |
+| Data | LocalStorage (Mock) |
+
+### Phase 2（予定）
+
+| カテゴリ | 技術 |
+|---------|------|
+| Web | Next.js (Requester UI) |
+| Mobile | React Native / Expo (Worker UI) |
+| Backend | Golang |
+| Database | PostgreSQL / Supabase |
+| Blockchain | Solidity + JPYC |
 
 ---
 
 ## Getting Started
 
 ### 必要環境
-- Bun 1.x
-- Node.js 20.x（Bunのフォールバック用）
+
+- Bun 1.x または Node.js 20.x
 
 ### セットアップ
 
 ```bash
-# リポジトリのクローン
-git clone <repository-url>
+# クローン
+git clone https://github.com/foasho/digital-guild.git
 cd digital-guild
 
-# フロントエンドのセットアップ
+# フロントエンド
 cd frontend
 bun install
 
-# 環境変数の設定
+# 環境変数
 cp .env.example .env
-# .envを編集してAPIキーを設定
+# .env を編集
 
-# 開発サーバーの起動
+# 開発サーバー起動
 bun run dev
 ```
 
@@ -181,53 +100,54 @@ GOOGLE_MAP_API_KEY=your_google_map_api_key
 
 ---
 
-## ディレクトリ構造
+## ディレクトリ構成
 
 ```
 digital-guild/
-├── frontend/              # Next.js フロントエンド
-│   ├── app/              # App Router ページ
-│   │   ├── worker/       # 労働者向けページ
-│   │   ├── requester/    # 発注者向けページ
-│   │   └── api/          # API Routes
-│   ├── admin/            # 管理者画面（将来実装予定）
-│   ├── components/       # UIコンポーネント
-│   ├── stores/           # Zustand ストア
-│   ├── types/            # TypeScript 型定義
-│   ├── lib/              # ライブラリ（Gemini等）
-│   ├── hooks/            # カスタムフック
-│   ├── utils/            # ユーティリティ関数
-│   ├── constants/        # 定数・モックデータ
-│   └── public/           # 静的ファイル
-├── hardhat/              # スマートコントラクト（Phase 2以降）
+├── frontend/           # Next.js フロントエンド
+│   ├── app/
+│   │   ├── worker/     # 労働者向けUI
+│   │   └── requester/  # 発注者向けUI
+│   ├── components/     # UIコンポーネント
+│   ├── stores/         # Zustand ストア
+│   ├── hooks/          # カスタムフック
+│   ├── constants/      # モックデータ・API
+│   └── types/          # 型定義
 ├── docs/
-│   ├── context/          # 仕様書
-│   ├── figma/            # デザインファイル
-│   └── works/            # 作業記録
-└── tasks/                # 実装計画書
+│   └── context/        # 仕様書・ロードマップ
+└── hardhat/            # スマートコントラクト（Phase 2）
 ```
+
+> 📖 詳細: [Phase 1 モックシステム仕様](./docs/context/phase1-mock-system.md)
 
 ---
 
-## 信用スコア（信用ポイント）システム
+## 主な機能
 
-### 計算式
-```
-TrustScore = クエスト達成数（最大50） + 人間評価平均 × 10
-```
+### 労働者向け
 
-- **最大値**: 100
-- **クエスト達成数**: 完了したジョブ数（最大50ポイント）
-- **人間評価**: 発注者からの星評価（1-5）の平均値 × 10
+- 📋 **掲示板**: ジョブ検索・フィルター
+- 🗺️ **マップ**: 地図上でジョブ探索
+- 💼 **ジョブ管理**: 応募中・進行中・完了の管理
+- 💰 **ウォレット**: JPYC残高・取引履歴
+- 🎖️ **ギルド証**: TrustPassport（信用スコア・ランク）
+- 🔔 **通知**: リアルタイム通知
 
-### ランク閾値
+### 発注者向け
 
-| ランク | 必要スコア |
-|--------|-----------|
-| Bronze | 0 - 59 |
-| Silver | 60 - 69 |
-| Gold | 70 - 79 |
-| Platinum | 80 - 100 |
+- 📊 **ダッシュボード**: ジョブ一覧管理
+- 👥 **応募者選定**: AIレコメンド付き
+- ⭐ **評価・支払**: 完了報告確認・報酬支払
+
+---
+
+## ドキュメント
+
+| ドキュメント | 内容 |
+|-------------|------|
+| [サービスコンテキスト](./docs/context/service-context-docs.md) | サービス全体像 |
+| [開発ロードマップ](./docs/context/roadmap.md) | Phase別開発計画 |
+| [Phase 1 モック仕様](./docs/context/phase1-mock-system.md) | モックシステム詳細 |
 
 ---
 

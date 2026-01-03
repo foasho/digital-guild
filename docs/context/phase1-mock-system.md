@@ -437,10 +437,16 @@ Phase 1のモックシステムは、Phase 2以降で以下に置き換えられ
 
 ---
 
-## 参考資料
+## デモ・ドキュメント
 
+### モックデモ
+- 🧑‍💼 [労働者向けUI](https://digital-guild.vercel.app/worker/request-boards)
+- 🏢 [発注者向けUI](https://digital-guild.vercel.app/requester/dashboard)
+
+### ドキュメント
 - [README.md](../../README.md) - プロジェクト概要
 - [サービスコンテキスト](./service-context-docs.md) - サービス全体像
+- [開発ロードマップ](./roadmap.md) - Phase別開発計画
 - [DIGITAL GUILD SERVICE.pdf](./DIGITAL%20GUILD%20SERVICE.pdf) - サービス企画書
 
 ---

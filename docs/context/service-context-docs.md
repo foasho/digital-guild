@@ -175,9 +175,15 @@ DIGITAL GUILDは競合しません。すべてのプレイヤーをつなぐハ�
 
 ---
 
-## 参考資料
+## デモ・ドキュメント
 
+### モックデモ（Phase 1）
+- 🧑‍💼 [労働者向けUI](https://digital-guild.vercel.app/worker/request-boards)
+- 🏢 [発注者向けUI](https://digital-guild.vercel.app/requester/dashboard)
+
+### ドキュメント
 - [README.md](../../README.md) - プロジェクト概要
+- [開発ロードマップ](./roadmap.md) - Phase別開発計画
 - [Phase 1 モックシステム仕様](./phase1-mock-system.md) - モックシステムの詳細
 - [DIGITAL GUILD SERVICE.pdf](./DIGITAL%20GUILD%20SERVICE.pdf) - サービス企画書
 

@@ -111,7 +111,17 @@ DIGITAL GUILDは、3つのPhaseに分けて段階的に開発・展開を行い�
 | **監視・ログ** | DataDog / Sentry | 中 |
 | **セキュリティ** | WAF、脆弱性診断 | 高 |
 
-#### 2-4. 機能拡張
+#### 2-4. Worker向けネイティブアプリ（Expo）
+
+| タスク | 詳細 | 優先度 |
+|--------|------|--------|
+| **Expoプロジェクト構築** | React Native (Expo) 環境構築 | 高 |
+| **UI移植** | Web版WorkerUIをネイティブへ移植 | 高 |
+| **Push通知** | Expo Notifications 実装 | 高 |
+| **位置情報** | バックグラウンド位置情報取得 | 中 |
+| **ウォレット連携** | WalletConnect / Wagmi 実装 | 高 |
+
+#### 2-5. 機能拡張
 
 | タスク | 詳細 | 優先度 |
 |--------|------|--------|
@@ -229,7 +239,8 @@ AI:           Gemini API
 ### Phase 2
 
 ```
-Frontend:     Next.js 16 + TypeScript + HeroUI + Tailwind
+Web:          Next.js 16 + TypeScript + HeroUI + Tailwind (Requester UI)
+Mobile:       React Native (Expo) + TypeScript (Worker UI)
 Backend:      Golang
 Database:     PostgreSQL + Prisma / Supabase
 Auth:         NextAuth.js / Wagmi
@@ -242,7 +253,8 @@ Infra:        Vercel / AWS
 ### Phase 3
 
 ```
-Frontend:     Next.js + React Native (Expo)
+Web:          Next.js (Requester UI / Admin)
+Mobile:       React Native (Expo) - iOS / Android 両ストア公開
 Backend:      Microservices (Kubernetes)
 Database:     PostgreSQL + Redis + TimescaleDB
 Auth:         DID / VC
@@ -301,8 +313,13 @@ Infra:        Multi-region Cloud
 
 ---
 
-## 参考資料
+## デモ・ドキュメント
 
+### モックデモ（Phase 1）
+- 🧑‍💼 [労働者向けUI](https://digital-guild.vercel.app/worker/request-boards)
+- 🏢 [発注者向けUI](https://digital-guild.vercel.app/requester/dashboard)
+
+### ドキュメント
 - [サービスコンテキスト](./service-context-docs.md) - サービス全体像
 - [Phase 1 モックシステム仕様](./phase1-mock-system.md) - モックシステムの詳細
 - [DIGITAL GUILD SERVICE.pdf](./DIGITAL%20GUILD%20SERVICE.pdf) - サービス企画書
