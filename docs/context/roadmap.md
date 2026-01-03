@@ -332,6 +332,7 @@ Infra:        Multi-region Cloud
 
 ### ドキュメント
 - [サービスコンテキスト](./service-context-docs.md) - サービス全体像
+- [開発者ガイド](./developer.md) - 環境構成・インフラ・テスト
 - [Phase 1 モックシステム仕様](./phase1-mock-system.md) - モックシステムの詳細
 - [Hardhat開発ガイド](./hardhat.md) - ブロックチェーン開発（Phase 2）
 - [DIGITAL GUILD SERVICE.pdf](./DIGITAL%20GUILD%20SERVICE.pdf) - サービス企画書

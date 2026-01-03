@@ -160,6 +160,7 @@ digital-guild/
 |-------------|------|
 | [サービスコンテキスト](./docs/context/service-context-docs.md) | サービス全体像 |
 | [開発ロードマップ](./docs/context/roadmap.md) | Phase別開発計画 |
+| [開発者ガイド](./docs/context/developer.md) | 環境構成・インフラ・テスト |
 | [Phase 1 モック仕様](./docs/context/phase1-mock-system.md) | モックシステム詳細 |
 | [Hardhat開発ガイド](./docs/context/hardhat.md) | ブロックチェーン開発（Phase 2） |
 
