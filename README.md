@@ -1,5 +1,9 @@
 # DIGITAL GUILD
 
+<p align="center">
+  <img src="./docs/images/digital-guild.png" alt="DIGITAL GUILD" width="864" height="480" />
+</p>
+
 **JPYCを活用した地方創生ジョブマッチングプラットフォーム**
 
 [![Demo](https://img.shields.io/badge/Demo-Worker%20UI-blue)](https://digital-guild.vercel.app/worker/request-boards)
