@@ -38,6 +38,8 @@ export function JobCard({
       className="relative w-full overflow-hidden rounded-xl drop-shadow-lg hover:drop-shadow-2xl transition-all duration-300"
       radius="lg"
       shadow="md"
+      isPressable={!!onDetailClick}
+      onPress={onDetailClick}
     >
       {/* 背景画像 + グラデーションオーバーレイ（下部をより暗く） */}
       <div

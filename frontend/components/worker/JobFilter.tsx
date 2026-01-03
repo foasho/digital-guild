@@ -74,7 +74,10 @@ export function JobFilter({
       onClose={onClose}
       placement="bottom"
       size="full"
+      scrollBehavior="inside"
+      backdrop="blur"
       classNames={{
+        backdrop: "bg-black/50",
         base: "m-0 sm:m-0 rounded-t-3xl rounded-b-none max-h-[60vh]",
         header: "border-b border-white/10",
         body: "py-4",

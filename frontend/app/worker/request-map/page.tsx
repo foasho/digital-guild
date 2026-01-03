@@ -5,12 +5,10 @@ import { debounce } from "es-toolkit";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, Send, X } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { JobDetailModal } from "@/components/worker/JobDetailModal";
-import { useJobs, useBookmarks, useUndertakedJobs, useWorker } from "@/hooks/workers";
-import { UndertakedJobApi, RequesterNotificationApi } from "@/constants/api-mocks";
-import type { Job, UndertakedJob } from "@/types";
+import { useJobs, useUndertakedJobs } from "@/hooks/workers";
+import type { Job } from "@/types";
 
 // SSR無効化でMapコンポーネントをdynamic import
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -23,34 +21,20 @@ const MapComponent = dynamic(() => import("./MapComponent"), {
 });
 
 export default function RequestMapPage() {
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isAccepting, setIsAccepting] = useState(false);
   const [flyToPosition, setFlyToPosition] = useState<{ lat: number; lng: number } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // hooksからデータ取得
-  const { worker } = useWorker();
   const { jobs, pending: jobsPending } = useJobs();
-  const { addBookmark, removeBookmark, isBookmarked } = useBookmarks();
-  const { addUndertakedJob, getByJobId, pending: undertakedPending } = useUndertakedJobs();
+  const { getByJobId, pending: undertakedPending } = useUndertakedJobs();
+  const { isBookmarked } = require("@/hooks/workers").useBookmarks();
 
   const isHydrated = !jobsPending && !undertakedPending;
-
-  // アクティブな応募/受注かどうかをチェック（完了済み・キャンセル済みは除外）
-  const isActivelyAccepted = useCallback(
-    (jobId: number): boolean => {
-      const undertakedJob = getByJobId(jobId);
-      if (!undertakedJob) return false;
-      // 応募中、進行中、または確認待ちはアクティブとみなす
-      return undertakedJob.status === "applied" || undertakedJob.status === "accepted" || undertakedJob.status === "completion_reported";
-    },
-    [getByJobId]
-  );
 
   // 検索バー展開時に入力欄にフォーカス
   useEffect(() => {
@@ -104,19 +88,6 @@ export default function RequestMapPage() {
     }
   }, [debouncedQuery, filteredJobs]);
 
-  // ブックマークのトグル
-  const handleBookmarkToggle = useCallback(
-    (jobId: number) => {
-      if (!worker) return;
-      if (isBookmarked(jobId)) {
-        removeBookmark(jobId);
-      } else {
-        addBookmark(jobId);
-      }
-    },
-    [worker, isBookmarked, addBookmark, removeBookmark]
-  );
-
   // マーカークリックで詳細モーダルを開く
   const handleMarkerClick = useCallback((job: Job) => {
     setSelectedJob(job);
@@ -128,59 +99,6 @@ export default function RequestMapPage() {
     setIsDetailModalOpen(false);
     setSelectedJob(null);
   }, []);
-
-  // 応募処理
-  const handleAccept = useCallback(async () => {
-    if (!selectedJob || !worker || isAccepting) return;
-
-    // 既にアクティブな応募/受注があるかチェック（完了済み・キャンセル済みは除外）
-    if (isActivelyAccepted(selectedJob.id)) {
-      return;
-    }
-
-    setIsAccepting(true);
-
-    try {
-      const newUndertakedJob: UndertakedJob = {
-        id: Date.now(),
-        workerId: worker.id,
-        jobId: selectedJob.id,
-        status: "applied", // 応募中ステータスに変更
-        requesterEvalScore: null,
-        appliedAt: new Date().toISOString(), // 応募日時を追加
-        acceptedAt: null,
-        completionReportedAt: null,
-        canceledAt: null,
-        finishedAt: null,
-        completionMemo: null,
-        completedChecklistIds: null,
-      };
-
-      // APIに保存
-      await UndertakedJobApi.create(newUndertakedJob);
-      // Storeに追加
-      addUndertakedJob(newUndertakedJob);
-
-      // 発注者に通知を送信
-      RequesterNotificationApi.create({
-        requesterId: selectedJob.requesterId,
-        confirmedAt: null, // 未読
-        title: "新しい応募がありました",
-        description: `「${selectedJob.title}」に${worker.name}さんから応募がありました。`,
-        url: `/requester/undertaked_jobs/${newUndertakedJob.id}`,
-        createdAt: new Date().toISOString(),
-      });
-
-      // 少し待ってからジョブ画面に遷移（UXのため）
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      // ジョブ画面に遷移
-      router.push("/worker/jobs");
-    } catch (error) {
-      console.error("応募エラー:", error);
-      setIsAccepting(false);
-    }
-  }, [selectedJob, worker, isAccepting, isActivelyAccepted, addUndertakedJob, router]);
 
   // 検索バーの展開/折りたたみをトグル
   const toggleSearch = useCallback(() => {
@@ -220,194 +138,189 @@ export default function RequestMapPage() {
   }, [searchQuery, jobs]);
 
   return (
-    <div className="relative w-full h-full">
-      {/* マップコンポーネント */}
-      <MapComponent
-        jobs={filteredJobs}
-        isBookmarked={(jobId) => isHydrated && isBookmarked(jobId)}
-        onMarkerClick={handleMarkerClick}
-        flyToPosition={flyToPosition}
-      />
+    <>
+      <div className="relative w-full h-full">
+        {/* マップコンポーネント */}
+        <MapComponent
+          jobs={filteredJobs}
+          isBookmarked={(jobId) => isHydrated && isBookmarked(jobId)}
+          onMarkerClick={handleMarkerClick}
+          flyToPosition={flyToPosition}
+        />
 
-      {/* 右下の検索UI */}
-      <div className="absolute bottom-6 right-4 z-[1000] flex items-center gap-2">
-        <AnimatePresence>
-          {isSearchExpanded && (
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 260, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="overflow-hidden"
-            >
-              <Input
-                ref={inputRef}
-                type="text"
-                placeholder="場所・タイトルで検索..."
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearchSubmit();
+        {/* 右下の検索UI */}
+        <div className="absolute bottom-6 right-4 z-[1000] flex items-center gap-2">
+          <AnimatePresence>
+            {isSearchExpanded && (
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 260, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="overflow-hidden"
+              >
+                <Input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="場所・タイトルで検索..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearchSubmit();
+                    }
+                  }}
+                  classNames={{
+                    base: "h-10",
+                    input: "text-gray-700 placeholder:text-gray-400 text-sm !pe-0 focus:outline-none",
+                    inputWrapper:
+                      "bg-white/95 backdrop-blur-sm border border-gray-200 hover:bg-white shadow-md h-10 min-h-10 rounded-full !pl-4 !pr-0.5 !outline-none !ring-0 !ring-offset-0 focus-within:!ring-0 focus-within:!border-gray-200 data-[focus=true]:!ring-0 data-[focus=true]:!border-gray-200 data-[focus-visible=true]:!ring-0 data-[focus-visible=true]:!ring-offset-0 data-[hover=true]:!border-gray-200 group-data-[focus=true]:!ring-0 group-data-[focus-visible=true]:!ring-0",
+                  }}
+                  size="sm"
+                  endContent={
+                    <button
+                      type="button"
+                      onClick={handleSearchSubmit}
+                      className="p-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="検索を実行"
+                      disabled={!searchQuery.trim()}
+                    >
+                      <Send size={14} />
+                    </button>
                   }
-                }}
-                classNames={{
-                  base: "h-10",
-                  input: "text-gray-700 placeholder:text-gray-400 text-sm !pe-0 focus:outline-none",
-                  inputWrapper:
-                    "bg-white/95 backdrop-blur-sm border border-gray-200 hover:bg-white shadow-md h-10 min-h-10 rounded-full !pl-4 !pr-0.5 !outline-none !ring-0 !ring-offset-0 focus-within:!ring-0 focus-within:!border-gray-200 data-[focus=true]:!ring-0 data-[focus=true]:!border-gray-200 data-[focus-visible=true]:!ring-0 data-[focus-visible=true]:!ring-offset-0 data-[hover=true]:!border-gray-200 group-data-[focus=true]:!ring-0 group-data-[focus-visible=true]:!ring-0",
-                }}
-                size="sm"
-                endContent={
-                  <button
-                    type="button"
-                    onClick={handleSearchSubmit}
-                    className="p-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    aria-label="検索を実行"
-                    disabled={!searchQuery.trim()}
-                  >
-                    <Send size={14} />
-                  </button>
-                }
-              />
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* 検索開閉ボタン */}
+          <motion.button
+            type="button"
+            onClick={toggleSearch}
+            className="p-3 rounded-full shadow-md bg-white/95 backdrop-blur-sm text-gray-500 hover:bg-white hover:text-gray-700 transition-colors"
+            aria-label={isSearchExpanded ? "検索を閉じる" : "検索を開く"}
+            whileTap={{ scale: 0.95 }}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {isSearchExpanded ? (
+                <motion.span
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <X size={20} />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="search"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <Search size={20} />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.button>
+        </div>
+
+        {/* 検索結果が0件の場合の表示 */}
+        <AnimatePresence>
+          {debouncedQuery && filteredJobs.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-4 left-4 right-4 z-[1000]"
+            >
+              <div className="bg-white/95 backdrop-blur-sm rounded-lg p-3 text-center text-gray-600 text-sm shadow-md">
+                「{debouncedQuery}」に該当する案件はありません
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* 検索開閉ボタン */}
-        <motion.button
-          type="button"
-          onClick={toggleSearch}
-          className="p-3 rounded-full shadow-md bg-white/95 backdrop-blur-sm text-gray-500 hover:bg-white hover:text-gray-700 transition-colors"
-          aria-label={isSearchExpanded ? "検索を閉じる" : "検索を開く"}
-          whileTap={{ scale: 0.95 }}
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            {isSearchExpanded ? (
-              <motion.span
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <X size={20} />
-              </motion.span>
-            ) : (
-              <motion.span
-                key="search"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <Search size={20} />
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.button>
+        {/* 詳細モーダル（JobDetailModalが全ての責務を持つ） */}
+        <JobDetailModal
+          job={selectedJob}
+          isOpen={isDetailModalOpen}
+          onClose={handleDetailClose}
+        />
       </div>
 
-      {/* 検索結果が0件の場合の表示 */}
-      <AnimatePresence>
-        {debouncedQuery && filteredJobs.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute top-4 left-4 right-4 z-[1000]"
-          >
-            <div className="bg-white/95 backdrop-blur-sm rounded-lg p-3 text-center text-gray-600 text-sm shadow-md">
-              「{debouncedQuery}」に該当する案件はありません
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Leaflet用グローバルスタイル - useEffectで適用 */}
+      <style>
+        {`
+          /* Leaflet コンテナのz-index修正 */
+          .leaflet-container {
+            z-index: 1 !important;
+          }
 
-      {/* 詳細モーダル */}
-      <JobDetailModal
-        job={selectedJob}
-        isOpen={isDetailModalOpen}
-        isBookmarked={
-          selectedJob ? isHydrated && isBookmarked(selectedJob.id) : false
-        }
-        isAlreadyAccepted={selectedJob ? isActivelyAccepted(selectedJob.id) : false}
-        isAccepting={isAccepting}
-        onClose={handleDetailClose}
-        onBookmarkClick={() =>
-          selectedJob && handleBookmarkToggle(selectedJob.id)
-        }
-        onAcceptClick={handleAccept}
-      />
+          /* Leaflet タイルレイヤーの表示修正 */
+          .leaflet-tile-pane {
+            z-index: 1 !important;
+          }
 
-      {/* カスタムマーカースタイル & Leaflet修正 */}
-      <style jsx global>{`
-        /* Leaflet コンテナのz-index修正 */
-        .leaflet-container {
-          z-index: 1 !important;
-        }
+          .leaflet-overlay-pane {
+            z-index: 2 !important;
+          }
 
-        /* Leaflet タイルレイヤーの表示修正 */
-        .leaflet-tile-pane {
-          z-index: 1 !important;
-        }
+          .leaflet-marker-pane {
+            z-index: 3 !important;
+          }
 
-        .leaflet-overlay-pane {
-          z-index: 2 !important;
-        }
+          .leaflet-tooltip-pane {
+            z-index: 4 !important;
+          }
 
-        .leaflet-marker-pane {
-          z-index: 3 !important;
-        }
+          .leaflet-popup-pane {
+            z-index: 5 !important;
+          }
 
-        .leaflet-tooltip-pane {
-          z-index: 4 !important;
-        }
+          /* カスタムマーカースタイル */
+          .job-map-marker {
+            background: transparent !important;
+            border: none !important;
+          }
 
-        .leaflet-popup-pane {
-          z-index: 5 !important;
-        }
+          /* マーカーホバーエフェクト */
+          .job-map-marker:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s ease-in-out;
+          }
 
-        /* カスタムマーカースタイル */
-        .job-map-marker {
-          background: transparent !important;
-          border: none !important;
-        }
+          .job-map-marker .marker-pin {
+            transition: all 0.2s ease-in-out;
+          }
 
-        /* マーカーホバーエフェクト */
-        .job-map-marker:hover {
-          transform: scale(1.1);
-          transition: transform 0.2s ease-in-out;
-        }
+          .job-map-marker:hover .marker-pin {
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+          }
 
-        .job-map-marker .marker-pin {
-          transition: all 0.2s ease-in-out;
-        }
-
-        .job-map-marker:hover .marker-pin {
-          filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
-        }
-
-        /* HeroUI Inputのフォーカスアウトライン無効化 */
-        [data-slot="input-wrapper"] {
-          outline: none !important;
-          box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
-        }
-        [data-slot="input-wrapper"]:focus-within {
-          outline: none !important;
-          box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
-        }
-        [data-slot="inner-wrapper"] {
-          outline: none !important;
-        }
-        [data-slot="input"] {
-          outline: none !important;
-        }
-        [data-slot="input"]:focus {
-          outline: none !important;
-        }
-      `}</style>
-    </div>
+          /* HeroUI Inputのフォーカスアウトライン無効化 */
+          [data-slot="input-wrapper"] {
+            outline: none !important;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+          }
+          [data-slot="input-wrapper"]:focus-within {
+            outline: none !important;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+          }
+          [data-slot="inner-wrapper"] {
+            outline: none !important;
+          }
+          [data-slot="input"] {
+            outline: none !important;
+          }
+          [data-slot="input"]:focus {
+            outline: none !important;
+          }
+        `}
+      </style>
+    </>
   );
 }

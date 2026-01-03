@@ -1,30 +1,151 @@
 "use client";
 
-import { Button, Chip, Modal, ModalBody, ModalContent, Spinner } from "@heroui/react";
-import { TrendingUp } from "lucide-react";
-import type { Job } from "@/types";
+import { useState, useCallback, useEffect } from "react";
+import { Button, Chip, Modal, ModalBody, ModalContent, ModalFooter } from "@heroui/react";
+import { Check, Loader2, TrendingUp } from "lucide-react";
+import type { Job, UndertakedJob } from "@/types";
+import { useWorker } from "@/hooks/workers/useWorker";
+import { useUndertakedJobs } from "@/hooks/workers/useUndertakedJobs";
+import { useBookmarks } from "@/hooks/workers/useBookmarks";
+import { UndertakedJobApi } from "@/constants/api-mocks/undertakedJobApi";
+import { RequesterNotificationApi } from "@/constants/api-mocks/requesterNotificationApi";
+
+// 応募ステータス
+type ApplyStatus = "idle" | "applying" | "complete" | "applied";
 
 interface JobDetailModalProps {
   job: Job | null;
   isOpen: boolean;
-  isBookmarked: boolean;
-  isAlreadyAccepted: boolean;
-  isAccepting?: boolean;
   onClose: () => void;
-  onBookmarkClick: () => void;
-  onAcceptClick: () => void;
 }
 
 export function JobDetailModal({
   job,
   isOpen,
-  isBookmarked,
-  isAlreadyAccepted,
-  isAccepting = false,
   onClose,
-  onBookmarkClick,
-  onAcceptClick,
 }: JobDetailModalProps) {
+  // 内部State
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [isApplyComplete, setIsApplyComplete] = useState(false);
+  const [hasJustApplied, setHasJustApplied] = useState(false);
+
+  // Hooks
+  const { worker } = useWorker();
+  const { addUndertakedJob, getByJobId } = useUndertakedJobs();
+  const { isBookmarked, addBookmark, removeBookmark } = useBookmarks();
+
+  // モーダルが閉じる時にStateをリセット
+  const handleClose = useCallback(() => {
+    setIsAccepting(false);
+    setIsApplyComplete(false);
+    setHasJustApplied(false);
+    onClose();
+  }, [onClose]);
+
+  // モーダルが開いたときにStateをリセット（別のジョブを開いた時用）
+  useEffect(() => {
+    if (isOpen && job) {
+      setIsAccepting(false);
+      setIsApplyComplete(false);
+      setHasJustApplied(false);
+    }
+  }, [isOpen, job?.id]); // job?.idを依存配列に入れて、ジョブが変わったらリセット
+
+  // 既にアクティブな応募/受注かどうかをチェック
+  const isActivelyAccepted = useCallback(
+    (jobId: number): boolean => {
+      const undertakedJob = getByJobId(jobId);
+      if (!undertakedJob) return false;
+      return (
+        undertakedJob.status === "applied" ||
+        undertakedJob.status === "accepted" ||
+        undertakedJob.status === "completion_reported"
+      );
+    },
+    [getByJobId]
+  );
+
+  // ブックマークトグル
+  const handleBookmarkToggle = useCallback(() => {
+    if (!job || !worker) return;
+    if (isBookmarked(job.id)) {
+      removeBookmark(job.id);
+    } else {
+      addBookmark(job.id);
+    }
+  }, [job, worker, isBookmarked, addBookmark, removeBookmark]);
+
+  // 応募処理
+  const handleAccept = useCallback(async () => {
+    if (!job || !worker || isAccepting || isApplyComplete) return;
+
+    // 既にアクティブな応募/受注があるかチェック
+    if (isActivelyAccepted(job.id) || hasJustApplied) {
+      return;
+    }
+
+    setIsAccepting(true);
+
+    try {
+      const newUndertakedJob: UndertakedJob = {
+        id: Date.now(),
+        workerId: worker.id,
+        jobId: job.id,
+        status: "applied",
+        requesterEvalScore: null,
+        appliedAt: new Date().toISOString(),
+        acceptedAt: null,
+        completionReportedAt: null,
+        canceledAt: null,
+        finishedAt: null,
+        completionMemo: null,
+        completedChecklistIds: null,
+      };
+
+      // APIに保存
+      await UndertakedJobApi.create(newUndertakedJob);
+      // Storeに追加
+      addUndertakedJob(newUndertakedJob);
+
+      // 発注者に通知を送信
+      RequesterNotificationApi.create({
+        requesterId: job.requesterId,
+        confirmedAt: null,
+        title: "新しい応募がありました",
+        description: `「${job.title}」に${worker.name}さんから応募がありました。`,
+        url: `/requester/undertaked_jobs/${newUndertakedJob.id}`,
+        createdAt: new Date().toISOString(),
+      });
+
+      // 1秒間Loading表現を見せる
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // 応募完了状態に遷移
+      setIsAccepting(false);
+      setIsApplyComplete(true);
+
+      // 1.5秒後に「応募済み」に遷移
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setIsApplyComplete(false);
+      setHasJustApplied(true);
+    } catch (error) {
+      console.error("応募エラー:", error);
+      setIsAccepting(false);
+    }
+  }, [job, worker, isAccepting, isApplyComplete, hasJustApplied, isActivelyAccepted, addUndertakedJob]);
+
+  // 応募ステータスを判定
+  const getApplyStatus = (): ApplyStatus => {
+    if (!job) return "idle";
+    if (isActivelyAccepted(job.id) || hasJustApplied) return "applied";
+    if (isApplyComplete) return "complete";
+    if (isAccepting) return "applying";
+    return "idle";
+  };
+
+  const applyStatus = getApplyStatus();
+  const bookmarked = job ? isBookmarked(job.id) : false;
+
   if (!job) return null;
 
   // 報酬合計
@@ -44,15 +165,16 @@ export function JobDetailModal({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       placement="bottom"
       size="full"
       scrollBehavior="inside"
       backdrop="blur"
       classNames={{
         backdrop: "bg-black/75",
-        base: "m-0 sm:m-0 rounded-t-3xl rounded-b-none max-h-[70vh] bg-gray-900/95",
+        base: "m-0 sm:m-0 rounded-t-3xl rounded-b-none max-h-[70vh] bg-gray-900/95 overflow-hidden",
         body: "p-0",
+        footer: "bg-gray-900 border-t border-white/10 px-4 py-4",
         closeButton:
           "top-4 right-4 z-20 bg-black/50 text-white hover:bg-black/70",
       }}
@@ -77,10 +199,10 @@ export function JobDetailModal({
         },
       }}
     >
-      <ModalContent>
+      <ModalContent className="bg-gray-900 rounded-t-3xl">
         <ModalBody className="p-0">
           {/* ヘッダー画像 */}
-          <div className="relative w-full h-48 shrink-0">
+          <div className="relative w-full h-48 shrink-0 rounded-t-3xl overflow-hidden">
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${job.imageUrl})` }}
@@ -111,13 +233,13 @@ export function JobDetailModal({
             {/* ブックマークボタン */}
             <button
               type="button"
-              onClick={onBookmarkClick}
+              onClick={handleBookmarkToggle}
               className="absolute bottom-4 right-4 p-2 bg-black/30 hover:bg-black/50 rounded-full transition-colors"
-              aria-label={isBookmarked ? "ブックマーク解除" : "ブックマーク"}
+              aria-label={bookmarked ? "ブックマーク解除" : "ブックマーク"}
             >
               <svg
-                className={`w-6 h-6 ${isBookmarked ? "text-amber-400 fill-amber-400" : "text-white"}`}
-                fill={isBookmarked ? "currentColor" : "none"}
+                className={`w-6 h-6 ${bookmarked ? "text-amber-400 fill-amber-400" : "text-white"}`}
+                fill={bookmarked ? "currentColor" : "none"}
                 stroke="currentColor"
                 strokeWidth={2}
                 viewBox="0 0 24 24"
@@ -223,37 +345,44 @@ export function JobDetailModal({
                 </ul>
               </div>
             )}
-
-            {/* 受注ボタン */}
-            <div className="pt-4 pb-8">
-              <Button
-                fullWidth
-                size="lg"
-                className={
-                  isAlreadyAccepted
-                    ? "bg-gray-500 text-white font-bold"
-                    : isAccepting
-                      ? "bg-amber-600 text-white font-bold"
-                      : "bg-amber-500 text-white font-bold"
-                }
-                radius="full"
-                onPress={onAcceptClick}
-                isDisabled={isAlreadyAccepted || isAccepting}
-              >
-                {isAlreadyAccepted ? (
-                  "受注済み"
-                ) : isAccepting ? (
-                  <span className="flex items-center gap-2">
-                    <Spinner size="sm" color="white" />
-                    受注中...
-                  </span>
-                ) : (
-                  "受注する"
-                )}
-              </Button>
-            </div>
           </div>
         </ModalBody>
+
+        {/* 応募ボタン（固定フッター） */}
+        <ModalFooter>
+          <Button
+            fullWidth
+            size="lg"
+            className={
+              applyStatus === "applied"
+                ? "bg-gray-500 text-white font-bold"
+                : applyStatus === "complete"
+                  ? "bg-emerald-500 text-white font-bold"
+                  : applyStatus === "applying"
+                    ? "bg-amber-600 text-white font-bold"
+                    : "bg-amber-500 text-white font-bold"
+            }
+            radius="full"
+            onPress={handleAccept}
+            isDisabled={applyStatus !== "idle"}
+          >
+            {applyStatus === "applied" ? (
+              "応募済み"
+            ) : applyStatus === "complete" ? (
+              <span className="flex items-center gap-2">
+                <Check size={18} />
+                応募完了しました
+              </span>
+            ) : applyStatus === "applying" ? (
+              <span className="flex items-center gap-2">
+                <Loader2 size={18} className="animate-spin" />
+                応募中...
+              </span>
+            ) : (
+              "応募する"
+            )}
+          </Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );
