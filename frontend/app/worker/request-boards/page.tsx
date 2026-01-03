@@ -2,24 +2,20 @@
 
 import { Input } from "@heroui/react";
 import { debounce } from "es-toolkit";
-import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { JobCard } from "@/components/worker/JobCard";
 import { JobDetailModal } from "@/components/worker/JobDetailModal";
 import { type FilterValues, JobFilter } from "@/components/worker/JobFilter";
 import { useJobs, useBookmarks, useUndertakedJobs, useRecommendedJobs } from "@/hooks/workers";
-import { useUndertakedJobStore, useWorkerStore } from "@/stores/workers";
-import { UndertakedJobApi, RequesterNotificationApi } from "@/constants/api-mocks";
-import type { Job, UndertakedJob } from "@/types";
+import { useWorkerStore, useUndertakedJobStore } from "@/stores/workers";
+import type { Job } from "@/types";
 
 export default function RequestBoardsPage() {
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isAccepting, setIsAccepting] = useState(false);
   const [filters, setFilters] = useState<FilterValues>({
     dateFrom: "",
     dateTo: "",
@@ -37,16 +33,18 @@ export default function RequestBoardsPage() {
   const recommendedJobs = useRecommendedJobs();
 
   // Store操作
-  const addUndertakedJob = useUndertakedJobStore((state) => state.addUndertakedJob);
   const getByJobId = useUndertakedJobStore((state) => state.getByJobId);
 
-  // アクティブな応募/受注かどうかをチェック（完了済み・キャンセル済みは除外）
+  // アクティブな応募/受注かどうかをチェック（JobCard用）
   const isActivelyAccepted = useCallback(
     (jobId: number): boolean => {
       const undertakedJob = getByJobId(jobId);
       if (!undertakedJob) return false;
-      // 応募中、進行中、または確認待ちはアクティブとみなす
-      return undertakedJob.status === "applied" || undertakedJob.status === "accepted" || undertakedJob.status === "completion_reported";
+      return (
+        undertakedJob.status === "applied" ||
+        undertakedJob.status === "accepted" ||
+        undertakedJob.status === "completion_reported"
+      );
     },
     [getByJobId]
   );
@@ -73,58 +71,71 @@ export default function RequestBoardsPage() {
     [debouncedSetQuery]
   );
 
-  // フィルタリングされたジョブ一覧
-  const filteredJobs = useMemo(() => {
-    let result = jobs;
-
-    // 検索クエリでフィルター
-    if (debouncedQuery) {
-      const query = debouncedQuery.toLowerCase();
-      result = result.filter(
-        (job) =>
-          job.title.toLowerCase().includes(query) ||
-          job.description.toLowerCase().includes(query) ||
-          job.location.toLowerCase().includes(query) ||
-          job.tags.some((tag) => tag.toLowerCase().includes(query))
-      );
-    }
-
-    // 日付範囲フィルター
-    if (filters.dateFrom) {
-      result = result.filter((job) => job.scheduledDate >= filters.dateFrom);
-    }
-    if (filters.dateTo) {
-      result = result.filter((job) => job.scheduledDate <= filters.dateTo);
-    }
-
-    // 最低報酬フィルター
-    if (filters.minReward !== null) {
-      const minReward = filters.minReward;
-      result = result.filter(
-        (job) => job.reward + job.aiInsentiveReward >= minReward
-      );
-    }
-
-    // タグフィルター
-    if (filters.selectedTags.length > 0) {
-      result = result.filter((job) =>
-        filters.selectedTags.some((tag) => job.tags.includes(tag))
-      );
-    }
-
-    return result;
-  }, [jobs, debouncedQuery, filters]);
-
-  // 利用可能なタグ一覧
+  // 全タグ一覧を取得
   const availableTags = useMemo(() => {
-    const tags = new Set<string>();
-    for (const job of jobs) {
-      for (const tag of job.tags) {
-        tags.add(tag);
-      }
-    }
-    return Array.from(tags);
+    const tagSet = new Set<string>();
+    jobs.forEach((job) => {
+      job.tags.forEach((tag) => tagSet.add(tag));
+    });
+    return Array.from(tagSet).sort();
   }, [jobs]);
+
+  // フィルタリングされたジョブリスト
+  const filteredJobs = useMemo(() => {
+    return jobs.filter((job) => {
+      // 既に受注済み/応募済みのジョブを除外
+      if (isActivelyAccepted(job.id)) {
+        return false;
+      }
+
+      // 検索クエリでフィルタ
+      if (debouncedQuery) {
+        const query = debouncedQuery.toLowerCase();
+        const matchesTitle = job.title.toLowerCase().includes(query);
+        const matchesDescription = job.description.toLowerCase().includes(query);
+        const matchesLocation = job.location.toLowerCase().includes(query);
+        const matchesTags = job.tags.some((tag) =>
+          tag.toLowerCase().includes(query)
+        );
+        if (
+          !matchesTitle &&
+          !matchesDescription &&
+          !matchesLocation &&
+          !matchesTags
+        ) {
+          return false;
+        }
+      }
+
+      // 日付フィルター
+      if (filters.dateFrom) {
+        const filterDate = new Date(filters.dateFrom);
+        const jobDate = new Date(job.scheduledDate);
+        if (jobDate < filterDate) return false;
+      }
+      if (filters.dateTo) {
+        const filterDate = new Date(filters.dateTo);
+        const jobDate = new Date(job.scheduledDate);
+        if (jobDate > filterDate) return false;
+      }
+
+      // 報酬フィルター
+      if (filters.minReward !== null) {
+        const totalReward = job.reward + job.aiInsentiveReward;
+        if (totalReward < filters.minReward) return false;
+      }
+
+      // タグフィルター
+      if (filters.selectedTags.length > 0) {
+        const hasMatchingTag = job.tags.some((tag) =>
+          filters.selectedTags.includes(tag)
+        );
+        if (!hasMatchingTag) return false;
+      }
+
+      return true;
+    });
+  }, [jobs, debouncedQuery, filters, isActivelyAccepted]);
 
   // ブックマークのトグル
   const handleBookmarkToggle = useCallback(
@@ -151,59 +162,6 @@ export default function RequestBoardsPage() {
     setSelectedJob(null);
   }, []);
 
-  // 応募処理
-  const handleAccept = useCallback(async () => {
-    if (!selectedJob || !worker || isAccepting) return;
-
-    // 既にアクティブな受注があるかチェック（完了済み・キャンセル済み・応募中は除外）
-    if (isActivelyAccepted(selectedJob.id)) {
-      return;
-    }
-
-    setIsAccepting(true);
-
-    try {
-      const newUndertakedJob: UndertakedJob = {
-        id: Date.now(),
-        workerId: worker.id,
-        jobId: selectedJob.id,
-        status: "applied", // 応募中ステータスに変更
-        requesterEvalScore: null,
-        appliedAt: new Date().toISOString(), // 応募日時を追加
-        acceptedAt: null,
-        completionReportedAt: null,
-        canceledAt: null,
-        finishedAt: null,
-        completionMemo: null,
-        completedChecklistIds: null,
-      };
-
-      // APIに保存
-      await UndertakedJobApi.create(newUndertakedJob);
-      // Storeに追加
-      addUndertakedJob(newUndertakedJob);
-
-      // 発注者に通知を送信
-      RequesterNotificationApi.create({
-        requesterId: selectedJob.requesterId,
-        confirmedAt: null, // 未読
-        title: "新しい応募がありました",
-        description: `「${selectedJob.title}」に${worker.name}さんから応募がありました。`,
-        url: `/requester/undertaked_jobs/${newUndertakedJob.id}`,
-        createdAt: new Date().toISOString(),
-      });
-
-      // 少し待ってからジョブ画面に遷移（UXのため）
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      // ジョブ画面に遷移
-      router.push("/worker/jobs");
-    } catch (error) {
-      console.error("応募エラー:", error);
-      setIsAccepting(false);
-    }
-  }, [selectedJob, worker, isAccepting, isActivelyAccepted, addUndertakedJob, router]);
-
   // フィルター適用
   const handleFilterApply = useCallback((newFilters: FilterValues) => {
     setFilters(newFilters);
@@ -221,110 +179,73 @@ export default function RequestBoardsPage() {
           size="lg"
           startContent={
             <svg
-              className="w-5 h-5 text-white/50 mr-2"
+              className="w-5 h-5 text-gray-400"
               fill="none"
               stroke="currentColor"
-              strokeWidth={2}
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                strokeWidth={2}
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
           }
           classNames={{
-            input: "text-white placeholder:text-white/50 rounded-xl",
-            inputWrapper:
-              "bg-white/10 border-white/20 hover:bg-white/15 rounded-xl",
+            inputWrapper: "bg-white dark:bg-gray-800 shadow-sm",
           }}
-          className="flex-1"
         />
         <button
           type="button"
           onClick={() => setIsFilterOpen(true)}
-          className="p-3 bg-white/10 border border-white/20 rounded-xl hover:bg-white/15 transition-colors"
+          className="flex items-center justify-center w-12 h-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm shrink-0"
           aria-label="フィルター"
         >
           <svg
-            className="w-5 h-5 text-white/70"
+            className="w-5 h-5 text-gray-600 dark:text-gray-300"
             fill="none"
             stroke="currentColor"
-            strokeWidth={2}
             viewBox="0 0 24 24"
             aria-hidden="true"
           >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+              strokeWidth={2}
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
             />
           </svg>
         </button>
       </div>
 
-      {/* アクティブフィルター表示 */}
-      {(filters.dateFrom ||
-        filters.dateTo ||
-        filters.minReward !== null ||
-        filters.selectedTags.length > 0) && (
-        <div className="px-4 pb-2">
-          <div className="flex flex-wrap gap-1 text-xs">
-            {filters.dateFrom && (
-              <span className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-full">
-                {filters.dateFrom}〜
-              </span>
-            )}
-            {filters.dateTo && (
-              <span className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-full">
-                〜{filters.dateTo}
-              </span>
-            )}
-            {filters.minReward !== null && (
-              <span className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-full">
-                ¥{filters.minReward.toLocaleString()}以上
-              </span>
-            )}
-            {filters.selectedTags.map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-full"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ジョブカード一覧 */}
+      {/* ジョブカード一覧（新しいものが上に来るように逆順表示） */}
       <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-6">
         {filteredJobs.length > 0 ? (
-          filteredJobs.map((job) => (
+          [...filteredJobs].reverse().map((job) => (
             <JobCard
               key={job.id}
               job={job}
-              isRecommended={recommendedJobIds.includes(job.id)}
               isBookmarked={isBookmarked(job.id)}
-              onDetailClick={() => handleDetailClick(job)}
+              isRecommended={recommendedJobIds.includes(job.id)}
               onBookmarkClick={() => handleBookmarkToggle(job.id)}
+              onDetailClick={() => handleDetailClick(job)}
             />
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-white/60">
+          <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2">
             <svg
-              className="w-16 h-16 mb-4"
+              className="w-12 h-12"
               fill="none"
               stroke="currentColor"
-              strokeWidth={1}
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                strokeWidth={1.5}
                 d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
@@ -333,18 +254,11 @@ export default function RequestBoardsPage() {
         )}
       </div>
 
-      {/* 詳細モーダル */}
+      {/* 詳細モーダル（JobDetailModalが全ての責務を持つ） */}
       <JobDetailModal
         job={selectedJob}
         isOpen={isDetailModalOpen}
-        isBookmarked={selectedJob ? isBookmarked(selectedJob.id) : false}
-        isAlreadyAccepted={selectedJob ? isActivelyAccepted(selectedJob.id) : false}
-        isAccepting={isAccepting}
         onClose={handleDetailClose}
-        onBookmarkClick={() =>
-          selectedJob && handleBookmarkToggle(selectedJob.id)
-        }
-        onAcceptClick={handleAccept}
       />
 
       {/* フィルターモーダル */}
