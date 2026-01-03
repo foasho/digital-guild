@@ -48,7 +48,7 @@ const useUndertakedJobs = (): UseUndertakedJobsResult => {
   useEffect(() => {
     // マウント時に常にLocalStorageから最新データを取得
     // （労働者側で更新された場合に反映するため）
-    fetchUndertakedJobs();
+      fetchUndertakedJobs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -37,21 +37,21 @@ const useUndertakedJobs = (): UseUndertakedJobsResult => {
   } = useUndertakedJobStore();
 
   const fetchUndertakedJobs = useCallback(async (): Promise<void> => {
-    setPending(true);
-    try {
+      setPending(true);
+      try {
       // 常にLocalStorageから最新データを取得
-      if (worker) {
-        // ワーカーがいる場合はそのワーカーの着手ジョブのみ
-        const data = await UndertakedJobApi.getByWorkerId(worker.id);
-        setUndertakedJobs(data);
-      } else {
+        if (worker) {
+          // ワーカーがいる場合はそのワーカーの着手ジョブのみ
+          const data = await UndertakedJobApi.getByWorkerId(worker.id);
+          setUndertakedJobs(data);
+        } else {
         // 全件
-        const data = await UndertakedJobApi.index();
-        setUndertakedJobs(data);
+          const data = await UndertakedJobApi.index();
+          setUndertakedJobs(data);
+        }
+      } finally {
+        setPending(false);
       }
-    } finally {
-      setPending(false);
-    }
   }, [worker, setUndertakedJobs]);
 
   useEffect(() => {

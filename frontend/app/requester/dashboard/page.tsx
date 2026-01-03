@@ -230,7 +230,7 @@ export default function RequesterDashboardPage() {
       return;
     }
 
-    router.push(`/requester/jobs/${jobId}`);
+      router.push(`/requester/jobs/${jobId}`);
   };
 
   return (
