@@ -452,7 +452,7 @@ export default function UndertakedJobEvaluationPage() {
           isDisabled={rating === 0}
           startContent={<CheckCircle size={20} />}
         >
-          承認する
+          評価を確定する
         </Button>
       </div>
     </div>
