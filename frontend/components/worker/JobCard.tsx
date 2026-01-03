@@ -1,6 +1,7 @@
 "use client";
 
-import { Button, Card, CardBody } from "@heroui/react";
+import { Button, Card, CardBody, Chip } from "@heroui/react";
+import { TrendingUp } from "lucide-react";
 import type { Job } from "@/types";
 
 interface JobCardProps {
@@ -20,6 +21,8 @@ export function JobCard({
 }: JobCardProps) {
   // 報酬合計（reward + aiInsentiveReward）
   const totalReward = job.reward + job.aiInsentiveReward;
+  // AIインセンティブが含まれているかどうか
+  const hasIncentive = job.aiInsentiveReward > 0;
 
   // 日付フォーマット（2026年1月6日〜）
   const formatDate = (dateString: string) => {
@@ -47,11 +50,27 @@ export function JobCard({
       <CardBody className="relative z-10 flex flex-col min-h-[200px] p-4">
         {/* 上部: 報酬とおすすめバッジ */}
         <div className="flex justify-between items-start">
-          {/* 左上: 報酬額 */}
-          <div className="text-white font-extrabold text-2xl drop-shadow-md">
-            <span className="text-amber-300">¥</span>
-            <span className="text-amber-100">{totalReward.toLocaleString()}</span>
-            <span className="text-base font-bold text-white/80 ml-1">/ 回</span>
+          {/* 左上: 報酬額とインセンティブChip */}
+          <div className="flex flex-col gap-1.5">
+            <div className="text-white font-extrabold text-2xl drop-shadow-md">
+              <span className="text-amber-300">¥</span>
+              <span className="text-amber-100">{totalReward.toLocaleString()}</span>
+              <span className="text-base font-bold text-white/80 ml-1">/ 回</span>
+            </div>
+            {/* インセンティブChip */}
+            {hasIncentive && (
+              <Chip
+                size="sm"
+                variant="flat"
+                startContent={<TrendingUp size={12} />}
+                classNames={{
+                  base: "bg-gradient-to-r from-emerald-500/90 to-teal-500/90 border-0 shadow-lg shadow-emerald-500/30 animate-pulse",
+                  content: "text-white font-bold text-[10px] tracking-wide drop-shadow-sm",
+                }}
+              >
+                報酬UP中
+              </Chip>
+            )}
           </div>
 
           {/* 右上: AIレコメンドバッジ（グラデーションリボン風） */}

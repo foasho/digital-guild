@@ -9,7 +9,7 @@ export const oitaJob1: Job = {
   description:
     "大分県別府温泉の老舗旅館で接客のお手伝いをお願いします。お客様のお迎えやお部屋への案内、食事の配膳補助などをしていただきます。温泉入浴と郷土料理の賄い付きです。",
   reward: 9000,
-  aiInsentiveReward: 45,
+  aiInsentiveReward: 0, // 別府温泉は観光地のため
   location: "大分県別府市",
   latitude: 33.2847,
   longitude: 131.4913,
@@ -166,7 +166,7 @@ export const pastJob102: Job = {
   description:
     "新規オープンするカフェの内装作業をお手伝いいただきます。家具の組み立てや配置、装飾品の設置などをお願いします。",
   reward: 10000,
-  aiInsentiveReward: 50,
+  aiInsentiveReward: 0, // 東京都渋谷区は人が集まりやすい
   location: "東京都渋谷区",
   latitude: 35.6580,
   longitude: 139.7016,
@@ -238,7 +238,7 @@ export const pastJob105: Job = {
   description:
     "観光地でのプロモーション写真撮影のアシスタントをお願いします。機材運搬や照明補助などをしていただきます。",
   reward: 11000,
-  aiInsentiveReward: 55,
+  aiInsentiveReward: 0, // 京都は観光地のため
   location: "京都府京都市",
   latitude: 35.0116,
   longitude: 135.7681,
@@ -262,7 +262,7 @@ export const pastJob106: Job = {
   description:
     "地域の海岸清掃活動に参加していただきます。ゴミ拾いや分別作業をお願いします。軽食とドリンク付きです。",
   reward: 6000,
-  aiInsentiveReward: 30,
+  aiInsentiveReward: 0, // 鎌倉は観光地のため
   location: "神奈川県鎌倉市",
   latitude: 35.3192,
   longitude: 139.5467,
@@ -286,7 +286,7 @@ export const pastJob107: Job = {
   description:
     "個人宅の引越し作業をお手伝いいただきます。荷物の梱包補助や運搬、新居での配置などをお願いします。",
   reward: 12000,
-  aiInsentiveReward: 60,
+  aiInsentiveReward: 0, // 福岡は都市部のため
   location: "福岡県福岡市",
   latitude: 33.5902,
   longitude: 130.4017,
@@ -310,7 +310,7 @@ export const pastJob108: Job = {
   description:
     "商業施設でのクリスマスイベントの運営補助をお願いします。来場者案内やワークショップの補助などをしていただきます。",
   reward: 9500,
-  aiInsentiveReward: 48,
+  aiInsentiveReward: 0, // 名古屋は都市部のため
   location: "愛知県名古屋市",
   latitude: 35.1815,
   longitude: 136.9066,
@@ -334,7 +334,7 @@ export const pastJob109: Job = {
   description:
     "オフィスビルの年末大掃除をお手伝いいただきます。窓拭きや床清掃、不用品の整理などをお願いします。",
   reward: 10500,
-  aiInsentiveReward: 53,
+  aiInsentiveReward: 0, // 東京都心は人が集まりやすい
   location: "東京都千代田区",
   latitude: 35.6938,
   longitude: 139.7533,
@@ -358,7 +358,7 @@ export const pastJob110: Job = {
   description:
     "地域の夏祭りで屋台の運営補助をお願いします。調理補助や販売、お客様対応などをしていただきます。",
   reward: 8000,
-  aiInsentiveReward: 40,
+  aiInsentiveReward: 0, // 広島は都市部のため
   location: "広島県広島市",
   latitude: 34.3853,
   longitude: 132.4553,

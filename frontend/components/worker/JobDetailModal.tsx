@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Chip, Modal, ModalBody, ModalContent, Spinner } from "@heroui/react";
+import { TrendingUp } from "lucide-react";
 import type { Job } from "@/types";
 
 interface JobDetailModalProps {
@@ -28,6 +29,8 @@ export function JobDetailModal({
 
   // 報酬合計
   const totalReward = job.reward + job.aiInsentiveReward;
+  // AIインセンティブが含まれているかどうか
+  const hasIncentive = job.aiInsentiveReward > 0;
 
   // 日付フォーマット
   const formatDate = (dateString: string) => {
@@ -86,9 +89,23 @@ export function JobDetailModal({
 
             {/* 報酬額オーバーレイ */}
             <div className="absolute bottom-4 left-4 text-white">
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold mb-1">
                 ¥{totalReward.toLocaleString()} / 回
               </div>
+              {/* インセンティブChip */}
+              {hasIncentive && (
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  startContent={<TrendingUp size={12} />}
+                  classNames={{
+                    base: "bg-gradient-to-r from-emerald-500/90 to-teal-500/90 border-0 shadow-lg shadow-emerald-500/30",
+                    content: "text-white font-bold text-[10px] tracking-wide drop-shadow-sm",
+                  }}
+                >
+                  報酬UP中
+                </Chip>
+              )}
             </div>
 
             {/* ブックマークボタン */}
