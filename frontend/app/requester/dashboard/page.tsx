@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Users,
   TrendingUp,
+  UserCheck,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -171,14 +172,33 @@ export default function RequesterDashboardPage() {
 
   // 確認待ちのUndertakedJob一覧（緊急度高）
   const pendingReviewUndertakedJobs = useMemo(() => {
-    const requesterId = requester?.id || 1;
     const requesterJobIds = allJobs.map((job) => job.id);
     return undertakedJobs.filter(
       (uj) =>
         uj.status === "completion_reported" &&
         requesterJobIds.includes(uj.jobId)
     );
-  }, [undertakedJobs, allJobs, requester?.id]);
+  }, [undertakedJobs, allJobs]);
+
+  // 応募中のUndertakedJob一覧（選定が必要）
+  const appliedUndertakedJobs = useMemo(() => {
+    const requesterJobIds = allJobs.map((job) => job.id);
+    // ジョブごとにグループ化して、応募があるジョブのみを返す
+    const jobsWithApplicants = new Map<number, typeof undertakedJobs>();
+    undertakedJobs
+      .filter(
+        (uj) =>
+          uj.status === "applied" &&
+          requesterJobIds.includes(uj.jobId)
+      )
+      .forEach((uj) => {
+        if (!jobsWithApplicants.has(uj.jobId)) {
+          jobsWithApplicants.set(uj.jobId, []);
+        }
+        jobsWithApplicants.get(uj.jobId)?.push(uj);
+      });
+    return jobsWithApplicants;
+  }, [undertakedJobs, allJobs]);
 
   // ジョブIDからジョブ情報を取得
   const getJobInfo = (jobId: number) => {
@@ -267,7 +287,7 @@ export default function RequesterDashboardPage() {
                   }
                   className="flex items-center gap-3 p-3 bg-white rounded-xl border border-amber-200 hover:border-amber-400 hover:shadow-md transition-all group text-left"
                 >
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0">
                     <Image
                       src={job.imageUrl || "/jobs/izakaya.jpg"}
                       alt={job.title}
@@ -289,7 +309,71 @@ export default function RequesterDashboardPage() {
                   </div>
                   <ArrowRight
                     size={18}
-                    className="text-amber-500 group-hover:translate-x-1 transition-transform flex-shrink-0"
+                    className="text-amber-500 group-hover:translate-x-1 transition-transform shrink-0"
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 応募者選定アラートセクション */}
+      {appliedUndertakedJobs.size > 0 && (
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-2xl p-4 lg:p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-indigo-500 rounded-full">
+              <UserCheck className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-indigo-800">
+                応募者の選定が必要です
+              </h3>
+              <p className="text-sm text-indigo-600">
+                {appliedUndertakedJobs.size}件のジョブに応募があります。採用するワーカーを選んでください。
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from(appliedUndertakedJobs.entries()).map(([jobId, applicants]) => {
+              const job = getJobInfo(jobId);
+              if (!job) return null;
+              const firstApplicant = applicants[0];
+              return (
+                <button
+                  key={jobId}
+                  type="button"
+                  onClick={() =>
+                    router.push(`/requester/undertaked_jobs/${firstApplicant.id}`)
+                  }
+                  className="flex items-center gap-3 p-3 bg-white rounded-xl border border-indigo-200 hover:border-indigo-400 hover:shadow-md transition-all group text-left"
+                >
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0">
+                    <Image
+                      src={job.imageUrl || "/jobs/izakaya.jpg"}
+                      alt={job.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800 text-sm truncate">
+                      {job.title}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <Users size={12} />
+                      <span className="text-indigo-600 font-medium">
+                        {applicants.length}名が応募中
+                      </span>
+                    </div>
+                    <p className="text-xs text-indigo-600 font-medium mt-0.5">
+                      {job.reward.toLocaleString()} JPYC
+                    </p>
+                  </div>
+                  <ArrowRight
+                    size={18}
+                    className="text-indigo-500 group-hover:translate-x-1 transition-transform shrink-0"
                   />
                 </button>
               );

@@ -54,3 +54,9 @@ export { jobAiRecommends } from "./jobAiRecommends";
 // Transaction Histories（取引履歴）
 export { transactionHistories } from "./transactionHistories";
 
+// Worker Notifications（労働者通知）
+export { workerNotifications } from "./workerNotifications";
+
+// Requester Notifications（発注者通知）
+export { requesterNotifications } from "./requesterNotifications";
+

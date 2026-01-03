@@ -12,3 +12,6 @@ export { useUndertakedJobs } from "./useUndertakedJobs";
 // Subsidies
 export { useSubsidies, useSubsidiesByRequesterId } from "./useSubsidies";
 
+// Notifications
+export { useNotifications } from "./useNotifications";
+

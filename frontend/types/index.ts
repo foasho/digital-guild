@@ -146,3 +146,25 @@ export interface TransactionHistory {
 
 // ランク
 export type Rank = "Bronze" | "Silver" | "Gold" | "Platinum";
+
+// 労働者通知
+export interface WorkerNotification {
+  id: number;
+  workerId: number;
+  confirmedAt: string | null; // 確認済み日時（nullは未読）
+  title: string;
+  description: string;
+  url: string | null; // 詳細ページへのリンク（nullable）
+  createdAt: string;
+}
+
+// 発注者通知
+export interface RequesterNotification {
+  id: number;
+  requesterId: number;
+  confirmedAt: string | null; // 確認済み日時（nullは未読）
+  title: string;
+  description: string;
+  url: string | null; // 詳細ページへのリンク（nullable）
+  createdAt: string;
+}

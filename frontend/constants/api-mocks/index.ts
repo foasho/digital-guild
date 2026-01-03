@@ -12,6 +12,8 @@ import {
   undertakedJobs,
   workers,
   workerSkills,
+  workerNotifications,
+  requesterNotifications,
 } from "@/constants/mocks";
 
 // API exports
@@ -28,6 +30,8 @@ export { TrustPassportApi } from "./trustPassportApi";
 export { UndertakedJobApi } from "./undertakedJobApi";
 export { WorkerApi } from "./workerApi";
 export { WorkerSkillApi } from "./workerSkillApi";
+export { WorkerNotificationApi } from "./workerNotificationApi";
+export { RequesterNotificationApi } from "./requesterNotificationApi";
 
 /**
  * モックデータをLocalStorageにロードする
@@ -57,6 +61,8 @@ const loadMockData = async (): Promise<void> => {
   localStorage.setItem("undertakedJobs", JSON.stringify(undertakedJobs));
   localStorage.setItem("workers", JSON.stringify(workers));
   localStorage.setItem("workerSkills", JSON.stringify(workerSkills));
+  localStorage.setItem("workerNotifications", JSON.stringify(workerNotifications));
+  localStorage.setItem("requesterNotifications", JSON.stringify(requesterNotifications));
 
   // ロード完了フラグ
   localStorage.setItem("mockDataLoaded", "true");
@@ -82,6 +88,8 @@ const resetMockData = async (): Promise<void> => {
   localStorage.removeItem("undertakedJobs");
   localStorage.removeItem("workers");
   localStorage.removeItem("workerSkills");
+  localStorage.removeItem("workerNotifications");
+  localStorage.removeItem("requesterNotifications");
 
   // 再ロード
   await loadMockData();

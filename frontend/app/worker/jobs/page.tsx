@@ -19,7 +19,7 @@ import type { Job, UndertakedJob } from "@/types";
 // ステータスの日本語ラベル
 const statusLabels: Record<UndertakedJob["status"], string> = {
   applied: "応募中",
-  accepted: "着手中",
+  accepted: "進行中",
   completion_reported: "確認待ち",
   completed: "完了",
   canceled: "キャンセル",
@@ -73,7 +73,7 @@ function StarRating({ score }: { score: number }) {
   );
 }
 
-// ジョブカード（着手中/完了済み用）
+// ジョブカード（進行中/完了済み用）
 function UndertakedJobCard({
   undertakedJob,
   job,
@@ -185,7 +185,7 @@ function UndertakedJobCard({
             </div>
           )}
 
-          {/* 着手中の場合: 詳細と完了報告ボタン */}
+          {/* 進行中の場合: 詳細と完了報告ボタン */}
           {isInProgress && (
             <div className="flex justify-end gap-2">
               {onDetailClick && (
@@ -227,7 +227,7 @@ function UndertakedJobCard({
   );
 }
 
-// 着手中ジョブの詳細モーダル
+// 進行中ジョブの詳細モーダル
 function UndertakedJobDetailModal({
   job,
   undertakedJob,
@@ -404,7 +404,7 @@ function UndertakedJobDetailModal({
               </div>
             )}
 
-            {/* 着手中の場合は完了報告ボタン */}
+            {/* 進行中の場合は完了報告ボタン */}
             {isInProgress && onCompletionReportClick && (
               <div className="pt-4 pb-8">
                 <Button
@@ -489,7 +489,7 @@ export default function WorkerJobsPage() {
     return undertakedJobs.filter((uj) => uj.status === "applied");
   }, [undertakedJobs]);
 
-  // 着手中のジョブ（accepted のみ）
+  // 進行中のジョブ（accepted のみ）
   const inProgressJobs = useMemo(() => {
     return undertakedJobs.filter((uj) => uj.status === "accepted");
   }, [undertakedJobs]);
@@ -587,7 +587,7 @@ export default function WorkerJobsPage() {
             key="in_progress"
             title={
               <div className="flex items-center gap-1">
-                <span>着手中</span>
+                <span>進行中</span>
                 {inProgressJobs.length > 0 && (
                   <Chip
                     size="sm"
@@ -659,7 +659,7 @@ export default function WorkerJobsPage() {
 
         {selectedTab === "in_progress" &&
           (inProgressJobs.length === 0 ? (
-            <EmptyState message="着手中のジョブがありません" />
+            <EmptyState message="進行中のジョブがありません" />
           ) : (
             inProgressJobs.map((undertakedJob) => {
               const job = getJobById(undertakedJob.jobId);

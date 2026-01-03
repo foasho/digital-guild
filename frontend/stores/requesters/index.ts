@@ -4,4 +4,5 @@ export { useRequesterStore } from "./useRequesterStore";
 export { useJobStore } from "./useJobStore";
 export { useUndertakedJobStore } from "./useUndertakedJobStore";
 export { useSubsidyStore } from "./useSubsidyStore";
+export { useNotificationStore } from "./useNotificationStore";
 

@@ -68,7 +68,7 @@ const getStatusStyle = (status: UndertakedJob["status"]) => {
   switch (status) {
     case "accepted":
       return {
-        label: "着手中",
+        label: "進行中",
         style:
           "bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-sm font-semibold",
       };

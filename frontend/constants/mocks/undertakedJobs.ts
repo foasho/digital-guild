@@ -376,7 +376,7 @@ export const completedJob25: UndertakedJob = {
   completedChecklistIds: null,
 };
 
-// 着手中のジョブ（izakayaJob = id: 1）
+// 進行中のジョブ（izakayaJob = id: 1）
 export const inProgressJob1: UndertakedJob = {
   id: 26,
   workerId: 1,

@@ -7,3 +7,4 @@ export { useTrustPassportStore } from "./useTrustPassportStore";
 export { useUndertakedJobStore } from "./useUndertakedJobStore";
 export { useWalletStore } from "./useWalletStore";
 export { useWorkerStore } from "./useWorkerStore";
+export { useNotificationStore } from "./useNotificationStore";

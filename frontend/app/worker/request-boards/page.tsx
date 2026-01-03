@@ -45,7 +45,7 @@ export default function RequestBoardsPage() {
     (jobId: number): boolean => {
       const undertakedJob = getByJobId(jobId);
       if (!undertakedJob) return false;
-      // 着手中または確認待ちのみアクティブとみなす
+      // 進行中または確認待ちのみアクティブとみなす
       return undertakedJob.status === "accepted" || undertakedJob.status === "completion_reported";
     },
     [getByJobId]
