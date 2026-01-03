@@ -172,7 +172,7 @@ export function JobDetailModal({
       backdrop="blur"
       classNames={{
         backdrop: "bg-black/75",
-        base: "m-0 sm:m-0 rounded-t-3xl rounded-b-none max-h-[70vh] bg-gray-900/95",
+        base: "m-0 sm:m-0 rounded-t-3xl rounded-b-none max-h-[70vh] bg-gray-900/95 overflow-hidden",
         body: "p-0",
         closeButton:
           "top-4 right-4 z-20 bg-black/50 text-white hover:bg-black/70",
@@ -198,10 +198,10 @@ export function JobDetailModal({
         },
       }}
     >
-      <ModalContent>
+      <ModalContent className="bg-gray-900 rounded-t-3xl">
         <ModalBody className="p-0">
           {/* ヘッダー画像 */}
-          <div className="relative w-full h-48 shrink-0">
+          <div className="relative w-full h-48 shrink-0 rounded-t-3xl overflow-hidden">
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${job.imageUrl})` }}
