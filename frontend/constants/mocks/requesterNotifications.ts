@@ -9,7 +9,7 @@ export const requesterNotification1: RequesterNotification = {
   confirmedAt: null, // 未読
   title: "新しい応募がありました",
   description: "「地元商店街のPR動画撮影」に田中一郎さんから応募がありました。",
-  url: "/requester/undertaked_jobs/4", // 応募者確認画面
+  url: "/requester/undertaked_jobs/29", // 応募者確認画面
   createdAt: "2026-01-03T10:00:00Z",
 };
 
@@ -19,7 +19,7 @@ export const requesterNotification2: RequesterNotification = {
   confirmedAt: null, // 未読
   title: "作業完了報告がありました",
   description: "「温泉旅館の接客補助」の作業が完了報告されました。評価をお願いします。",
-  url: "/requester/undertaked_jobs/3", // 完了報告確認画面
+  url: "/requester/undertaked_jobs/28", // 完了報告確認画面
   createdAt: "2026-01-02T18:30:00Z",
 };
 

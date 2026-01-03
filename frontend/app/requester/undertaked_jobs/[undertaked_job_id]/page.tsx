@@ -837,7 +837,8 @@ export default function UndertakedJobEvaluationPage() {
         <Button
           color="primary"
           size="lg"
-          className="bg-sky-500 hover:bg-sky-600 font-semibold px-8 rounded-xl"
+          fullWidth
+          className="text-white bg-sky-500 hover:bg-sky-600 font-semibold px-8 rounded-xl"
           onPress={handleApprove}
           isDisabled={rating === 0}
           startContent={<CheckCircle size={20} />}
