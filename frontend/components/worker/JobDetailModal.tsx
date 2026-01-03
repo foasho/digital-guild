@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Button, Chip, Modal, ModalBody, ModalContent } from "@heroui/react";
+import { Button, Chip, Modal, ModalBody, ModalContent, ModalFooter } from "@heroui/react";
 import { Check, Loader2, TrendingUp } from "lucide-react";
 import type { Job, UndertakedJob } from "@/types";
 import { useWorker } from "@/hooks/workers/useWorker";
@@ -174,6 +174,7 @@ export function JobDetailModal({
         backdrop: "bg-black/75",
         base: "m-0 sm:m-0 rounded-t-3xl rounded-b-none max-h-[70vh] bg-gray-900/95 overflow-hidden",
         body: "p-0",
+        footer: "bg-gray-900 border-t border-white/10 px-4 py-4",
         closeButton:
           "top-4 right-4 z-20 bg-black/50 text-white hover:bg-black/70",
       }}
@@ -344,44 +345,44 @@ export function JobDetailModal({
                 </ul>
               </div>
             )}
-
-            {/* 応募ボタン */}
-            <div className="pt-4 pb-8">
-              <Button
-                fullWidth
-                size="lg"
-                className={
-                  applyStatus === "applied"
-                    ? "bg-gray-500 text-white font-bold"
-                    : applyStatus === "complete"
-                      ? "bg-emerald-500 text-white font-bold"
-                      : applyStatus === "applying"
-                        ? "bg-amber-600 text-white font-bold"
-                        : "bg-amber-500 text-white font-bold"
-                }
-                radius="full"
-                onPress={handleAccept}
-                isDisabled={applyStatus !== "idle"}
-              >
-                {applyStatus === "applied" ? (
-                  "応募済み"
-                ) : applyStatus === "complete" ? (
-                  <span className="flex items-center gap-2">
-                    <Check size={18} />
-                    応募完了しました
-                  </span>
-                ) : applyStatus === "applying" ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 size={18} className="animate-spin" />
-                    応募中...
-                  </span>
-                ) : (
-                  "応募する"
-                )}
-              </Button>
-            </div>
           </div>
         </ModalBody>
+
+        {/* 応募ボタン（固定フッター） */}
+        <ModalFooter>
+          <Button
+            fullWidth
+            size="lg"
+            className={
+              applyStatus === "applied"
+                ? "bg-gray-500 text-white font-bold"
+                : applyStatus === "complete"
+                  ? "bg-emerald-500 text-white font-bold"
+                  : applyStatus === "applying"
+                    ? "bg-amber-600 text-white font-bold"
+                    : "bg-amber-500 text-white font-bold"
+            }
+            radius="full"
+            onPress={handleAccept}
+            isDisabled={applyStatus !== "idle"}
+          >
+            {applyStatus === "applied" ? (
+              "応募済み"
+            ) : applyStatus === "complete" ? (
+              <span className="flex items-center gap-2">
+                <Check size={18} />
+                応募完了しました
+              </span>
+            ) : applyStatus === "applying" ? (
+              <span className="flex items-center gap-2">
+                <Loader2 size={18} className="animate-spin" />
+                応募中...
+              </span>
+            ) : (
+              "応募する"
+            )}
+          </Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );
