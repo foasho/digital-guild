@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Chip, Modal, ModalBody, ModalContent } from "@heroui/react";
+import { Button, Chip, Modal, ModalBody, ModalContent, Spinner } from "@heroui/react";
 import type { Job } from "@/types";
 
 interface JobDetailModalProps {
@@ -8,6 +8,7 @@ interface JobDetailModalProps {
   isOpen: boolean;
   isBookmarked: boolean;
   isAlreadyAccepted: boolean;
+  isAccepting?: boolean;
   onClose: () => void;
   onBookmarkClick: () => void;
   onAcceptClick: () => void;
@@ -18,6 +19,7 @@ export function JobDetailModal({
   isOpen,
   isBookmarked,
   isAlreadyAccepted,
+  isAccepting = false,
   onClose,
   onBookmarkClick,
   onAcceptClick,
@@ -213,13 +215,24 @@ export function JobDetailModal({
                 className={
                   isAlreadyAccepted
                     ? "bg-gray-500 text-white font-bold"
-                    : "bg-amber-500 text-white font-bold"
+                    : isAccepting
+                      ? "bg-amber-600 text-white font-bold"
+                      : "bg-amber-500 text-white font-bold"
                 }
                 radius="full"
                 onPress={onAcceptClick}
-                isDisabled={isAlreadyAccepted}
+                isDisabled={isAlreadyAccepted || isAccepting}
               >
-                {isAlreadyAccepted ? "受注済み" : "受注する"}
+                {isAlreadyAccepted ? (
+                  "受注済み"
+                ) : isAccepting ? (
+                  <span className="flex items-center gap-2">
+                    <Spinner size="sm" color="white" />
+                    受注中...
+                  </span>
+                ) : (
+                  "受注する"
+                )}
               </Button>
             </div>
           </div>

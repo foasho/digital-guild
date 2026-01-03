@@ -2,6 +2,7 @@
 
 import { Input } from "@heroui/react";
 import { debounce } from "es-toolkit";
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { JobCard } from "@/components/worker/JobCard";
 import { JobDetailModal } from "@/components/worker/JobDetailModal";
@@ -12,11 +13,13 @@ import { UndertakedJobApi } from "@/constants/api-mocks";
 import type { Job, UndertakedJob } from "@/types";
 
 export default function RequestBoardsPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
   const [filters, setFilters] = useState<FilterValues>({
     dateFrom: "",
     dateTo: "",
@@ -36,6 +39,17 @@ export default function RequestBoardsPage() {
   // Store操作
   const addUndertakedJob = useUndertakedJobStore((state) => state.addUndertakedJob);
   const getByJobId = useUndertakedJobStore((state) => state.getByJobId);
+
+  // アクティブな受注かどうかをチェック（完了済み・キャンセル済みは除外）
+  const isActivelyAccepted = useCallback(
+    (jobId: number): boolean => {
+      const undertakedJob = getByJobId(jobId);
+      if (!undertakedJob) return false;
+      // 着手中または確認待ちのみアクティブとみなす
+      return undertakedJob.status === "accepted" || undertakedJob.status === "completion_reported";
+    },
+    [getByJobId]
+  );
 
   // AIレコメンドされたジョブIDリスト
   const recommendedJobIds = useMemo(() => {
@@ -139,33 +153,45 @@ export default function RequestBoardsPage() {
 
   // 受注処理
   const handleAccept = useCallback(async () => {
-    if (!selectedJob || !worker) return;
+    if (!selectedJob || !worker || isAccepting) return;
 
-    // 既に受注済みかチェック
-    if (getByJobId(selectedJob.id)) {
+    // 既にアクティブな受注があるかチェック（完了済み・キャンセル済みは除外）
+    if (isActivelyAccepted(selectedJob.id)) {
       return;
     }
 
-    const newUndertakedJob: UndertakedJob = {
-      id: Date.now(),
-      workerId: worker.id,
-      jobId: selectedJob.id,
-      status: "accepted",
-      requesterEvalScore: null,
-      acceptedAt: new Date().toISOString(),
-      completionReportedAt: null,
-      canceledAt: null,
-      finishedAt: null,
-      completionMemo: null,
-      completedChecklistIds: null,
-    };
+    setIsAccepting(true);
 
-    // APIに保存
-    await UndertakedJobApi.create(newUndertakedJob);
-    // Storeに追加
-    addUndertakedJob(newUndertakedJob);
-    handleDetailClose();
-  }, [selectedJob, worker, getByJobId, addUndertakedJob, handleDetailClose]);
+    try {
+      const newUndertakedJob: UndertakedJob = {
+        id: Date.now(),
+        workerId: worker.id,
+        jobId: selectedJob.id,
+        status: "accepted",
+        requesterEvalScore: null,
+        acceptedAt: new Date().toISOString(),
+        completionReportedAt: null,
+        canceledAt: null,
+        finishedAt: null,
+        completionMemo: null,
+        completedChecklistIds: null,
+      };
+
+      // APIに保存
+      await UndertakedJobApi.create(newUndertakedJob);
+      // Storeに追加
+      addUndertakedJob(newUndertakedJob);
+
+      // 少し待ってからジョブ画面に遷移（UXのため）
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // ジョブ画面に遷移
+      router.push("/worker/jobs");
+    } catch (error) {
+      console.error("受注エラー:", error);
+      setIsAccepting(false);
+    }
+  }, [selectedJob, worker, isAccepting, isActivelyAccepted, addUndertakedJob, router]);
 
   // フィルター適用
   const handleFilterApply = useCallback((newFilters: FilterValues) => {
@@ -301,7 +327,8 @@ export default function RequestBoardsPage() {
         job={selectedJob}
         isOpen={isDetailModalOpen}
         isBookmarked={selectedJob ? isBookmarked(selectedJob.id) : false}
-        isAlreadyAccepted={selectedJob ? !!getByJobId(selectedJob.id) : false}
+        isAlreadyAccepted={selectedJob ? isActivelyAccepted(selectedJob.id) : false}
+        isAccepting={isAccepting}
         onClose={handleDetailClose}
         onBookmarkClick={() =>
           selectedJob && handleBookmarkToggle(selectedJob.id)

@@ -5,10 +5,12 @@ import { debounce } from "es-toolkit";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, Send, X } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { JobDetailModal } from "@/components/worker/JobDetailModal";
 import { useJobs, useBookmarks, useUndertakedJobs, useWorker } from "@/hooks/workers";
-import type { Job } from "@/types";
+import { UndertakedJobApi } from "@/constants/api-mocks";
+import type { Job, UndertakedJob } from "@/types";
 
 // SSR無効化でMapコンポーネントをdynamic import
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -21,11 +23,13 @@ const MapComponent = dynamic(() => import("./MapComponent"), {
 });
 
 export default function RequestMapPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
   const [flyToPosition, setFlyToPosition] = useState<{ lat: number; lng: number } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -36,6 +40,17 @@ export default function RequestMapPage() {
   const { addUndertakedJob, getByJobId, pending: undertakedPending } = useUndertakedJobs();
 
   const isHydrated = !jobsPending && !undertakedPending;
+
+  // アクティブな受注かどうかをチェック（完了済み・キャンセル済みは除外）
+  const isActivelyAccepted = useCallback(
+    (jobId: number): boolean => {
+      const undertakedJob = getByJobId(jobId);
+      if (!undertakedJob) return false;
+      // 着手中または確認待ちのみアクティブとみなす
+      return undertakedJob.status === "accepted" || undertakedJob.status === "completion_reported";
+    },
+    [getByJobId]
+  );
 
   // 検索バー展開時に入力欄にフォーカス
   useEffect(() => {
@@ -115,29 +130,46 @@ export default function RequestMapPage() {
   }, []);
 
   // 受注処理
-  const handleAccept = useCallback(() => {
-    if (!selectedJob || !worker) return;
+  const handleAccept = useCallback(async () => {
+    if (!selectedJob || !worker || isAccepting) return;
 
-    // 既に受注済みかチェック
-    if (getByJobId(selectedJob.id)) {
+    // 既にアクティブな受注があるかチェック（完了済み・キャンセル済みは除外）
+    if (isActivelyAccepted(selectedJob.id)) {
       return;
     }
 
-    // hooksのaddUndertakedJobを使用（IDは自動生成）
-    addUndertakedJob({
-      workerId: worker.id,
-      jobId: selectedJob.id,
-      status: "accepted",
-      requesterEvalScore: null,
-      acceptedAt: new Date().toISOString(),
-      completionReportedAt: null,
-      canceledAt: null,
-      finishedAt: null,
-      completionMemo: null,
-      completedChecklistIds: null,
-    });
-    handleDetailClose();
-  }, [selectedJob, worker, getByJobId, addUndertakedJob, handleDetailClose]);
+    setIsAccepting(true);
+
+    try {
+      const newUndertakedJob: UndertakedJob = {
+        id: Date.now(),
+        workerId: worker.id,
+        jobId: selectedJob.id,
+        status: "accepted",
+        requesterEvalScore: null,
+        acceptedAt: new Date().toISOString(),
+        completionReportedAt: null,
+        canceledAt: null,
+        finishedAt: null,
+        completionMemo: null,
+        completedChecklistIds: null,
+      };
+
+      // APIに保存
+      await UndertakedJobApi.create(newUndertakedJob);
+      // Storeに追加
+      addUndertakedJob(newUndertakedJob);
+
+      // 少し待ってからジョブ画面に遷移（UXのため）
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // ジョブ画面に遷移
+      router.push("/worker/jobs");
+    } catch (error) {
+      console.error("受注エラー:", error);
+      setIsAccepting(false);
+    }
+  }, [selectedJob, worker, isAccepting, isActivelyAccepted, addUndertakedJob, router]);
 
   // 検索バーの展開/折りたたみをトグル
   const toggleSearch = useCallback(() => {
@@ -289,7 +321,8 @@ export default function RequestMapPage() {
         isBookmarked={
           selectedJob ? isHydrated && isBookmarked(selectedJob.id) : false
         }
-        isAlreadyAccepted={selectedJob ? !!getByJobId(selectedJob.id) : false}
+        isAlreadyAccepted={selectedJob ? isActivelyAccepted(selectedJob.id) : false}
+        isAccepting={isAccepting}
         onClose={handleDetailClose}
         onBookmarkClick={() =>
           selectedJob && handleBookmarkToggle(selectedJob.id)
