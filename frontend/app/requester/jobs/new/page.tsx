@@ -117,6 +117,9 @@ export default function NewJobPage() {
   // エラー状態
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // 送信中状態
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // 補助金残高を計算
   const subsidyBalance = useMemo(() => {
     return subsidies.reduce((acc, s) => acc + s.amount, 0);
@@ -171,6 +174,11 @@ export default function NewJobPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // 既に送信中の場合は何もしない
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
     // フォームデータを構築
     const formData: JobFormData = {
       title,
@@ -195,6 +203,7 @@ export default function NewJobPage() {
         newErrors[path] = issue.message;
       });
       setErrors(newErrors);
+      setIsSubmitting(false);
       return;
     }
 
@@ -242,6 +251,7 @@ export default function NewJobPage() {
       router.push("/requester/dashboard");
     } catch (error) {
       console.error("ジョブ作成エラー:", error);
+      setIsSubmitting(false);
     }
   };
 
@@ -635,9 +645,10 @@ export default function NewJobPage() {
               type="submit"
               size="lg"
               className="w-full h-14 text-lg font-bold text-white bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.01] transition-all duration-200"
-              isDisabled={!isRequiredFieldsValid}
+              isDisabled={!isRequiredFieldsValid || isSubmitting}
+              isLoading={isSubmitting}
             >
-              ジョブを作成する
+              {isSubmitting ? "作成中..." : "ジョブを作成する"}
             </Button>
           </div>
         </form>

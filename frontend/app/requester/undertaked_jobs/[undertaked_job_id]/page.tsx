@@ -235,7 +235,7 @@ export default function UndertakedJobEvaluationPage() {
           </div>
           {job.aiInsentiveReward > 0 && (
             <p className="text-xs text-gray-400 mt-2">
-              (内訳: 報酬 {job.reward.toLocaleString()} + AI補助{" "}
+              (内訳: 報酬 {job.reward.toLocaleString()} + 助成金{" "}
               {job.aiInsentiveReward.toLocaleString()} JPYC)
             </p>
           )}
@@ -325,10 +325,10 @@ export default function UndertakedJobEvaluationPage() {
           <div className="mb-4">
             <h3 className="text-lg font-bold text-gray-800 mb-1">{job.title}</h3>
             <p className="text-sky-600 font-semibold">
-              {(job.reward + job.aiInsentiveReward).toLocaleString()} JPYC
+              {(job.reward)} JPYC
               {job.aiInsentiveReward > 0 && (
                 <span className="text-xs text-gray-400 font-normal ml-2">
-                  (報酬 {job.reward.toLocaleString()} + AI補助{" "}
+                  (報酬 {job.reward.toLocaleString()} + 助成金{" "}
                   {job.aiInsentiveReward.toLocaleString()})
                 </span>
               )}

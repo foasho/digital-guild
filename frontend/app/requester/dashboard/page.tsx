@@ -365,7 +365,7 @@ export default function RequesterDashboardPage() {
                           </p>
                           <p className="text-xs text-gray-500">JPYC</p>
                           {job.aiInsentiveReward && job.aiInsentiveReward > 0 && (
-                            <div className="flex items-center gap-1 mt-1 text-xs text-emerald-600">
+                            <div className="flex items-center gap-1 mt-1 text-base text-emerald-600">
                               <TrendingUp size={10} />
                               <span>+{job.aiInsentiveReward}</span>
                             </div>

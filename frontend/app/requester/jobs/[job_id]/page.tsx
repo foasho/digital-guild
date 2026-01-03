@@ -217,7 +217,7 @@ export default function RequesterJobDetailPage() {
             {/* 報酬情報 */}
             <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 mb-4">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 text-sm">基本報酬</span>
+                <span className="text-gray-600 text-sm">報酬</span>
                 <span className="font-bold text-gray-800">
                   {job.reward.toLocaleString()} JPYC
                 </span>
@@ -226,7 +226,7 @@ export default function RequesterJobDetailPage() {
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-gray-600 text-sm flex items-center gap-1">
                     <Sparkles size={14} className="text-purple-500" />
-                    AIインセンティブ
+                    補助金 (変動)
                   </span>
                   <span className="font-bold text-purple-600">
                     +{job.aiInsentiveReward.toLocaleString()} JPYC
