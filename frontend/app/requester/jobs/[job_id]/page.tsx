@@ -405,7 +405,7 @@ export default function RequesterJobDetailPage() {
 
                       {/* 応募日時 */}
                       <div className="mt-2 text-xs text-gray-400">
-                        応募日: {formatDate(applicant.acceptedAt)}
+                        応募日: {applicant.appliedAt ? formatDate(applicant.appliedAt) : applicant.acceptedAt ? formatDate(applicant.acceptedAt) : "-"}
                       </div>
                     </div>
                   );
