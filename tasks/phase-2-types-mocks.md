@@ -193,8 +193,8 @@ TypeScriptの型定義、モックデータ、Zustandストアを作成する。
 - **対象ファイル**: `frontend/utils/calculateAiIncentive.ts`
 - **完了条件**: AIインセンティブが正しく計算される
 
-### Task 2.5: Trust Score計算ロジック
-- **目的**: 仕様書に基づくTrust Score計算を実装
+### Task 2.5: 信用ポイント計算ロジック
+- **目的**: 仕様書に基づく信用ポイント計算を実装
 - **作業内容**:
   1. `utils/calculateTrustScore.ts`を作成
   2. ロジック:
@@ -207,7 +207,7 @@ TypeScriptの型定義、モックデータ、Zustandストアを作成する。
      - ~80: Gold
      - ~90: Platinum
 - **対象ファイル**: `frontend/utils/calculateTrustScore.ts`
-- **完了条件**: Trust Scoreとランクが正しく計算される
+- **完了条件**: 信用ポイントとランクが正しく計算される
 
 ## 完了条件
 - [ ] すべての型が定義されている
@@ -215,4 +215,4 @@ TypeScriptの型定義、モックデータ、Zustandストアを作成する。
 - [ ] すべてのZustandストアが作成されている
 - [ ] LocalStorage永続化が機能している
 - [ ] AIインセンティブ計算が正しく動作する
-- [ ] Trust Score計算が正しく動作する
+- [ ] 信用ポイント計算が正しく動作する

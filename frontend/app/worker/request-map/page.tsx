@@ -5,10 +5,12 @@ import { debounce } from "es-toolkit";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, Send, X } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { JobDetailModal } from "@/components/worker/JobDetailModal";
 import { useJobs, useBookmarks, useUndertakedJobs, useWorker } from "@/hooks/workers";
-import type { Job } from "@/types";
+import { UndertakedJobApi, RequesterNotificationApi } from "@/constants/api-mocks";
+import type { Job, UndertakedJob } from "@/types";
 
 // SSR無効化でMapコンポーネントをdynamic import
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -21,11 +23,13 @@ const MapComponent = dynamic(() => import("./MapComponent"), {
 });
 
 export default function RequestMapPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
   const [flyToPosition, setFlyToPosition] = useState<{ lat: number; lng: number } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -36,6 +40,17 @@ export default function RequestMapPage() {
   const { addUndertakedJob, getByJobId, pending: undertakedPending } = useUndertakedJobs();
 
   const isHydrated = !jobsPending && !undertakedPending;
+
+  // アクティブな応募/受注かどうかをチェック（完了済み・キャンセル済みは除外）
+  const isActivelyAccepted = useCallback(
+    (jobId: number): boolean => {
+      const undertakedJob = getByJobId(jobId);
+      if (!undertakedJob) return false;
+      // 応募中、進行中、または確認待ちはアクティブとみなす
+      return undertakedJob.status === "applied" || undertakedJob.status === "accepted" || undertakedJob.status === "completion_reported";
+    },
+    [getByJobId]
+  );
 
   // 検索バー展開時に入力欄にフォーカス
   useEffect(() => {
@@ -114,30 +129,58 @@ export default function RequestMapPage() {
     setSelectedJob(null);
   }, []);
 
-  // 受注処理
-  const handleAccept = useCallback(() => {
-    if (!selectedJob || !worker) return;
+  // 応募処理
+  const handleAccept = useCallback(async () => {
+    if (!selectedJob || !worker || isAccepting) return;
 
-    // 既に受注済みかチェック
-    if (getByJobId(selectedJob.id)) {
+    // 既にアクティブな応募/受注があるかチェック（完了済み・キャンセル済みは除外）
+    if (isActivelyAccepted(selectedJob.id)) {
       return;
     }
 
-    // hooksのaddUndertakedJobを使用（IDは自動生成）
-    addUndertakedJob({
-      workerId: worker.id,
-      jobId: selectedJob.id,
-      status: "accepted",
-      requesterEvalScore: null,
-      acceptedAt: new Date().toISOString(),
-      completionReportedAt: null,
-      canceledAt: null,
-      finishedAt: null,
-      completionMemo: null,
-      completedChecklistIds: null,
-    });
-    handleDetailClose();
-  }, [selectedJob, worker, getByJobId, addUndertakedJob, handleDetailClose]);
+    setIsAccepting(true);
+
+    try {
+      const newUndertakedJob: UndertakedJob = {
+        id: Date.now(),
+        workerId: worker.id,
+        jobId: selectedJob.id,
+        status: "applied", // 応募中ステータスに変更
+        requesterEvalScore: null,
+        appliedAt: new Date().toISOString(), // 応募日時を追加
+        acceptedAt: null,
+        completionReportedAt: null,
+        canceledAt: null,
+        finishedAt: null,
+        completionMemo: null,
+        completedChecklistIds: null,
+      };
+
+      // APIに保存
+      await UndertakedJobApi.create(newUndertakedJob);
+      // Storeに追加
+      addUndertakedJob(newUndertakedJob);
+
+      // 発注者に通知を送信
+      RequesterNotificationApi.create({
+        requesterId: selectedJob.requesterId,
+        confirmedAt: null, // 未読
+        title: "新しい応募がありました",
+        description: `「${selectedJob.title}」に${worker.name}さんから応募がありました。`,
+        url: `/requester/undertaked_jobs/${newUndertakedJob.id}`,
+        createdAt: new Date().toISOString(),
+      });
+
+      // 少し待ってからジョブ画面に遷移（UXのため）
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // ジョブ画面に遷移
+      router.push("/worker/jobs");
+    } catch (error) {
+      console.error("応募エラー:", error);
+      setIsAccepting(false);
+    }
+  }, [selectedJob, worker, isAccepting, isActivelyAccepted, addUndertakedJob, router]);
 
   // 検索バーの展開/折りたたみをトグル
   const toggleSearch = useCallback(() => {
@@ -289,7 +332,8 @@ export default function RequestMapPage() {
         isBookmarked={
           selectedJob ? isHydrated && isBookmarked(selectedJob.id) : false
         }
-        isAlreadyAccepted={selectedJob ? !!getByJobId(selectedJob.id) : false}
+        isAlreadyAccepted={selectedJob ? isActivelyAccepted(selectedJob.id) : false}
+        isAccepting={isAccepting}
         onClose={handleDetailClose}
         onBookmarkClick={() =>
           selectedJob && handleBookmarkToggle(selectedJob.id)

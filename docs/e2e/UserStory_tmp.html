@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>UserStory.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="userstory-%E7%99%BA%E6%B3%A8%E8%80%85%E3%81%A8%E5%8A%B4%E5%83%8D%E8%80%85%E3%81%AE%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9%E6%89%8B%E9%A0%86%E6%9B%B8">UserStory: 発注者と労働者のユースケース手順書</h1>
+<h2 id="%E6%A6%82%E8%A6%81">概要</h2>
+<p>このドキュメントは、DIGITAL GUILDプラットフォームにおける発注者（Requester）と労働者（Worker）の実際のユースケースを描いたE2Eテスト用の手順書です。一人二役で画面を操作し、両者の視点からプラットフォームの利用フローを体験します。</p>
+<hr>
+<h2 id="%E7%99%BB%E5%A0%B4%E4%BA%BA%E7%89%A9">登場人物</h2>
+<h3 id="%F0%9F%91%94-%E7%99%BA%E6%B3%A8%E8%80%85-%E5%A4%A7%E5%88%86-%E5%B9%B8%E5%AD%90%E3%81%95%E3%82%9360%E4%BB%A3">👔 発注者: 大分 幸子さん（60代）</h3>
+<ul>
+<li><strong>職業</strong>: 大分県竹田市で老舗和菓子店「竹田屋」を経営</li>
+<li><strong>背景</strong>: 創業50年の店を守り続けてきたが、高齢化により一人で店の管理が難しくなってきた</li>
+<li><strong>課題</strong>: 年末の大掃除を手伝ってくれる人を探しているが、地方では人手が見つからない</li>
+</ul>
+<h3 id="%F0%9F%91%B7-%E5%8A%B4%E5%83%8D%E8%80%85-%E7%94%B0%E4%B8%AD-%E4%B8%80%E9%83%8E%E3%81%95%E3%82%9325%E6%AD%B3">👷 労働者: 田中 一郎さん（25歳）</h3>
+<ul>
+<li><strong>職業</strong>: フリーランスのカメラマン／大分市在住</li>
+<li><strong>背景</strong>: 地方創生に興味があり、様々な地域の仕事を体験したいと考えている</li>
+<li><strong>課題</strong>: 収入を増やしたいが、スキルを活かせる短期の仕事がなかなか見つからない</li>
+</ul>
+<hr>
+<h2 id="%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AA%E3%83%BC%E3%83%95%E3%83%AD%E3%83%BC">ストーリーフロー</h2>
+<pre class="hljs"><code><div>┌─────────────────────────────────────────────────────────────────────┐
+│  発注者フェーズ                                                       │
+│  ①ジョブ作成 → ②公開                                                │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  労働者フェーズ                                                       │
+│  ③ジョブ発見 → ④詳細確認 → ⑤応募                                    │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  発注者フェーズ                                                       │
+│  ⑥応募確認 → ⑦ワーカー選定                                          │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  労働者フェーズ                                                       │
+│  ⑧作業実施 → ⑨完了報告                                              │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  発注者フェーズ                                                       │
+│  ⑩作業確認 → ⑪評価・報酬支払い                                       │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  労働者フェーズ                                                       │
+│  ⑫報酬受領 → ⑬発注者評価                                            │
+└─────────────────────────────────────────────────────────────────────┘
+</div></code></pre>
+<hr>
+<h2 id="phase-1-%E3%82%B8%E3%83%A7%E3%83%96%E4%BD%9C%E6%88%90%E7%99%BA%E6%B3%A8%E8%80%85">Phase 1: ジョブ作成（発注者）</h2>
+<h3 id="step-1-1-%E3%83%80%E3%83%83%E3%82%B7%E3%83%A5%E3%83%9C%E3%83%BC%E3%83%89%E3%81%AB%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9">Step 1-1: ダッシュボードにアクセス</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👔 発注者（大分さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/requester/dashboard</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>ダッシュボードを開く</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%F0%9F%92%AD-%E5%A4%A7%E5%88%86%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 大分さんの心境</h4>
+<blockquote>
+<p>「年末が近づいてきたわ。今年こそ店の大掃除をしっかりやりたいけど、一人じゃとても無理...。息子は東京に行ってしまったし、近所の若い人もいなくなってしまった。このDIGITAL GUILDというサービスなら、誰か手伝ってくれる人が見つかるかもしれない。」</p>
+</blockquote>
+<h4 id="%F0%9F%8E%AF-%E3%82%84%E3%82%8A%E3%81%9F%E3%81%84%E3%81%93%E3%81%A8">🎯 やりたいこと</h4>
+<ul>
+<li>年末の大掃除を手伝ってくれる人を募集したい</li>
+<li>地元の若い人や、興味を持ってくれる人に来てほしい</li>
+</ul>
+<hr>
+<h3 id="step-1-2-%E6%96%B0%E8%A6%8F%E3%82%B8%E3%83%A7%E3%83%96%E4%BD%9C%E6%88%90%E7%94%BB%E9%9D%A2%E3%81%B8%E9%81%B7%E7%A7%BB">Step 1-2: 新規ジョブ作成画面へ遷移</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👔 発注者（大分さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/requester/jobs/new</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>「新規ジョブ作成」ボタンをクリック</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%F0%9F%92%AD-%E5%A4%A7%E5%88%86%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 大分さんの心境</h4>
+<blockquote>
+<p>「どんな内容で募集すればいいのかしら。若い人に来てもらいたいから、魅力的な内容にしないと。昼食と手作りの和菓子をお土産にすれば、少しは興味を持ってもらえるかも。」</p>
+</blockquote>
+<hr>
+<h3 id="step-1-3-%E3%82%B8%E3%83%A7%E3%83%96%E6%83%85%E5%A0%B1%E3%81%AE%E5%85%A5%E5%8A%9B">Step 1-3: ジョブ情報の入力</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👔 発注者（大分さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/requester/jobs/new</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>フォームに以下を入力</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E5%85%A5%E5%8A%9B%E5%86%85%E5%AE%B9">入力内容</h4>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th>値</th>
+<th>入力の意図</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>タイトル</td>
+<td>和菓子店の年末大掃除おてつだい</td>
+<td>わかりやすく親しみやすいタイトルに</td>
+</tr>
+<tr>
+<td>説明</td>
+<td>創業50年の和菓子店です。年末の大掃除を一緒に手伝ってくださる方を募集しています。窓拭き、床掃除、棚の整理などをお願いします。昼食と手作り和菓子のお土産付きです！</td>
+<td>店の歴史と特典をアピール</td>
+</tr>
+<tr>
+<td>報酬</td>
+<td>¥8,000</td>
+<td>半日の作業として適切な金額</td>
+</tr>
+<tr>
+<td>定員</td>
+<td>3名</td>
+<td>一人より複数人の方が楽しく作業できる</td>
+</tr>
+<tr>
+<td>場所</td>
+<td>大分県竹田市竹田町</td>
+<td>正確な住所を記載</td>
+</tr>
+<tr>
+<td>予定日</td>
+<td>2026-01-10</td>
+<td>年末年始後の落ち着いた時期</td>
+</tr>
+<tr>
+<td>スキル</td>
+<td>清掃、軽作業</td>
+<td>特別なスキル不要であることを明示</td>
+</tr>
+<tr>
+<td>チェックリスト</td>
+<td>①窓ガラスの清掃 ②床の拭き掃除 ③棚の整理整頓 ④外回りの掃き掃除</td>
+<td>作業内容を明確に</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%F0%9F%92%AD-%E5%A4%A7%E5%88%86%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 大分さんの心境</h4>
+<blockquote>
+<p>「報酬はどのくらいが適切かしら...。あまり安いと来てもらえないし、でも年金生活だからあまり高くは出せない。8,000円なら半日の作業として妥当よね。それに、補助金からインセンティブも付くみたいだから、ワーカーさんにとってもお得になるわ。」</p>
+</blockquote>
+<hr>
+<h3 id="step-1-4-%E3%82%B8%E3%83%A7%E3%83%96%E4%BD%9C%E6%88%90%E5%AE%8C%E4%BA%86">Step 1-4: ジョブ作成完了</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👔 発注者（大分さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/requester/jobs/new</code> → <code>/requester/dashboard</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>「ジョブを作成する」ボタンをクリック</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E6%9C%9F%E5%BE%85%E3%81%99%E3%82%8B%E5%8B%95%E4%BD%9C">期待する動作</h4>
+<ol>
+<li>ボタンが「作成中...」に変わりローディング表示</li>
+<li>AIインセンティブが自動計算される</li>
+<li>ダッシュボードにリダイレクト</li>
+<li>作成したジョブが「募集中」として表示される</li>
+</ol>
+<h4 id="%F0%9F%92%AD-%E5%A4%A7%E5%88%86%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 大分さんの心境</h4>
+<blockquote>
+<p>「できた！これで誰かが応募してくれるのを待つだけね。インセンティブが+600円も付くなんて嬉しいわ。きっと誰か来てくれるはず...。」</p>
+</blockquote>
+<hr>
+<h2 id="phase-2-%E3%82%B8%E3%83%A7%E3%83%96%E7%99%BA%E8%A6%8B%E3%83%BB%E5%BF%9C%E5%8B%9F%E5%8A%B4%E5%83%8D%E8%80%85">Phase 2: ジョブ発見・応募（労働者）</h2>
+<h3 id="step-2-1-%E3%82%B8%E3%83%A7%E3%83%96%E3%83%9E%E3%83%83%E3%83%97%E3%82%92%E7%A2%BA%E8%AA%8D">Step 2-1: ジョブマップを確認</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👷 労働者（田中さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/worker/request-map</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>マップ上でジョブを探す</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%F0%9F%92%AD-%E7%94%B0%E4%B8%AD%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 田中さんの心境</h4>
+<blockquote>
+<p>「今月は撮影の仕事が少なくて収入がピンチだな...。何か短期で稼げる仕事はないかな。DIGITAL GUILDで探してみよう。大分県内で、できれば自分の車で行ける範囲がいいな。」</p>
+</blockquote>
+<h4 id="%F0%9F%8E%AF-%E3%82%84%E3%82%8A%E3%81%9F%E3%81%84%E3%81%93%E3%81%A8">🎯 やりたいこと</h4>
+<ul>
+<li>収入を補填するための短期の仕事を探したい</li>
+<li>様々な地域の人や仕事に触れる機会がほしい</li>
+<li>スキルを活かせる or 新しい経験ができる仕事</li>
+</ul>
+<hr>
+<h3 id="step-2-2-%E3%82%B8%E3%83%A7%E3%83%96%E4%B8%80%E8%A6%A7%E3%82%92%E7%A2%BA%E8%AA%8D">Step 2-2: ジョブ一覧を確認</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👷 労働者（田中さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/worker/jobs</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>ジョブ一覧をスクロールして探す</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%F0%9F%92%AD-%E7%94%B0%E4%B8%AD%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 田中さんの心境</h4>
+<blockquote>
+<p>「おっ、竹田市で和菓子店の大掃除か。老舗の和菓子店って興味あるな。8,000円＋インセンティブ600円で合計8,600円、半日でこれならいいかも。昼食と和菓子のお土産付きっていうのも嬉しい。」</p>
+</blockquote>
+<hr>
+<h3 id="step-2-3-%E3%82%B8%E3%83%A7%E3%83%96%E8%A9%B3%E7%B4%B0%E3%82%92%E7%A2%BA%E8%AA%8D">Step 2-3: ジョブ詳細を確認</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👷 労働者（田中さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/worker/jobs/[job_id]</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>ジョブカードをクリックして詳細を確認</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E7%A2%BA%E8%AA%8D%E3%83%9D%E3%82%A4%E3%83%B3%E3%83%88">確認ポイント</h4>
+<ul>
+<li>作業内容（チェックリスト）</li>
+<li>報酬とインセンティブ</li>
+<li>場所と日時</li>
+<li>発注者の評価・Trust Passport</li>
+</ul>
+<h4 id="%F0%9F%92%AD-%E7%94%B0%E4%B8%AD%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 田中さんの心境</h4>
+<blockquote>
+<p>「チェックリストを見ると、窓拭き、床掃除、棚の整理、外回りの掃除か。これなら僕でもできるな。発注者さんの評価も良さそうだし、安心して応募できそう。竹田市なら車で1時間くらいだし、ドライブがてら行ってみるか。」</p>
+</blockquote>
+<hr>
+<h3 id="step-2-4-%E3%82%B8%E3%83%A7%E3%83%96%E3%81%AB%E5%BF%9C%E5%8B%9F">Step 2-4: ジョブに応募</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👷 労働者（田中さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/worker/jobs/[job_id]</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>「このジョブに応募する」ボタンをクリック</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%F0%9F%92%AD-%E7%94%B0%E4%B8%AD%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 田中さんの心境</h4>
+<blockquote>
+<p>「よし、応募完了！採用されるといいな。老舗の和菓子店ってどんな雰囲気なんだろう。もしかしたらいい写真が撮れるかもしれないし、次の仕事につながるかも。」</p>
+</blockquote>
+<hr>
+<h2 id="phase-3-%E5%BF%9C%E5%8B%9F%E7%A2%BA%E8%AA%8D%E3%83%BB%E3%83%AF%E3%83%BC%E3%82%AB%E3%83%BC%E9%81%B8%E5%AE%9A%E7%99%BA%E6%B3%A8%E8%80%85">Phase 3: 応募確認・ワーカー選定（発注者）</h2>
+<h3 id="step-3-1-%E5%BF%9C%E5%8B%9F%E9%80%9A%E7%9F%A5%E3%82%92%E7%A2%BA%E8%AA%8D">Step 3-1: 応募通知を確認</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👔 発注者（大分さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/requester/dashboard</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>ダッシュボードで応募状況を確認</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%F0%9F%92%AD-%E5%A4%A7%E5%88%86%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 大分さんの心境</h4>
+<blockquote>
+<p>「あら、もう応募が来てる！嬉しいわ。どんな方かしら...。」</p>
+</blockquote>
+<hr>
+<h3 id="step-3-2-%E5%BF%9C%E5%8B%9F%E8%80%85%E3%81%AE%E3%83%97%E3%83%AD%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%82%92%E7%A2%BA%E8%AA%8D">Step 3-2: 応募者のプロフィールを確認</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👔 発注者（大分さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/requester/jobs/[job_id]</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>応募者リストから田中さんのプロフィールを確認</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E7%A2%BA%E8%AA%8D%E3%83%9D%E3%82%A4%E3%83%B3%E3%83%88">確認ポイント</h4>
+<ul>
+<li>応募者のTrust Passport（信頼スコア）</li>
+<li>過去の作業履歴</li>
+<li>スキルセット</li>
+<li>評価・レビュー</li>
+</ul>
+<h4 id="%F0%9F%92%AD-%E5%A4%A7%E5%88%86%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 大分さんの心境</h4>
+<blockquote>
+<p>「田中さんという方ね。25歳の若い方みたい。カメラマンをされているのね。評価も4.8と高いわ。過去にも清掃の仕事をされたことがあるみたいだし、この方にお願いしてみましょう。」</p>
+</blockquote>
+<hr>
+<h3 id="step-3-3-%E3%83%AF%E3%83%BC%E3%82%AB%E3%83%BC%E3%82%92%E9%81%B8%E5%AE%9A">Step 3-3: ワーカーを選定</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👔 発注者（大分さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/requester/jobs/[job_id]</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>「採用する」ボタンをクリック</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%F0%9F%92%AD-%E5%A4%A7%E5%88%86%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 大分さんの心境</h4>
+<blockquote>
+<p>「これで決まりね。1月10日が楽しみだわ。若い方が来てくれるなんて、久しぶりに店が賑やかになりそう。」</p>
+</blockquote>
+<hr>
+<h2 id="phase-4-%E4%BD%9C%E6%A5%AD%E5%AE%9F%E6%96%BD%E3%83%BB%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E5%8A%B4%E5%83%8D%E8%80%85">Phase 4: 作業実施・完了報告（労働者）</h2>
+<h3 id="step-4-1-%E6%8E%A1%E7%94%A8%E9%80%9A%E7%9F%A5%E3%82%92%E5%8F%97%E4%BF%A1">Step 4-1: 採用通知を受信</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👷 労働者（田中さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/worker/dashboard</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>採用通知を確認</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%F0%9F%92%AD-%E7%94%B0%E4%B8%AD%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 田中さんの心境</h4>
+<blockquote>
+<p>「やった、採用された！1月10日、竹田市か。カメラも持っていこうかな。もし大分さんが許可してくれたら、お店の写真を撮らせてもらおう。」</p>
+</blockquote>
+<hr>
+<h3 id="step-4-2-%E4%BD%9C%E6%A5%AD%E5%BD%93%E6%97%A5---%E3%83%81%E3%82%A7%E3%83%83%E3%82%AF%E3%82%A4%E3%83%B3">Step 4-2: 作業当日 - チェックイン</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👷 労働者（田中さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/worker/undertaked_jobs/[id]</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>現地到着後「作業開始」ボタンをクリック</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%F0%9F%92%AD-%E7%94%B0%E4%B8%AD%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 田中さんの心境</h4>
+<blockquote>
+<p>「着いた！思っていたよりも趣のあるお店だな。大分さん、優しそうな方だ。よし、頑張るぞ！」</p>
+</blockquote>
+<hr>
+<h3 id="step-4-3-%E4%BD%9C%E6%A5%AD%E5%AE%9F%E6%96%BD---%E3%83%81%E3%82%A7%E3%83%83%E3%82%AF%E3%83%AA%E3%82%B9%E3%83%88%E6%B6%88%E5%8C%96">Step 4-3: 作業実施 - チェックリスト消化</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👷 労働者（田中さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/worker/undertaked_jobs/[id]</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>各チェックリスト項目を完了したらチェック</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E3%83%81%E3%82%A7%E3%83%83%E3%82%AF%E3%83%AA%E3%82%B9%E3%83%88%E9%80%B2%E8%A1%8C">チェックリスト進行</h4>
+<ol>
+<li>☐ → ☑ 窓ガラスの清掃</li>
+<li>☐ → ☑ 床の拭き掃除</li>
+<li>☐ → ☑ 棚の整理整頓</li>
+<li>☐ → ☑ 外回りの掃き掃除</li>
+</ol>
+<h4 id="%F0%9F%92%AD-%E7%94%B0%E4%B8%AD%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 田中さんの心境</h4>
+<blockquote>
+<p>「大分さんが昔話を聞かせてくれて面白いな。創業50年って、すごい歴史だ。この棚に並んでる和菓子の型、年季が入ってていい感じ...。写真撮らせてもらえないかな。」</p>
+</blockquote>
+<hr>
+<h3 id="step-4-4-%E4%BD%9C%E6%A5%AD%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A">Step 4-4: 作業完了報告</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👷 労働者（田中さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/worker/undertaked_jobs/[id]</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>全チェックリスト完了後「作業完了報告」ボタンをクリック</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E5%A0%B1%E5%91%8A%E5%86%85%E5%AE%B9">報告内容</h4>
+<ul>
+<li>完了した作業の写真（任意）</li>
+<li>コメント：「お店がピカピカになりました！大分さんに和菓子作りのお話も聞けて楽しかったです。」</li>
+</ul>
+<h4 id="%F0%9F%92%AD-%E7%94%B0%E4%B8%AD%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 田中さんの心境</h4>
+<blockquote>
+<p>「終わった！思ったより楽しかったな。大分さん、和菓子もらっちゃったし、写真も撮らせてもらえた。またこういう仕事があったらやりたいな。」</p>
+</blockquote>
+<hr>
+<h2 id="phase-5-%E4%BD%9C%E6%A5%AD%E7%A2%BA%E8%AA%8D%E3%83%BB%E8%A9%95%E4%BE%A1%E7%99%BA%E6%B3%A8%E8%80%85">Phase 5: 作業確認・評価（発注者）</h2>
+<h3 id="step-5-1-%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E3%82%92%E7%A2%BA%E8%AA%8D">Step 5-1: 完了報告を確認</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👔 発注者（大分さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/requester/dashboard</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>「確認待ちの作業報告があります」の通知を確認</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%F0%9F%92%AD-%E5%A4%A7%E5%88%86%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 大分さんの心境</h4>
+<blockquote>
+<p>「田中さん、もう報告してくれたのね。どれどれ...。」</p>
+</blockquote>
+<hr>
+<h3 id="step-5-2-%E4%BD%9C%E6%A5%AD%E5%86%85%E5%AE%B9%E3%82%92%E7%A2%BA%E8%AA%8D">Step 5-2: 作業内容を確認</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👔 発注者（大分さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/requester/undertaked_jobs/[id]</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>作業報告の詳細を確認</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E7%A2%BA%E8%AA%8D%E3%83%9D%E3%82%A4%E3%83%B3%E3%83%88">確認ポイント</h4>
+<ul>
+<li>チェックリストの完了状況</li>
+<li>作業写真（添付されている場合）</li>
+<li>ワーカーのコメント</li>
+</ul>
+<h4 id="%F0%9F%92%AD-%E5%A4%A7%E5%88%86%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 大分さんの心境</h4>
+<blockquote>
+<p>「まあ、こんなにきれいにしてくれたのね！窓もピカピカだわ。田中さん、一生懸命やってくれたのね。写真も撮ってくれて...これは評価を良くつけなきゃ。」</p>
+</blockquote>
+<hr>
+<h3 id="step-5-3-%E8%A9%95%E4%BE%A1%E3%83%BB%E5%A0%B1%E9%85%AC%E6%94%AF%E6%89%95%E3%81%84">Step 5-3: 評価・報酬支払い</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👔 発注者（大分さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/requester/undertaked_jobs/[id]</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>評価を入力し「承認・報酬支払い」ボタンをクリック</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%A9%95%E4%BE%A1%E5%86%85%E5%AE%B9">評価内容</h4>
+<ul>
+<li>星評価: ★★★★★（5つ星）</li>
+<li>コメント: 「とても丁寧に作業してくださいました。若いのにしっかりされていて感心しました。また機会があればお願いしたいです。」</li>
+</ul>
+<h4 id="%F0%9F%92%AD-%E5%A4%A7%E5%88%86%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 大分さんの心境</h4>
+<blockquote>
+<p>「田中さん、本当にいい方だったわ。こんな若い人が地方の仕事に興味を持ってくれるなんて嬉しい。またお願いできたらいいな。報酬も無事に送れたみたい。」</p>
+</blockquote>
+<hr>
+<h2 id="phase-6-%E5%A0%B1%E9%85%AC%E5%8F%97%E9%A0%98%E3%83%BB%E7%99%BA%E6%B3%A8%E8%80%85%E8%A9%95%E4%BE%A1%E5%8A%B4%E5%83%8D%E8%80%85">Phase 6: 報酬受領・発注者評価（労働者）</h2>
+<h3 id="step-6-1-%E5%A0%B1%E9%85%AC%E5%8F%97%E9%A0%98%E7%A2%BA%E8%AA%8D">Step 6-1: 報酬受領確認</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👷 労働者（田中さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/worker/dashboard</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>ウォレットで報酬受領を確認</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E7%A2%BA%E8%AA%8D%E5%86%85%E5%AE%B9">確認内容</h4>
+<ul>
+<li>基本報酬: 8,000 JPYC</li>
+<li>AIインセンティブ: +600 JPYC</li>
+<li>合計: 8,600 JPYC</li>
+</ul>
+<h4 id="%F0%9F%92%AD-%E7%94%B0%E4%B8%AD%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 田中さんの心境</h4>
+<blockquote>
+<p>「おっ、報酬が入った！8,600円、ありがたいな。大分さんから5つ星の評価ももらえた。嬉しいな。」</p>
+</blockquote>
+<hr>
+<h3 id="step-6-2-%E7%99%BA%E6%B3%A8%E8%80%85%E3%82%92%E8%A9%95%E4%BE%A1">Step 6-2: 発注者を評価</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ロール</strong></td>
+<td>👷 労働者（田中さん）</td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>/worker/undertaked_jobs/[id]</code></td>
+</tr>
+<tr>
+<td><strong>操作</strong></td>
+<td>発注者への評価を入力</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%A9%95%E4%BE%A1%E5%86%85%E5%AE%B9">評価内容</h4>
+<ul>
+<li>星評価: ★★★★★（5つ星）</li>
+<li>コメント: 「大分さん、とても親切にしていただきました。昼食も和菓子も美味しかったです。50年続く和菓子店の歴史についてお話を聞けて、とても勉強になりました。また機会があればぜひお手伝いさせてください！」</li>
+</ul>
+<h4 id="%F0%9F%92%AD-%E7%94%B0%E4%B8%AD%E3%81%95%E3%82%93%E3%81%AE%E5%BF%83%E5%A2%83">💭 田中さんの心境</h4>
+<blockquote>
+<p>「いい経験だったな。大分さんのお店、写真もたくさん撮れたし、和菓子の写真はポートフォリオに使えそう。地方の仕事、思ってた以上に楽しいかも。また探してみよう。」</p>
+</blockquote>
+<hr>
+<h2 id="%E3%82%A8%E3%83%94%E3%83%AD%E3%83%BC%E3%82%B0">エピローグ</h2>
+<h3 id="%F0%9F%91%94-%E5%A4%A7%E5%88%86%E3%81%95%E3%82%93%E3%81%AE%E3%81%9D%E3%81%AE%E5%BE%8C">👔 大分さんのその後</h3>
+<blockquote>
+<p>店は見違えるほどきれいになり、年始のお客様を気持ちよくお迎えできた。田中さんが撮ってくれた写真をSNSに載せたところ、「素敵なお店ですね」とコメントが付き、遠方からのお客様も増えた。次は春の店舗リニューアルの際にもDIGITAL GUILDで人を募集しようと考えている。</p>
+</blockquote>
+<h3 id="%F0%9F%91%B7-%E7%94%B0%E4%B8%AD%E3%81%95%E3%82%93%E3%81%AE%E3%81%9D%E3%81%AE%E5%BE%8C">👷 田中さんのその後</h3>
+<blockquote>
+<p>大分さんのお店で撮った写真が好評で、「地方の老舗店舗を撮影する」という新しい仕事のジャンルを開拓するきっかけになった。DIGITAL GUILDで様々な地域の仕事を受けながら、地方創生に関わる写真プロジェクトを構想中。Trust Passportのスコアも上がり、より良い条件の仕事にも応募できるようになった。</p>
+</blockquote>
+<hr>
+<h2 id="%E3%83%86%E3%82%B9%E3%83%88%E5%AE%9F%E8%A1%8C%E3%83%81%E3%82%A7%E3%83%83%E3%82%AF%E3%83%AA%E3%82%B9%E3%83%88">テスト実行チェックリスト</h2>
+<h3 id="phase-1-%E3%82%B8%E3%83%A7%E3%83%96%E4%BD%9C%E6%88%90">Phase 1: ジョブ作成</h3>
+<ul>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0">ダッシュボードにアクセスできる</label></li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1">新規ジョブ作成画面に遷移できる</label></li>
+<li><input type="checkbox" id="checkbox2"><label for="checkbox2">必須項目を入力できる</label></li>
+<li><input type="checkbox" id="checkbox3"><label for="checkbox3">スキルを選択できる</label></li>
+<li><input type="checkbox" id="checkbox4"><label for="checkbox4">チェックリストを追加できる</label></li>
+<li><input type="checkbox" id="checkbox5"><label for="checkbox5">ジョブを作成できる（ローディング表示あり）</label></li>
+<li><input type="checkbox" id="checkbox6"><label for="checkbox6">AIインセンティブが付与される</label></li>
+<li><input type="checkbox" id="checkbox7"><label for="checkbox7">ダッシュボードにリダイレクトされる</label></li>
+</ul>
+<h3 id="phase-2-%E3%82%B8%E3%83%A7%E3%83%96%E7%99%BA%E8%A6%8B%E3%83%BB%E5%BF%9C%E5%8B%9F">Phase 2: ジョブ発見・応募</h3>
+<ul>
+<li><input type="checkbox" id="checkbox8"><label for="checkbox8">マップでジョブを確認できる</label></li>
+<li><input type="checkbox" id="checkbox9"><label for="checkbox9">ジョブ一覧を閲覧できる</label></li>
+<li><input type="checkbox" id="checkbox10"><label for="checkbox10">ジョブ詳細を確認できる</label></li>
+<li><input type="checkbox" id="checkbox11"><label for="checkbox11">ジョブに応募できる</label></li>
+</ul>
+<h3 id="phase-3-%E5%BF%9C%E5%8B%9F%E7%A2%BA%E8%AA%8D%E3%83%BB%E9%81%B8%E5%AE%9A">Phase 3: 応募確認・選定</h3>
+<ul>
+<li><input type="checkbox" id="checkbox12"><label for="checkbox12">応募通知を確認できる</label></li>
+<li><input type="checkbox" id="checkbox13"><label for="checkbox13">応募者のプロフィールを確認できる</label></li>
+<li><input type="checkbox" id="checkbox14"><label for="checkbox14">ワーカーを選定（採用）できる</label></li>
+</ul>
+<h3 id="phase-4-%E4%BD%9C%E6%A5%AD%E5%AE%9F%E6%96%BD%E3%83%BB%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A">Phase 4: 作業実施・完了報告</h3>
+<ul>
+<li><input type="checkbox" id="checkbox15"><label for="checkbox15">採用通知を確認できる</label></li>
+<li><input type="checkbox" id="checkbox16"><label for="checkbox16">作業開始を記録できる</label></li>
+<li><input type="checkbox" id="checkbox17"><label for="checkbox17">チェックリストを消化できる</label></li>
+<li><input type="checkbox" id="checkbox18"><label for="checkbox18">作業完了報告を送信できる</label></li>
+</ul>
+<h3 id="phase-5-%E4%BD%9C%E6%A5%AD%E7%A2%BA%E8%AA%8D%E3%83%BB%E8%A9%95%E4%BE%A1">Phase 5: 作業確認・評価</h3>
+<ul>
+<li><input type="checkbox" id="checkbox19"><label for="checkbox19">完了報告を確認できる</label></li>
+<li><input type="checkbox" id="checkbox20"><label for="checkbox20">作業内容を確認できる</label></li>
+<li><input type="checkbox" id="checkbox21"><label for="checkbox21">評価を入力できる</label></li>
+<li><input type="checkbox" id="checkbox22"><label for="checkbox22">報酬を支払える</label></li>
+</ul>
+<h3 id="phase-6-%E5%A0%B1%E9%85%AC%E5%8F%97%E9%A0%98%E3%83%BB%E8%A9%95%E4%BE%A1">Phase 6: 報酬受領・評価</h3>
+<ul>
+<li><input type="checkbox" id="checkbox23"><label for="checkbox23">報酬受領を確認できる</label></li>
+<li><input type="checkbox" id="checkbox24"><label for="checkbox24">発注者を評価できる</label></li>
+</ul>
+<hr>
+<h2 id="%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4">更新履歴</h2>
+<table>
+<thead>
+<tr>
+<th>日付</th>
+<th>更新者</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-01-03</td>
+<td>-</td>
+<td>初版作成</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>

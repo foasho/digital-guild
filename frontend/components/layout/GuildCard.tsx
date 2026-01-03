@@ -11,18 +11,11 @@ import {
   useTrustPassportStore,
   useUndertakedJobStore,
 } from "@/stores/workers";
+import { useTrustPassport } from "@/hooks/workers";
 import {
   undertakedJobs as defaultUndertakedJobs,
   workerSkills as defaultWorkerSkills,
 } from "@/constants/mocks";
-
-const DEFAULT_NAME = "田中　一郎";
-const DEFAULT_BALANCE = 81520;
-const DEFAULT_RANK = "BRONZE";
-const DEFAULT_REGISTERED_AT = "2026-01-07T00:00:00Z";
-const DEFAULT_CERT_ID = "17695712143";
-const DEFAULT_WORKER_ID = 1;
-
 // Rank-based styling configurations
 const rankStyles = {
   BRONZE: {
@@ -93,9 +86,9 @@ export function GuildCard() {
   const pathname = usePathname();
 
   const worker = useWorkerStore((state) => state.worker);
-  const jpycBalance = useWorkerStore((state) => state.jpycBalance);
+  // useTrustPassportフックでpassportをストアにロード
+  const { passport, skills: passportSkills, getRank: getRankFn } = useTrustPassport();
   const getRank = useTrustPassportStore((state) => state.getRank);
-  const passportSkills = useTrustPassportStore((state) => state.skills);
   const storeUndertakedJobs = useUndertakedJobStore(
     (state) => state.undertakedJobs,
   );
@@ -111,19 +104,19 @@ export function GuildCard() {
   }, [pathname]);
 
   // Use default values until hydration is complete or if store is empty
-  const displayName = isHydrated && worker?.name ? worker.name : DEFAULT_NAME;
+  const displayName = isHydrated && worker?.name ? worker.name : worker?.name ?? "";
   const displayBalance =
-    isHydrated && jpycBalance > 0 ? jpycBalance : DEFAULT_BALANCE;
+    isHydrated && passport?.balance ? passport.balance : passport?.balance ?? 0;
   const displayRank = (
-    isHydrated ? getRank().toUpperCase() : DEFAULT_RANK
+    isHydrated ? getRank().toUpperCase() : getRank().toUpperCase() ?? "BRONZE"
   ) as RankType;
   const displayRegisteredAt = formatRegisteredAt(
-    isHydrated && worker?.createdAt ? worker.createdAt : DEFAULT_REGISTERED_AT,
+    isHydrated && worker?.createdAt ? worker.createdAt : worker?.createdAt ?? "",
   );
   const displayCertId =
-    isHydrated && worker?.id ? toCertificateId(worker.id) : DEFAULT_CERT_ID;
+    isHydrated && worker?.id ? toCertificateId(worker.id) : toCertificateId(worker?.id ?? 0);
   const displayWorkerId =
-    isHydrated && worker?.id ? worker.id : DEFAULT_WORKER_ID;
+    isHydrated && worker?.id ? worker.id : worker?.id ?? 0;
 
   const formattedBalance = displayBalance.toLocaleString();
 

@@ -13,11 +13,15 @@ interface UseUndertakedJobsResult {
   updateStatus: (id: number, status: UndertakedJob["status"]) => Promise<void>;
   getByJobId: (jobId: number) => UndertakedJob | undefined;
   getById: (id: number) => UndertakedJob | undefined;
+  refetch: () => Promise<void>;
 }
 
 /**
  * 着手ジョブ一覧を取得し、Storeに格納するhook
  * データ取得: hooks → API → LocalStorage
+ * 
+ * 注意: Worker側とRequester側は別のストアを使用するため、
+ * ページアクセス時に毎回LocalStorageから最新データを取得する
  */
 const useUndertakedJobs = (): UseUndertakedJobsResult => {
   const [pending, setPending] = useState(false);
@@ -32,27 +36,30 @@ const useUndertakedJobs = (): UseUndertakedJobsResult => {
     getById,
   } = useUndertakedJobStore();
 
-  useEffect(() => {
-    const fetchUndertakedJobs = async (): Promise<void> => {
-      if (undertakedJobs.length > 0) return; // 既にロード済み
-      setPending(true);
-      try {
-        // APIからデータ取得
-        if (worker) {
-          // ワーカーがいる場合はそのワーカーの着手ジョブのみ
-          const data = await UndertakedJobApi.getByWorkerId(worker.id);
-          setUndertakedJobs(data);
-        } else {
-          // 全件（発注者向け）
-          const data = await UndertakedJobApi.index();
-          setUndertakedJobs(data);
-        }
-      } finally {
-        setPending(false);
+  const fetchUndertakedJobs = useCallback(async (): Promise<void> => {
+    setPending(true);
+    try {
+      // 常にLocalStorageから最新データを取得
+      if (worker) {
+        // ワーカーがいる場合はそのワーカーの着手ジョブのみ
+        const data = await UndertakedJobApi.getByWorkerId(worker.id);
+        setUndertakedJobs(data);
+      } else {
+        // 全件
+        const data = await UndertakedJobApi.index();
+        setUndertakedJobs(data);
       }
-    };
+    } finally {
+      setPending(false);
+    }
+  }, [worker, setUndertakedJobs]);
+
+  useEffect(() => {
+    // マウント時に常にLocalStorageから最新データを取得
+    // （発注者側で更新された場合に反映するため）
     fetchUndertakedJobs();
-  }, [worker, undertakedJobs.length, setUndertakedJobs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const addUndertakedJob = useCallback(
     async (params: Omit<UndertakedJob, "id">): Promise<UndertakedJob> => {
@@ -90,6 +97,7 @@ const useUndertakedJobs = (): UseUndertakedJobsResult => {
     updateStatus,
     getByJobId,
     getById,
+    refetch: fetchUndertakedJobs,
   };
 };
 

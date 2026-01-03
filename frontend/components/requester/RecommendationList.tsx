@@ -52,7 +52,7 @@ const getConfidenceTextColor = (confidence: number): string => {
   return "text-red-600";
 };
 
-// モック用Trust Score (ワーカーIDに基づくシンプルなハッシュ)
+// モック用信用ポイント (ワーカーIDに基づくシンプルなハッシュ)
 const getMockTrustScore = (workerId: number): number => {
   const hash = String(workerId)
     .split("")
@@ -168,7 +168,7 @@ export function RecommendationList({
                           </span>
                         </div>
                         <div className="text-sm text-gray-500">
-                          Trust Score: {trustScore}
+                          信用ポイント: {trustScore}
                         </div>
                       </div>
                     </div>

@@ -38,7 +38,8 @@ const useRequester = (): UseRequesterResult => {
       try {
         // TODO: 本番移行では、APIから取得する予定
         if (mockRequesters.length > 0) {
-          setRequester(mockRequesters[0]);
+          const _requester = mockRequesters.find((r) => r.name === "大分 幸子");
+          if (_requester) setRequester(_requester);
         }
       } finally {
         setPending(false);

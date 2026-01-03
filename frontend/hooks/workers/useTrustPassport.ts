@@ -17,6 +17,7 @@ interface UseTrustPassportResult {
   skills: WorkerSkill[];
   pending: boolean;
   updateTrustScore: (score: number) => Promise<void>;
+  updateBalance: (amount: number) => Promise<void>;
   addSkill: (name: string, jobId: number) => Promise<WorkerSkill>;
   getRank: () => Rank;
 }
@@ -34,6 +35,7 @@ const useTrustPassport = (): UseTrustPassportResult => {
     setPassport,
     setSkills,
     updateTrustScore: updateScoreInStore,
+    updateBalance: updateBalanceInStore,
     addSkill: addSkillToStore,
     getRank: getRankFromStore,
   } = useTrustPassportStore();
@@ -70,6 +72,17 @@ const useTrustPassport = (): UseTrustPassportResult => {
     [passport, updateScoreInStore]
   );
 
+  const updateBalance = useCallback(
+    async (amount: number): Promise<void> => {
+      if (!passport) return;
+      const newBalance = passport.balance + amount;
+      // APIで更新
+      await TrustPassportApi.update(passport.id, { balance: newBalance });
+      updateBalanceInStore(amount);
+    },
+    [passport, updateBalanceInStore]
+  );
+
   const addSkill = useCallback(
     async (name: string, jobId: number): Promise<WorkerSkill> => {
       if (!worker) throw new Error("Worker not found");
@@ -95,6 +108,7 @@ const useTrustPassport = (): UseTrustPassportResult => {
     skills,
     pending,
     updateTrustScore,
+    updateBalance,
     addSkill,
     getRank,
   };

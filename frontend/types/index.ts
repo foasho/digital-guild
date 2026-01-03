@@ -21,6 +21,7 @@ export interface Worker {
 export interface Requester {
   id: number;
   name: string;
+  address: string;
   createdAt: string;
 }
 
@@ -84,14 +85,16 @@ export interface UndertakedJob {
   jobId: number;
   /**
    * ステータスフロー:
-   * 1. accepted - 労働者が着手開始
-   * 2. completion_reported - 労働者が作業完了報告
-   * 3. completed - 発注者が確認して評価完了
-   * 4. canceled - キャンセル
+   * 1. applied - 労働者が応募（発注者の承認待ち）
+   * 2. accepted - 発注者が採用を確定、労働者が着手開始
+   * 3. completion_reported - 労働者が作業完了報告
+   * 4. completed - 発注者が確認して評価完了
+   * 5. canceled - キャンセル
    */
-  status: "accepted" | "completion_reported" | "completed" | "canceled";
+  status: "applied" | "accepted" | "completion_reported" | "completed" | "canceled";
   requesterEvalScore: number | null;
-  acceptedAt: string;
+  appliedAt: string | null; // 労働者が応募した日時
+  acceptedAt: string | null; // 発注者が採用を確定した日時
   completionReportedAt: string | null; // 労働者が完了報告した日時
   canceledAt: string | null;
   finishedAt: string | null;
@@ -105,6 +108,7 @@ export interface TrustPassport {
   id: number;
   workerId: number;
   trustScore: number;
+  balance: number;
 }
 
 // 労働者スキル
@@ -143,3 +147,25 @@ export interface TransactionHistory {
 
 // ランク
 export type Rank = "Bronze" | "Silver" | "Gold" | "Platinum";
+
+// 労働者通知
+export interface WorkerNotification {
+  id: number;
+  workerId: number;
+  confirmedAt: string | null; // 確認済み日時（nullは未読）
+  title: string;
+  description: string;
+  url: string | null; // 詳細ページへのリンク（nullable）
+  createdAt: string;
+}
+
+// 発注者通知
+export interface RequesterNotification {
+  id: number;
+  requesterId: number;
+  confirmedAt: string | null; // 確認済み日時（nullは未読）
+  title: string;
+  description: string;
+  url: string | null; // 詳細ページへのリンク（nullable）
+  createdAt: string;
+}

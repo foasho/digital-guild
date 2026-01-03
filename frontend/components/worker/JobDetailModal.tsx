@@ -1,6 +1,7 @@
 "use client";
 
-import { Button, Chip, Modal, ModalBody, ModalContent } from "@heroui/react";
+import { Button, Chip, Modal, ModalBody, ModalContent, Spinner } from "@heroui/react";
+import { TrendingUp } from "lucide-react";
 import type { Job } from "@/types";
 
 interface JobDetailModalProps {
@@ -8,6 +9,7 @@ interface JobDetailModalProps {
   isOpen: boolean;
   isBookmarked: boolean;
   isAlreadyAccepted: boolean;
+  isAccepting?: boolean;
   onClose: () => void;
   onBookmarkClick: () => void;
   onAcceptClick: () => void;
@@ -18,6 +20,7 @@ export function JobDetailModal({
   isOpen,
   isBookmarked,
   isAlreadyAccepted,
+  isAccepting = false,
   onClose,
   onBookmarkClick,
   onAcceptClick,
@@ -26,6 +29,8 @@ export function JobDetailModal({
 
   // 報酬合計
   const totalReward = job.reward + job.aiInsentiveReward;
+  // AIインセンティブが含まれているかどうか
+  const hasIncentive = job.aiInsentiveReward > 0;
 
   // 日付フォーマット
   const formatDate = (dateString: string) => {
@@ -84,9 +89,23 @@ export function JobDetailModal({
 
             {/* 報酬額オーバーレイ */}
             <div className="absolute bottom-4 left-4 text-white">
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold mb-1">
                 ¥{totalReward.toLocaleString()} / 回
               </div>
+              {/* インセンティブChip */}
+              {hasIncentive && (
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  startContent={<TrendingUp size={12} />}
+                  classNames={{
+                    base: "bg-gradient-to-r from-emerald-500/90 to-teal-500/90 border-0 shadow-lg shadow-emerald-500/30",
+                    content: "text-white font-bold text-[10px] tracking-wide drop-shadow-sm",
+                  }}
+                >
+                  報酬UP中
+                </Chip>
+              )}
             </div>
 
             {/* ブックマークボタン */}
@@ -213,13 +232,24 @@ export function JobDetailModal({
                 className={
                   isAlreadyAccepted
                     ? "bg-gray-500 text-white font-bold"
-                    : "bg-amber-500 text-white font-bold"
+                    : isAccepting
+                      ? "bg-amber-600 text-white font-bold"
+                      : "bg-amber-500 text-white font-bold"
                 }
                 radius="full"
                 onPress={onAcceptClick}
-                isDisabled={isAlreadyAccepted}
+                isDisabled={isAlreadyAccepted || isAccepting}
               >
-                {isAlreadyAccepted ? "受注済み" : "受注する"}
+                {isAlreadyAccepted ? (
+                  "受注済み"
+                ) : isAccepting ? (
+                  <span className="flex items-center gap-2">
+                    <Spinner size="sm" color="white" />
+                    受注中...
+                  </span>
+                ) : (
+                  "受注する"
+                )}
               </Button>
             </div>
           </div>

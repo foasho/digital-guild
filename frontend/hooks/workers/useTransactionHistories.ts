@@ -17,6 +17,9 @@ interface UseTransactionHistoriesResult {
 /**
  * 取引履歴を取得し、Storeに格納するhook
  * データ取得: hooks → API → LocalStorage
+ * 
+ * 注意: 発注者側で追加されたトランザクションを反映するため、
+ * マウント時に常にLocalStorageから最新データを取得する
  */
 const useTransactionHistories = (): UseTransactionHistoriesResult => {
   const [pending, setPending] = useState(false);
@@ -26,10 +29,11 @@ const useTransactionHistories = (): UseTransactionHistoriesResult => {
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      if (!worker || transactions.length > 0) return;
+      if (!worker) return;
       setPending(true);
       try {
-        // APIからデータ取得
+        // マウント時に常にLocalStorageから最新データを取得
+        // （発注者側で報酬が振り込まれた場合に反映するため）
         const workerTx = await TransactionHistoryApi.getByWorkerId({
           workerId: worker.id,
         });
@@ -39,7 +43,7 @@ const useTransactionHistories = (): UseTransactionHistoriesResult => {
       }
     };
     fetchData();
-  }, [worker, transactions.length, setTransactions]);
+  }, [worker, setTransactions]);
 
   // 残高計算
   const balance = useMemo(() => {

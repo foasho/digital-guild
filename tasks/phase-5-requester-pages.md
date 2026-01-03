@@ -37,7 +37,7 @@
        - 「この人にオススメ」セクション
        - confidence、reason表示
      - 応募者一覧（着手ジョブから取得）
-       - 労働者名、Trust Score、ランク
+       - 労働者名、信用ポイント、ランク
        - 「承認待ち」の場合は評価ページへのリンク
   3. 動的ルーティング（[job_id]）
 - **対象ファイル**: `frontend/app/requester/jobs/[job_id]/page.tsx`
@@ -48,11 +48,11 @@
 - **作業内容**:
   1. `app/requester/undertaked_jobs/[undertaked_job_id]/page.tsx`を作成
   2. UI:
-     - 労働者情報（名前、Trust Score、ランク）
+     - 労働者情報（名前、信用ポイント、ランク）
      - ジョブ情報
      - 完了報告内容（チェックリスト、メモ）
      - 星評価（1-5）入力
-     - 「承認する」ボタン
+     - 「評価を確定する」ボタン
   3. 承認時の後続処理:
      - UndertakedJobのrequesterEvalScore更新
      - WorkerSkill追加（ジョブに紐づくスキル）
@@ -135,7 +135,7 @@
   2. UI:
      - 「この人にオススメ」セクション
      - レコメンドカード:
-       - 労働者名、Trust Score、ランク
+       - 労働者名、信用ポイント、ランク
        - confidence（%表示）
        - reason（折りたたみ可）
 - **対象ファイル**: `frontend/components/requester/RecommendationList.tsx`

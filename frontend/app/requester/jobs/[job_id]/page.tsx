@@ -42,7 +42,7 @@ const getRankStyle = (rank: Rank) => {
   }
 };
 
-// Trust Scoreに応じた色を取得
+// 信用ポイントに応じた色を取得
 const getTrustScoreColor = (score: number) => {
   if (score >= 80) return { bar: "bg-green-500", text: "text-green-600" };
   if (score >= 60) return { bar: "bg-yellow-500", text: "text-yellow-600" };
@@ -68,7 +68,7 @@ const getStatusStyle = (status: UndertakedJob["status"]) => {
   switch (status) {
     case "accepted":
       return {
-        label: "着手中",
+        label: "進行中",
         style:
           "bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-sm font-semibold",
       };
@@ -103,7 +103,7 @@ const formatDate = (dateString: string) => {
   return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 };
 
-// モック用Trust Score (ワーカーIDに基づくシンプルなハッシュ)
+// モック用信用ポイント (ワーカーIDに基づくシンプルなハッシュ)
 const getMockTrustScore = (workerId: number): number => {
   // numberを文字列に変換してハッシュ計算
   const hash = String(workerId)
@@ -217,7 +217,7 @@ export default function RequesterJobDetailPage() {
             {/* 報酬情報 */}
             <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 mb-4">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 text-sm">基本報酬</span>
+                <span className="text-gray-600 text-sm">報酬</span>
                 <span className="font-bold text-gray-800">
                   {job.reward.toLocaleString()} JPYC
                 </span>
@@ -226,7 +226,7 @@ export default function RequesterJobDetailPage() {
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-gray-600 text-sm flex items-center gap-1">
                     <Sparkles size={14} className="text-purple-500" />
-                    AIインセンティブ
+                    補助金 (変動)
                   </span>
                   <span className="font-bold text-purple-600">
                     +{job.aiInsentiveReward.toLocaleString()} JPYC
@@ -350,10 +350,10 @@ export default function RequesterJobDetailPage() {
                                 {rank}
                               </span>
                             </div>
-                            {/* Trust Score プログレスバー */}
+                            {/* 信用ポイント プログレスバー */}
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-xs text-gray-500 w-20">
-                                Trust Score
+                                信用ポイント
                               </span>
                               <div className="flex-1 max-w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
                                 <div
@@ -405,7 +405,7 @@ export default function RequesterJobDetailPage() {
 
                       {/* 応募日時 */}
                       <div className="mt-2 text-xs text-gray-400">
-                        応募日: {formatDate(applicant.acceptedAt)}
+                        応募日: {applicant.appliedAt ? formatDate(applicant.appliedAt) : applicant.acceptedAt ? formatDate(applicant.acceptedAt) : "-"}
                       </div>
                     </div>
                   );

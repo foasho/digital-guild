@@ -64,6 +64,7 @@ export default function WalletPage() {
   // hooksから取得
   const { worker, pending: workerPending } = useWorker();
   const { transactions, balance, pending: txPending } = useTransactionHistories();
+  const reversedTransactions = [...transactions].reverse();
 
   const isLoading = workerPending || txPending;
 
@@ -172,7 +173,7 @@ export default function WalletPage() {
               <p className="text-white/50">取引履歴がありません</p>
             </div>
           ) : (
-            transactions.map((transaction) => (
+            reversedTransactions.map((transaction) => (
               <TransactionItem key={transaction.id} transaction={transaction} />
             ))
           )}

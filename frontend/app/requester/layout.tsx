@@ -11,12 +11,15 @@ import {
   X,
   Sun,
   Moon,
+  Bell,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Button } from "@heroui/react";
+import { usePathname, useRouter } from "next/navigation";
+import { Button, Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/react";
 import { MockSwitchBar } from "@/components/layout";
 import { loadMockData } from "@/constants/api-mocks";
+import { useNotifications } from "@/hooks/requesters";
 
 interface RequesterLayoutProps {
   children: ReactNode;
@@ -52,9 +55,22 @@ const secondaryNavItems = [
 
 export default function RequesterLayout({ children }: RequesterLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+
+  const handleNotificationClick = (notification: typeof notifications[0]) => {
+    if (!notification.confirmedAt) {
+      markAsRead(notification.id);
+    }
+    if (notification.url) {
+      setIsNotificationOpen(false);
+      router.push(notification.url);
+    }
+  };
 
   // 初回起動時にモックデータをLocalStorageにロード
   useEffect(() => {
@@ -77,6 +93,19 @@ export default function RequesterLayout({ children }: RequesterLayoutProps) {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffHours < 1) return "たった今";
+    if (diffHours < 24) return `${diffHours}時間前`;
+    if (diffDays < 7) return `${diffDays}日前`;
+    return `${date.getMonth() + 1}/${date.getDate()}`;
   };
 
   if (!mounted) {
@@ -168,6 +197,24 @@ export default function RequesterLayout({ children }: RequesterLayoutProps) {
           </Link>
 
           <div className="flex items-center gap-2">
+            {/* 通知アイコン */}
+            <div className="relative">
+              <Button
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+                onPress={() => setIsNotificationOpen(true)}
+                className="text-gray-500 dark:text-gray-400"
+              >
+                <Bell className="w-5 h-5" />
+              </Button>
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full px-1">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
             {/* ダークモードトグル */}
             <Button
               isIconOnly
@@ -233,6 +280,24 @@ export default function RequesterLayout({ children }: RequesterLayoutProps) {
             </p>
           </div>
           <div className="flex items-center gap-4">
+            {/* 通知アイコン */}
+            <div className="relative">
+              <Button
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+                onPress={() => setIsNotificationOpen(true)}
+                className="text-gray-500 dark:text-gray-400"
+              >
+                <Bell className="w-5 h-5" />
+              </Button>
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full px-1">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
             {/* ダークモードトグル */}
             <Button
               isIconOnly
@@ -244,9 +309,8 @@ export default function RequesterLayout({ children }: RequesterLayoutProps) {
             >
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
-            <span className="text-sm text-gray-600 dark:text-gray-300">湯煙町自治体</span>
             <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-              湯
+              SO
             </div>
           </div>
         </div>
@@ -256,6 +320,88 @@ export default function RequesterLayout({ children }: RequesterLayoutProps) {
       <main className="lg:pl-64 pt-24 lg:pt-24 pb-8 min-h-screen">
         <div className="pt-4 px-8">{children}</div>
       </main>
+
+      {/* 通知モーダル */}
+      <Modal
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+        placement="center"
+        backdrop="blur"
+        size="sm"
+        scrollBehavior="inside"
+        classNames={{
+          base: "max-h-[70vh] bg-white/75",
+        }}
+      >
+        <ModalContent>
+          <ModalHeader className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bell size={18} className="text-sky-500" />
+              通知
+              {unreadCount > 0 && (
+                <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">
+                  {unreadCount}件
+                </span>
+              )}
+            </div>
+            {unreadCount > 0 && (
+              <Button
+                size="sm"
+                variant="light"
+                className="text-sky-500 text-xs"
+                onPress={markAllAsRead}
+              >
+                すべて既読
+              </Button>
+            )}
+          </ModalHeader>
+          <ModalBody className="p-0">
+            {notifications.length === 0 ? (
+              <div className="p-8 text-center text-gray-400">
+                通知はありません
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {notifications.map((notification) => (
+                  <button
+                    key={notification.id}
+                    type="button"
+                    onClick={() => handleNotificationClick(notification)}
+                    className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
+                      notification.confirmedAt ? "opacity-60" : ""
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      {!notification.confirmedAt && (
+                        <span className="w-2 h-2 bg-sky-500 rounded-full mt-2 shrink-0" />
+                      )}
+                      <div className={`flex-1 ${notification.confirmedAt ? "pl-5" : ""}`}>
+                        <p className="text-gray-800 font-medium text-sm">
+                          {notification.title}
+                        </p>
+                        <p className="text-gray-500 text-xs mt-1">
+                          {notification.description}
+                        </p>
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-gray-400 text-xs">
+                            {formatDate(notification.createdAt)}
+                          </p>
+                          {notification.url && (
+                            <span className="flex items-center gap-0.5 text-sky-500 text-xs font-medium">
+                              詳細を見る
+                              <ChevronRight size={14} />
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

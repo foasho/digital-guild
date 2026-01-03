@@ -1,5 +1,61 @@
 import type { Job } from "@/types";
 
+// ===== 大分幸子(id: 1000)のジョブ =====
+
+export const oitaJob1: Job = {
+  id: 1001,
+  requesterId: 1000,
+  title: "温泉旅館の接客補助",
+  description:
+    "大分県別府温泉の老舗旅館で接客のお手伝いをお願いします。お客様のお迎えやお部屋への案内、食事の配膳補助などをしていただきます。温泉入浴と郷土料理の賄い付きです。",
+  reward: 9000,
+  aiInsentiveReward: 0, // 別府温泉は観光地のため
+  location: "大分県別府市",
+  latitude: 33.2847,
+  longitude: 131.4913,
+  imageUrl: "/jobs/ryokan.png",
+  tags: ["接客", "旅館", "おもてなし"],
+  capacity: 2,
+  checklist: [
+    { id: 1001, text: "旅館フロントで受付" },
+    { id: 1002, text: "制服着替え・挨拶研修" },
+    { id: 1003, text: "お客様案内完了" },
+    { id: 1004, text: "配膳補助完了" },
+    { id: 1005, text: "片付け・作業報告" },
+  ],
+  scheduledDate: "2026-01-15",
+  createdAt: "2025-12-25T00:00:00Z",
+  updatedAt: "2025-12-25T00:00:00Z",
+};
+
+export const oitaJob2: Job = {
+  id: 1002,
+  requesterId: 1000,
+  title: "地元商店街のPR動画撮影",
+  description:
+    "大分市中心部の商店街活性化のためのPR動画撮影をお手伝いいただきます。各店舗への取材同行やインタビューのサポート、機材の運搬などをお願いします。",
+  reward: 11000,
+  aiInsentiveReward: 55,
+  location: "大分県大分市",
+  latitude: 33.2382,
+  longitude: 131.6126,
+  imageUrl: "/jobs/izakaya.jpg",
+  tags: ["撮影", "取材", "地域活性"],
+  capacity: 3,
+  checklist: [
+    { id: 1006, text: "商店街入口で集合" },
+    { id: 1007, text: "撮影機材準備完了" },
+    { id: 1008, text: "店舗取材1〜5件完了" },
+    { id: 1009, text: "店舗取材6〜10件完了" },
+    { id: 1010, text: "機材片付け・作業報告" },
+  ],
+  scheduledDate: "2026-01-20",
+  createdAt: "2025-12-28T00:00:00Z",
+  updatedAt: "2025-12-28T00:00:00Z",
+};
+
+// ===== 既存の募集中ジョブ =====
+
 export const izakayaJob: Job = {
   id: 1,
   requesterId: 1,
@@ -110,7 +166,7 @@ export const pastJob102: Job = {
   description:
     "新規オープンするカフェの内装作業をお手伝いいただきます。家具の組み立てや配置、装飾品の設置などをお願いします。",
   reward: 10000,
-  aiInsentiveReward: 50,
+  aiInsentiveReward: 0, // 東京都渋谷区は人が集まりやすい
   location: "東京都渋谷区",
   latitude: 35.6580,
   longitude: 139.7016,
@@ -182,7 +238,7 @@ export const pastJob105: Job = {
   description:
     "観光地でのプロモーション写真撮影のアシスタントをお願いします。機材運搬や照明補助などをしていただきます。",
   reward: 11000,
-  aiInsentiveReward: 55,
+  aiInsentiveReward: 0, // 京都は観光地のため
   location: "京都府京都市",
   latitude: 35.0116,
   longitude: 135.7681,
@@ -206,7 +262,7 @@ export const pastJob106: Job = {
   description:
     "地域の海岸清掃活動に参加していただきます。ゴミ拾いや分別作業をお願いします。軽食とドリンク付きです。",
   reward: 6000,
-  aiInsentiveReward: 30,
+  aiInsentiveReward: 0, // 鎌倉は観光地のため
   location: "神奈川県鎌倉市",
   latitude: 35.3192,
   longitude: 139.5467,
@@ -230,7 +286,7 @@ export const pastJob107: Job = {
   description:
     "個人宅の引越し作業をお手伝いいただきます。荷物の梱包補助や運搬、新居での配置などをお願いします。",
   reward: 12000,
-  aiInsentiveReward: 60,
+  aiInsentiveReward: 0, // 福岡は都市部のため
   location: "福岡県福岡市",
   latitude: 33.5902,
   longitude: 130.4017,
@@ -254,7 +310,7 @@ export const pastJob108: Job = {
   description:
     "商業施設でのクリスマスイベントの運営補助をお願いします。来場者案内やワークショップの補助などをしていただきます。",
   reward: 9500,
-  aiInsentiveReward: 48,
+  aiInsentiveReward: 0, // 名古屋は都市部のため
   location: "愛知県名古屋市",
   latitude: 35.1815,
   longitude: 136.9066,
@@ -278,7 +334,7 @@ export const pastJob109: Job = {
   description:
     "オフィスビルの年末大掃除をお手伝いいただきます。窓拭きや床清掃、不用品の整理などをお願いします。",
   reward: 10500,
-  aiInsentiveReward: 53,
+  aiInsentiveReward: 0, // 東京都心は人が集まりやすい
   location: "東京都千代田区",
   latitude: 35.6938,
   longitude: 139.7533,
@@ -302,7 +358,7 @@ export const pastJob110: Job = {
   description:
     "地域の夏祭りで屋台の運営補助をお願いします。調理補助や販売、お客様対応などをしていただきます。",
   reward: 8000,
-  aiInsentiveReward: 40,
+  aiInsentiveReward: 0, // 広島は都市部のため
   location: "広島県広島市",
   latitude: 34.3853,
   longitude: 132.4553,
@@ -319,8 +375,8 @@ export const pastJob110: Job = {
   updatedAt: "2025-08-01T00:00:00Z",
 };
 
-// 現在募集中のジョブ
-export const jobs: Job[] = [izakayaJob, noukaJob, ryokanJob];
+// 現在募集中のジョブ（大分幸子のジョブを含む）
+export const jobs: Job[] = [oitaJob1, oitaJob2, izakayaJob, noukaJob, ryokanJob];
 
 // 過去ジョブ（完了済み用）
 export const pastJobs: Job[] = [

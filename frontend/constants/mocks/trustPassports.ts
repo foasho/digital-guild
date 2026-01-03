@@ -7,6 +7,7 @@ export const defaultTrustPassport: TrustPassport = {
   id: 1,
   workerId: 1,
   trustScore: 68,
+  balance: 81520,
 };
 
 export const trustPassports: TrustPassport[] = [defaultTrustPassport];

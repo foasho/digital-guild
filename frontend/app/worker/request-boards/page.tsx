@@ -2,21 +2,24 @@
 
 import { Input } from "@heroui/react";
 import { debounce } from "es-toolkit";
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { JobCard } from "@/components/worker/JobCard";
 import { JobDetailModal } from "@/components/worker/JobDetailModal";
 import { type FilterValues, JobFilter } from "@/components/worker/JobFilter";
 import { useJobs, useBookmarks, useUndertakedJobs, useRecommendedJobs } from "@/hooks/workers";
 import { useUndertakedJobStore, useWorkerStore } from "@/stores/workers";
-import { UndertakedJobApi } from "@/constants/api-mocks";
+import { UndertakedJobApi, RequesterNotificationApi } from "@/constants/api-mocks";
 import type { Job, UndertakedJob } from "@/types";
 
 export default function RequestBoardsPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
   const [filters, setFilters] = useState<FilterValues>({
     dateFrom: "",
     dateTo: "",
@@ -36,6 +39,17 @@ export default function RequestBoardsPage() {
   // Store操作
   const addUndertakedJob = useUndertakedJobStore((state) => state.addUndertakedJob);
   const getByJobId = useUndertakedJobStore((state) => state.getByJobId);
+
+  // アクティブな応募/受注かどうかをチェック（完了済み・キャンセル済みは除外）
+  const isActivelyAccepted = useCallback(
+    (jobId: number): boolean => {
+      const undertakedJob = getByJobId(jobId);
+      if (!undertakedJob) return false;
+      // 応募中、進行中、または確認待ちはアクティブとみなす
+      return undertakedJob.status === "applied" || undertakedJob.status === "accepted" || undertakedJob.status === "completion_reported";
+    },
+    [getByJobId]
+  );
 
   // AIレコメンドされたジョブIDリスト
   const recommendedJobIds = useMemo(() => {
@@ -137,35 +151,58 @@ export default function RequestBoardsPage() {
     setSelectedJob(null);
   }, []);
 
-  // 受注処理
+  // 応募処理
   const handleAccept = useCallback(async () => {
-    if (!selectedJob || !worker) return;
+    if (!selectedJob || !worker || isAccepting) return;
 
-    // 既に受注済みかチェック
-    if (getByJobId(selectedJob.id)) {
+    // 既にアクティブな受注があるかチェック（完了済み・キャンセル済み・応募中は除外）
+    if (isActivelyAccepted(selectedJob.id)) {
       return;
     }
 
-    const newUndertakedJob: UndertakedJob = {
-      id: Date.now(),
-      workerId: worker.id,
-      jobId: selectedJob.id,
-      status: "accepted",
-      requesterEvalScore: null,
-      acceptedAt: new Date().toISOString(),
-      completionReportedAt: null,
-      canceledAt: null,
-      finishedAt: null,
-      completionMemo: null,
-      completedChecklistIds: null,
-    };
+    setIsAccepting(true);
 
-    // APIに保存
-    await UndertakedJobApi.create(newUndertakedJob);
-    // Storeに追加
-    addUndertakedJob(newUndertakedJob);
-    handleDetailClose();
-  }, [selectedJob, worker, getByJobId, addUndertakedJob, handleDetailClose]);
+    try {
+      const newUndertakedJob: UndertakedJob = {
+        id: Date.now(),
+        workerId: worker.id,
+        jobId: selectedJob.id,
+        status: "applied", // 応募中ステータスに変更
+        requesterEvalScore: null,
+        appliedAt: new Date().toISOString(), // 応募日時を追加
+        acceptedAt: null,
+        completionReportedAt: null,
+        canceledAt: null,
+        finishedAt: null,
+        completionMemo: null,
+        completedChecklistIds: null,
+      };
+
+      // APIに保存
+      await UndertakedJobApi.create(newUndertakedJob);
+      // Storeに追加
+      addUndertakedJob(newUndertakedJob);
+
+      // 発注者に通知を送信
+      RequesterNotificationApi.create({
+        requesterId: selectedJob.requesterId,
+        confirmedAt: null, // 未読
+        title: "新しい応募がありました",
+        description: `「${selectedJob.title}」に${worker.name}さんから応募がありました。`,
+        url: `/requester/undertaked_jobs/${newUndertakedJob.id}`,
+        createdAt: new Date().toISOString(),
+      });
+
+      // 少し待ってからジョブ画面に遷移（UXのため）
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // ジョブ画面に遷移
+      router.push("/worker/jobs");
+    } catch (error) {
+      console.error("応募エラー:", error);
+      setIsAccepting(false);
+    }
+  }, [selectedJob, worker, isAccepting, isActivelyAccepted, addUndertakedJob, router]);
 
   // フィルター適用
   const handleFilterApply = useCallback((newFilters: FilterValues) => {
@@ -301,7 +338,8 @@ export default function RequestBoardsPage() {
         job={selectedJob}
         isOpen={isDetailModalOpen}
         isBookmarked={selectedJob ? isBookmarked(selectedJob.id) : false}
-        isAlreadyAccepted={selectedJob ? !!getByJobId(selectedJob.id) : false}
+        isAlreadyAccepted={selectedJob ? isActivelyAccepted(selectedJob.id) : false}
+        isAccepting={isAccepting}
         onClose={handleDetailClose}
         onBookmarkClick={() =>
           selectedJob && handleBookmarkToggle(selectedJob.id)

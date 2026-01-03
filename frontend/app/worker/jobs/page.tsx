@@ -14,11 +14,13 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CompletionReportModal } from "@/components/worker";
 import { useJobs, useUndertakedJobs } from "@/hooks/workers";
+import { RequesterNotificationApi } from "@/constants/api-mocks";
 import type { Job, UndertakedJob } from "@/types";
 
 // ステータスの日本語ラベル
 const statusLabels: Record<UndertakedJob["status"], string> = {
-  accepted: "着手中",
+  applied: "応募中",
+  accepted: "進行中",
   completion_reported: "確認待ち",
   completed: "完了",
   canceled: "キャンセル",
@@ -29,6 +31,7 @@ const statusStyles: Record<
   UndertakedJob["status"],
   { bg: string; text: string; border: string }
 > = {
+  applied: { bg: "bg-indigo-500/25", text: "text-indigo-300", border: "border-indigo-400/50" },
   accepted: { bg: "bg-amber-500/25", text: "text-amber-300", border: "border-amber-400/50" },
   completion_reported: { bg: "bg-blue-500/25", text: "text-blue-300", border: "border-blue-400/50" },
   completed: { bg: "bg-emerald-500/25", text: "text-emerald-300", border: "border-emerald-400/50" },
@@ -71,7 +74,7 @@ function StarRating({ score }: { score: number }) {
   );
 }
 
-// ジョブカード（着手中/完了済み用）
+// ジョブカード（進行中/完了済み用）
 function UndertakedJobCard({
   undertakedJob,
   job,
@@ -183,7 +186,7 @@ function UndertakedJobCard({
             </div>
           )}
 
-          {/* 着手中の場合: 詳細と完了報告ボタン */}
+          {/* 進行中の場合: 詳細と完了報告ボタン */}
           {isInProgress && (
             <div className="flex justify-end gap-2">
               {onDetailClick && (
@@ -225,7 +228,7 @@ function UndertakedJobCard({
   );
 }
 
-// 着手中ジョブの詳細モーダル
+// 進行中ジョブの詳細モーダル
 function UndertakedJobDetailModal({
   job,
   undertakedJob,
@@ -402,7 +405,7 @@ function UndertakedJobDetailModal({
               </div>
             )}
 
-            {/* 着手中の場合は完了報告ボタン */}
+            {/* 進行中の場合は完了報告ボタン */}
             {isInProgress && onCompletionReportClick && (
               <div className="pt-4 pb-8">
                 <Button
@@ -482,7 +485,12 @@ export default function WorkerJobsPage() {
     setIsHydrated(true);
   }, []);
 
-  // 着手中のジョブ（accepted のみ）
+  // 応募中のジョブ（applied）
+  const appliedJobs = useMemo(() => {
+    return undertakedJobs.filter((uj) => uj.status === "applied");
+  }, [undertakedJobs]);
+
+  // 進行中のジョブ（accepted のみ）
   const inProgressJobs = useMemo(() => {
     return undertakedJobs.filter((uj) => uj.status === "accepted");
   }, [undertakedJobs]);
@@ -522,7 +530,7 @@ export default function WorkerJobsPage() {
     memo: string,
     completedChecklistIds: number[]
   ) => {
-    if (selectedUndertakedJob) {
+    if (selectedUndertakedJob && selectedJob) {
       // ステータスを completion_reported に更新（発注者の確認待ち）
       updateUndertakedJob(selectedUndertakedJob.id, {
         status: "completion_reported",
@@ -530,6 +538,16 @@ export default function WorkerJobsPage() {
         completionMemo: memo || null,
         completedChecklistIds:
           completedChecklistIds.length > 0 ? completedChecklistIds : null,
+      });
+
+      // 発注者に通知を送信
+      RequesterNotificationApi.create({
+        requesterId: selectedJob.requesterId,
+        confirmedAt: null, // 未読
+        title: "作業完了報告がありました",
+        description: `「${selectedJob.title}」の作業が完了報告されました。評価をお願いします。`,
+        url: `/requester/undertaked_jobs/${selectedUndertakedJob.id}`,
+        createdAt: new Date().toISOString(),
       });
     }
   };
@@ -544,31 +562,48 @@ export default function WorkerJobsPage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* タブ切り替え */}
-      <div className="px-4 py-2 text-center">
+      {/* タブ切り替え（スマホでも横スクロール可能） */}
+      <div className="px-2 py-2 text-center overflow-x-auto">
         <Tabs
           selectedKey={selectedTab}
           onSelectionChange={(key) => setSelectedTab(key as string)}
           variant="underlined"
           classNames={{
             tabList:
-              "gap-6 w-full relative rounded-none p-0 border-b border-white/10",
+              "gap-2 w-full relative rounded-none p-0 border-b border-white/10 overflow-x-auto flex-nowrap min-w-max",
             cursor: "w-full bg-amber-500",
-            tab: "max-w-fit px-0 h-12",
+            tab: "max-w-fit px-2 h-12 shrink-0",
             tabContent:
-              "group-data-[selected=true]:text-amber-400 text-white/60",
+              "group-data-[selected=true]:text-amber-400 text-white/60 text-sm",
           }}
         >
           <Tab
+            key="applied"
+            title={
+              <div className="flex items-center gap-1">
+                <span>応募中</span>
+                {appliedJobs.length > 0 && (
+                  <Chip
+                    size="sm"
+                    variant="flat"
+                    className="bg-indigo-500/20 text-indigo-400 min-w-5 h-5 px-1"
+                  >
+                    {appliedJobs.length}
+                  </Chip>
+                )}
+              </div>
+            }
+          />
+          <Tab
             key="in_progress"
             title={
-              <div className="flex items-center gap-2">
-                <span>着手中</span>
+              <div className="flex items-center gap-1">
+                <span>進行中</span>
                 {inProgressJobs.length > 0 && (
                   <Chip
                     size="sm"
                     variant="flat"
-                    className="bg-amber-500/20 text-amber-400"
+                    className="bg-amber-500/20 text-amber-400 min-w-5 h-5 px-1"
                   >
                     {inProgressJobs.length}
                   </Chip>
@@ -579,13 +614,13 @@ export default function WorkerJobsPage() {
           <Tab
             key="pending_review"
             title={
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <span>確認待ち</span>
                 {pendingReviewJobs.length > 0 && (
                   <Chip
                     size="sm"
                     variant="flat"
-                    className="bg-blue-500/20 text-blue-400"
+                    className="bg-blue-500/20 text-blue-400 min-w-5 h-5 px-1"
                   >
                     {pendingReviewJobs.length}
                   </Chip>
@@ -596,13 +631,13 @@ export default function WorkerJobsPage() {
           <Tab
             key="completed"
             title={
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <span>完了</span>
                 {completedJobs.length > 0 && (
                   <Chip
                     size="sm"
                     variant="flat"
-                    className="bg-white/10 text-white/60"
+                    className="bg-white/10 text-white/60 min-w-5 h-5 px-1"
                   >
                     {completedJobs.length}
                   </Chip>
@@ -615,9 +650,27 @@ export default function WorkerJobsPage() {
 
       {/* ジョブリスト */}
       <div className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
+        {selectedTab === "applied" &&
+          (appliedJobs.length === 0 ? (
+            <EmptyState message="応募中のジョブがありません" />
+          ) : (
+            appliedJobs.map((undertakedJob) => {
+              const job = getJobById(undertakedJob.jobId);
+              if (!job) return null;
+              return (
+                <UndertakedJobCard
+                  key={undertakedJob.id}
+                  undertakedJob={undertakedJob}
+                  job={job}
+                  onDetailClick={() => handleOpenDetailModal(undertakedJob)}
+                />
+              );
+            })
+          ))}
+
         {selectedTab === "in_progress" &&
           (inProgressJobs.length === 0 ? (
-            <EmptyState message="着手中のジョブがありません" />
+            <EmptyState message="進行中のジョブがありません" />
           ) : (
             inProgressJobs.map((undertakedJob) => {
               const job = getJobById(undertakedJob.jobId);
