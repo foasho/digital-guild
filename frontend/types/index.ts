@@ -85,14 +85,16 @@ export interface UndertakedJob {
   jobId: number;
   /**
    * ステータスフロー:
-   * 1. accepted - 労働者が着手開始
-   * 2. completion_reported - 労働者が作業完了報告
-   * 3. completed - 発注者が確認して評価完了
-   * 4. canceled - キャンセル
+   * 1. applied - 労働者が応募（発注者の承認待ち）
+   * 2. accepted - 発注者が採用を確定、労働者が着手開始
+   * 3. completion_reported - 労働者が作業完了報告
+   * 4. completed - 発注者が確認して評価完了
+   * 5. canceled - キャンセル
    */
-  status: "accepted" | "completion_reported" | "completed" | "canceled";
+  status: "applied" | "accepted" | "completion_reported" | "completed" | "canceled";
   requesterEvalScore: number | null;
-  acceptedAt: string;
+  appliedAt: string | null; // 労働者が応募した日時
+  acceptedAt: string | null; // 発注者が採用を確定した日時
   completionReportedAt: string | null; // 労働者が完了報告した日時
   canceledAt: string | null;
   finishedAt: string | null;

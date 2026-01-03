@@ -25,13 +25,13 @@ import {
 } from "@/hooks/requesters";
 import type { Job, UndertakedJob } from "@/types";
 
-type StatusFilter = "all" | "recruiting" | "in_progress" | "pending_review" | "completed";
+type StatusFilter = "all" | "recruiting" | "applied" | "in_progress" | "pending_review" | "completed";
 
 // ジョブのステータスを判定する関数
 function getJobStatus(
   job: Job,
   undertakedJobs: UndertakedJob[]
-): "recruiting" | "in_progress" | "pending_review" | "completed" {
+): "recruiting" | "applied" | "in_progress" | "pending_review" | "completed" {
   const relatedUndertakedJobs = undertakedJobs.filter(
     (uj) => uj.jobId === job.id
   );
@@ -53,13 +53,21 @@ function getJobStatus(
   );
   if (hasInProgress) return "in_progress";
 
+  // 応募中（applied）がある場合
+  const hasApplied = relatedUndertakedJobs.some(
+    (uj) => uj.status === "applied"
+  );
+  if (hasApplied) return "applied";
+
   return "recruiting";
 }
 
-function getStatusLabel(status: "recruiting" | "in_progress" | "pending_review" | "completed") {
+function getStatusLabel(status: "recruiting" | "applied" | "in_progress" | "pending_review" | "completed") {
   switch (status) {
     case "recruiting":
       return "募集中";
+    case "applied":
+      return "応募中";
     case "in_progress":
       return "進行中";
     case "pending_review":
@@ -69,10 +77,12 @@ function getStatusLabel(status: "recruiting" | "in_progress" | "pending_review" 
   }
 }
 
-function getStatusStyle(status: "recruiting" | "in_progress" | "pending_review" | "completed") {
+function getStatusStyle(status: "recruiting" | "applied" | "in_progress" | "pending_review" | "completed") {
   switch (status) {
     case "recruiting":
       return "bg-sky-100 text-sky-700 border-sky-200";
+    case "applied":
+      return "bg-indigo-100 text-indigo-700 border-indigo-200";
     case "in_progress":
       return "bg-amber-100 text-amber-700 border-amber-200";
     case "pending_review":
@@ -104,6 +114,7 @@ export default function RequesterDashboardPage() {
 
   const stats = useMemo(() => {
     let recruiting = 0;
+    let applied = 0;
     let inProgress = 0;
     let pendingReview = 0;
     let completed = 0;
@@ -116,6 +127,9 @@ export default function RequesterDashboardPage() {
       switch (status) {
         case "recruiting":
           recruiting++;
+          break;
+        case "applied":
+          applied++;
           break;
         case "in_progress":
           inProgress++;
@@ -138,6 +152,7 @@ export default function RequesterDashboardPage() {
     return {
       total: allJobs.length,
       recruiting,
+      applied,
       inProgress,
       pendingReview,
       completed,
@@ -183,9 +198,19 @@ export default function RequesterDashboardPage() {
     );
     if (pendingUndertakedJob) {
       router.push(`/requester/undertaked_jobs/${pendingUndertakedJob.id}`);
-    } else {
-      router.push(`/requester/jobs/${jobId}`);
+      return;
     }
+
+    // 応募中のジョブの場合は応募者選定画面へ（最初のappliedを使用）
+    const appliedUndertakedJob = undertakedJobs.find(
+      (uj) => uj.jobId === jobId && uj.status === "applied"
+    );
+    if (appliedUndertakedJob) {
+      router.push(`/requester/undertaked_jobs/${appliedUndertakedJob.id}`);
+      return;
+    }
+
+    router.push(`/requester/jobs/${jobId}`);
   };
 
   return (
@@ -289,13 +314,14 @@ export default function RequesterDashboardPage() {
                 tabList:
                   "gap-0 w-full relative rounded-none p-0 overflow-x-auto",
                 cursor: "w-full bg-sky-500 h-[3px]",
-                tab: "flex-1 min-w-[100px] px-4 py-4 h-14 data-[hover=true]:bg-sky-50/50 transition-colors",
+                tab: "flex-1 min-w-[80px] px-3 py-4 h-14 data-[hover=true]:bg-sky-50/50 transition-colors",
                 tabContent:
                   "text-gray-500 group-data-[selected=true]:text-sky-600 group-data-[selected=true]:font-semibold text-sm whitespace-nowrap",
               }}
             >
               <Tab key="all" title={`全て (${stats.total})`} />
               <Tab key="recruiting" title={`募集中 (${stats.recruiting})`} />
+              <Tab key="applied" title={`応募中 (${stats.applied})`} />
               <Tab key="in_progress" title={`進行中 (${stats.inProgress})`} />
               <Tab key="pending_review" title={`確認待ち (${stats.pendingReview})`} />
               <Tab key="completed" title={`完了 (${stats.completed})`} />

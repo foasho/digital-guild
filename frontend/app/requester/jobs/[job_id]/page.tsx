@@ -42,7 +42,7 @@ const getRankStyle = (rank: Rank) => {
   }
 };
 
-// Trust Scoreに応じた色を取得
+// 信用ポイントに応じた色を取得
 const getTrustScoreColor = (score: number) => {
   if (score >= 80) return { bar: "bg-green-500", text: "text-green-600" };
   if (score >= 60) return { bar: "bg-yellow-500", text: "text-yellow-600" };
@@ -103,7 +103,7 @@ const formatDate = (dateString: string) => {
   return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 };
 
-// モック用Trust Score (ワーカーIDに基づくシンプルなハッシュ)
+// モック用信用ポイント (ワーカーIDに基づくシンプルなハッシュ)
 const getMockTrustScore = (workerId: number): number => {
   // numberを文字列に変換してハッシュ計算
   const hash = String(workerId)
@@ -350,10 +350,10 @@ export default function RequesterJobDetailPage() {
                                 {rank}
                               </span>
                             </div>
-                            {/* Trust Score プログレスバー */}
+                            {/* 信用ポイント プログレスバー */}
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-xs text-gray-500 w-20">
-                                Trust Score
+                                信用ポイント
                               </span>
                               <div className="flex-1 max-w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
                                 <div

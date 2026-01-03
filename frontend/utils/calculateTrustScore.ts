@@ -1,7 +1,7 @@
 import type { Rank, UndertakedJob } from "@/types";
 
 /**
- * Trust Scoreを計算
+ * 信用ポイントを計算
  *
  * 計算ロジック:
  * - クエスト達成数: 1クエスト = 1ポイント、最大50ポイント
@@ -9,7 +9,7 @@ import type { Rank, UndertakedJob } from "@/types";
  * - 合計: 最大100ポイント
  *
  * @param completedJobs - 着手ジョブの配列
- * @returns Trust Score（0-100）
+ * @returns 信用ポイント（0-100）
  */
 export function calculateTrustScore(completedJobs: UndertakedJob[]): number {
   // 完了したジョブのみをフィルタリング
@@ -36,7 +36,7 @@ export function calculateTrustScore(completedJobs: UndertakedJob[]): number {
 }
 
 /**
- * Trust Scoreからランクを取得
+ * 信用ポイントからランクを取得
  *
  * ランク閾値:
  * - ~60: Bronze
@@ -44,7 +44,7 @@ export function calculateTrustScore(completedJobs: UndertakedJob[]): number {
  * - 71~80: Gold
  * - 81~100: Platinum
  *
- * @param trustScore - Trust Score（0-100）
+ * @param trustScore - 信用ポイント（0-100）
  * @returns ランク
  */
 export function getRankFromScore(trustScore: number): Rank {
