@@ -1,0 +1,56 @@
+# WIP
+
+services:
+  # Frontend (Next.js)
+  dg-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GOOGLE_MAP_API_KEY=${GOOGLE_MAP_API_KEY}
+    volumes:
+      - ./frontend:/app
+      - dg-frontend-node-modules:/app/node_modules
+      - /app/.next
+    command: sh -c "bun install && bun run dev"
+    # Phase2
+    # depends_on:
+    #   - dg-postgres
+
+  # Phase2: PostgreSQL Database
+  # dg-postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_USER: digital_guild
+  #     POSTGRES_PASSWORD: password
+  #     POSTGRES_DB: digital_guild_dev
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U digital_guild"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+
+  # Phase2: Hardhat Local Node (optional)
+  # dg-hardhat:
+  #   build:
+  #     context: ./hardhat
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8545:8545"
+  #   profiles:
+  #     - blockchain
+  #   command: npx hardhat node
+
+volumes:
+  postgres_data:
+  dg-frontend-node-modules:
+

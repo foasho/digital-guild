@@ -72,7 +72,7 @@ Worker（労働者）の信用スコアをNFT化し、ブロックチェーン�
 | 項目 | 内容 |
 |------|------|
 | 規格 | ERC-721（NFT） + SBT（譲渡不可） |
-| チェーン | Polygon（低ガス代のため） |
+| チェーン | Avalanche C-Chain（低ガス代・高速ファイナリティ） |
 | 所有権 | 1 Worker = 1 TrustPassport |
 | 譲渡 | 不可（Soul Bound Token） |
 
@@ -263,13 +263,13 @@ function approveJob(uint256 jobId, uint8 rating) external {
 
 [JPYC](https://jpyc.jp/) は、日本円に連動したステーブルコイン（ERC-20トークン）です。1 JPYC = 1円 で安定しています。
 
-#### コントラクトアドレス
+#### コントラクトアドレス（JPYC）
 
 | ネットワーク | アドレス |
 |-------------|----------|
 | Ethereum Mainnet | `0x2370f9d504c7a6E775bf6E14B3F12846b594cD53` |
-| Polygon Mainnet | `0x6AE7Dfc73E0dDE2aa99ac063DcF7e8A63265108c` |
-| Polygon Mumbai (テスト) | テストネット用を使用 |
+| Avalanche C-Chain | `0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB` |
+| Avalanche Fuji (テスト) | テストトークンを使用 |
 
 #### 使用方法
 
@@ -333,20 +333,22 @@ const config: HardhatUserConfig = {
     // ローカル開発用
     hardhat: {},
     
-    // Polygon Mumbai テストネット
-    mumbai: {
-      url: process.env.MUMBAI_RPC_URL || "",
+    // Avalanche Fuji テストネット（staging）
+    fuji: {
+      url: process.env.AVALANCHE_FUJI_RPC_URL || "https://api.avax-test.network/ext/bc/C/rpc",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 43113,
     },
     
-    // Polygon Mainnet（本番）
-    polygon: {
-      url: process.env.POLYGON_RPC_URL || "",
+    // Avalanche C-Chain Mainnet（本番）
+    avalanche: {
+      url: process.env.AVALANCHE_RPC_URL || "https://api.avax.network/ext/bc/C/rpc",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 43114,
     },
   },
   etherscan: {
-    apiKey: process.env.POLYGONSCAN_API_KEY,
+    apiKey: process.env.SNOWTRACE_API_KEY,
   },
 };
 
@@ -357,10 +359,10 @@ export default config;
 
 ```bash
 # .env
-MUMBAI_RPC_URL=https://rpc-mumbai.maticvigil.com
-POLYGON_RPC_URL=https://polygon-rpc.com
+AVALANCHE_FUJI_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
+AVALANCHE_RPC_URL=https://api.avax.network/ext/bc/C/rpc
 PRIVATE_KEY=your_private_key_here
-POLYGONSCAN_API_KEY=your_api_key
+SNOWTRACE_API_KEY=your_api_key
 ```
 
 ---
@@ -372,8 +374,8 @@ POLYGONSCAN_API_KEY=your_api_key
 | `npx hardhat compile` | コントラクトをコンパイル |
 | `npx hardhat test` | テストを実行 |
 | `npx hardhat node` | ローカルノードを起動 |
-| `npx hardhat run scripts/deploy.ts --network mumbai` | テストネットにデプロイ |
-| `npx hardhat verify --network polygon ADDRESS` | Polygonscanでコントラクト検証 |
+| `npx hardhat run scripts/deploy.ts --network fuji` | Fujiテストネットにデプロイ |
+| `npx hardhat verify --network avalanche ADDRESS` | Snowtraceでコントラクト検証 |
 
 ---
 
@@ -439,7 +441,7 @@ describe("TrustPassport", function () {
 ### Phase 2 デプロイ計画
 
 ```
-1. テストネット（Mumbai）デプロイ
+1. テストネット（Avalanche Fuji）デプロイ
    ├── TrustPassport コントラクト
    ├── JobEscrow コントラクト
    └── 統合テスト
@@ -447,9 +449,9 @@ describe("TrustPassport", function () {
 2. セキュリティ監査
    └── 外部監査 or 自己監査
 
-3. メインネット（Polygon）デプロイ
+3. メインネット（Avalanche C-Chain）デプロイ
    ├── デプロイスクリプト実行
-   ├── Polygonscan 検証
+   ├── Snowtrace 検証
    └── フロントエンド連携
 ```
 
